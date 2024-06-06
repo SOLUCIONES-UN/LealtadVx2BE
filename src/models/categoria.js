@@ -39,4 +39,5 @@ asignarCategoria.belongsTo(Categoria, {
 //     // Code here
 // })();
 
+
 module.exports = { Categoria };

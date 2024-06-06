@@ -10,6 +10,7 @@ const Profecion = sequelize.define('profesiones', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: false,
+        unique: true
 
         
     }, proyecto: {
