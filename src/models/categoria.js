@@ -10,7 +10,8 @@ const Categoria = sequelize.define('categoria', {
     },
     nombre: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     estado: {
         type: DataTypes.INTEGER,
