@@ -1,7 +1,11 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
-const { DetallePromocion } = require("../models/detallePromocion")
-const Promocion = sequelize.define('promocion', {
+const { DetallePromocion } = require("../models/detallePromocion");
+const { PremioPromocion } = require('./premioPromocion');
+const { Configuraciones } = require('./configuraciones');
+
+
+const Promocion = sequelize.define('promocions', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -28,11 +32,11 @@ const Promocion = sequelize.define('promocion', {
         allowNull: false,
     },
     imgSuccess: {
-        type: DataTypes.STRING(1000),
+        type: DataTypes.TEXT('long'),
         allowNull: false,
     },
     imgFail: {
-        type: DataTypes.STRING(1000),
+        type: DataTypes.TEXT('long'),
         allowNull: false,
     },
     fechaInicio: {
@@ -61,16 +65,48 @@ Promocion.hasMany(DetallePromocion, {
     sourceKey: 'id'
 });
 
-DetallePromocion.belongsTo(DetallePromocion, {
+DetallePromocion.belongsTo(Promocion, {
     foreignKey: 'idPromocion',
     targetId: 'id',
 
 });
 
 
-// (async () => {
-//     await sequelize.sync({ force: true });
-//     // Code here
-// })();
+Promocion.hasMany(PremioPromocion, {
+    foreignKey: 'idPromocion',
+    sourceKey: 'id'
+});
 
-module.exports = { Promocion }
+PremioPromocion.belongsTo(Promocion, {
+    foreignKey: 'idPromocion',
+    targetId: 'id',
+
+});
+
+Promocion.hasMany(Configuraciones, {
+    foreignKey: 'idPromocion',
+    sourceKey: 'id'
+});
+
+Configuraciones.belongsTo(Promocion, {
+    foreignKey: 'idPromocion',
+    targetId: 'id',
+});
+
+
+// Configuraciones.sync({ alter: true }).then(() => {
+//     console.log('Tabla Configuraciones creada o actualizada correctamente');
+// });
+
+
+// (async () => {
+//     await Promocion.sync({ alter: true });
+//     // Code here
+// // })();
+
+
+// Configuraciones.sync({ alter: true }).then(() => {
+//     console.log('tabla Campania creada');
+// });
+
+module.exports = { Promocion, sequelize }

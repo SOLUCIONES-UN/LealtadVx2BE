@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
+const { CangePromocion } = require('./cangePromocion');
 
-const DetallePromocion = sequelize.define('detallePromocion', {
+const DetallePromocion = sequelize.define('detallepromocions', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -9,26 +10,35 @@ const DetallePromocion = sequelize.define('detallePromocion', {
     },
     cupon: {
         type: DataTypes.STRING(100),
-        allowNull:false,
+        allowNull: false,
     },
     esPremio: {
         type: DataTypes.INTEGER,
-        allowNull:false,
-        defaultValue:0
+        allowNull: false,
+        defaultValue: 0
     },
     estado: {
         type: DataTypes.INTEGER,
-        allowNull:false,
+        allowNull: false,
         defaultValue: 1
     },
-},{timestamps: false});
+}, { timestamps: false });
 
 
+DetallePromocion.hasMany(CangePromocion, {
+    foreignKey: 'idDetallePromocion',
+    sourceKey: 'id'
+})
+
+CangePromocion.belongsTo(DetallePromocion, {
+    foreignKey: 'idDetallePromocion',
+    targetId: 'id',
+});
 
 
-(async () => {
-    await sequelize.sync({ force: false });
-    // Code here
-  })(); 
+// (async () => {
+//  await DetallePromocion.sync({ alter: false });
+//     // Code here
+//  })();
 
-module.exports = {DetallePromocion}
+module.exports = { DetallePromocion }
