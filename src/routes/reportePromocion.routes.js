@@ -8,7 +8,7 @@ const router = Router();
 
 const path = 'reportePromocion';
 
-router.post(`/${path}`,authUser, postDatosCupon);
+router.post(`/${path}`, postDatosCupon);
 
 
 

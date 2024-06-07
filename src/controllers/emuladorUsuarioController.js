@@ -9,8 +9,6 @@ const { Participacion } = require('../models/Participacion');
 const { Transaccion } = require('../models/transaccion');
 const { Departamento } = require('../models/departamento');
 const { Municipio } = require("../models/municipio");
-
-// const { EmuladorUsuario } = require('../models/emuladorUsuario');
 const { pronet, sequelize, genesis, Op } = require('../database/database');
 const { Sequelize, where } = require('sequelize');
 const { CampaniaRegiones } = require('../models/campaniaregions');
@@ -140,7 +138,6 @@ async function obtenerTransaccionesValidas(customerId, idProyecto) {
             }
         });
     } catch (error) {
-        console.error("Error al obtener transacciones válidas:", error);
         throw error;
     }
 }
@@ -155,7 +152,6 @@ async function obtenerMistransacciones(customerId, idProyecto) {
             }
         });
     } catch (error) {
-        console.error("Error al obtener transacciones no válidas:", error);
         throw error; 
     }
 }
@@ -219,7 +215,6 @@ async function procesarCampanas(usuario, campanas) {
 const generaCampanasUsuarios = async (req, res) => {
     try {
         const { referens } = req.params;
-        console.log("Número de referencia:", referens);
 
         const usuario = await obtenerUsuarioPorReferens(referens);
         if (!usuario) {
@@ -238,7 +233,6 @@ const generaCampanasUsuarios = async (req, res) => {
 
         res.json(resultado);
     } catch (error) {
-        console.error("Error en generaCampanasUsuarios:", error);
         res.status(500).json({ message: "Error interno del servidor." });
     }
 };
@@ -260,8 +254,6 @@ const campanasUsuariosEmulador_get = async (req, res) => {
             }
         );
 
-        console.log("Resultado de la consulta teléfono:", referens);
-
         if (!referens || referens.length === 0) {
             return res.status(200).json({
                 textoSinInfo: 'Estamos trabajando para traerte más promociones.',
@@ -275,7 +267,6 @@ const campanasUsuariosEmulador_get = async (req, res) => {
         }
     }
     catch (error) {
-        console.error("Error en campanasUsuariosEmulador_get:", error);
         if (!res.headersSent) {
             return res.status(500).json({ message: "Error interno del servidor." });
         }
@@ -325,7 +316,6 @@ const transaccionesValidasCampanasFusion = async (idCampania) => {
 
         return transacciones;
     } catch (error) {
-        console.error("Error al obtener transacciones válidas de la campaña:", error);
         throw error;
     }
 };
@@ -348,7 +338,6 @@ const actualizarParticipantesRestantes = async (idCampania, idDepto, idMuni) => 
             return res.status(404).json({ status: 400, message: 'No se encontraron registros para actualizar' });
         }
     } catch (error) {
-        console.error("Error al actualizar participantes restantes:", error);
     }
 };
 
@@ -366,7 +355,6 @@ async function campanasActualesActivasTercero(res, req) {
 
         return campanias;
     } catch (error) {
-        console.error("Error en campanasActualesActivasTercero:", error);
         throw error;
     }
 }
@@ -384,7 +372,6 @@ const transaccionesValidasCampania = async (idCampania) => {
 
         return transacciones;
     } catch (error) {
-        console.error("Error al obtener transacciones válidas de la campaña:", error);
         throw error;
     }
 };
@@ -421,7 +408,6 @@ const regionesValidasCampania = async (idCampania) => {
         });
         return regionesValidas;
     } catch (error) {
-        console.error("Error en regionesValidasCampana:", error);
         throw error;
     }
 };
@@ -444,7 +430,6 @@ const validarParticipacionesRestantes = async (idCampania, idDepto, idMuni) => {
 
         return { espacio: espacio };
     } catch (error) {
-        console.error('Error al validar los participantes restantes:', error);
         throw error;
     };
 }
@@ -508,7 +493,6 @@ const validarLimiteParticipacionesPorUsuario = async (idUsuarioParticipante, idC
 
         return totalParticipaciones;
     } catch (error) {
-        console.error('Error en validarLimiteParticipacionesPorUsuario:', error);
        
         throw error;
     }
@@ -545,7 +529,6 @@ const TransaccionesDelUsuarioPendientesXcampana = async (idUsuarioParticipante, 
 
         return transacciones;
     } catch (error) {
-        console.error('Error al obtener transacciones pendientes del usuario por campaña:', error);
         throw error;
     }
 };
@@ -560,7 +543,6 @@ const cantidadParametros = async (idCampania) => {
 
         return { cantidad: resultado || 0 };
     } catch (error) {
-        console.error('Error al obtener la cantidad de parametros:', error);
         throw error;
     }
 };
@@ -595,7 +577,6 @@ const campaniaNumerosRestringidos = async (idCampania, numero, restringe) => {
 
         return permitido;
     } catch (error) {
-        console.error('Error al verificar números restringidos para la campaña:', error);
         throw error;
     }
 };
@@ -637,7 +618,6 @@ async function tienePremiosPendientesCampanas(idCampania, idUsuarioParticipante)
             return null;
         }
     } catch (error) {
-        console.error('Error al realizar la consulta:', error);
         throw error;
        
     }
@@ -699,7 +679,6 @@ async function campanasRevisionGeneralIdCampana(id) {
         });
         return results[0];
     } catch (error) {
-        console.error('Error al ejecutar la consulta:', error);
         throw error;
     }
 }
@@ -729,7 +708,6 @@ async function CampanasBotonesAppMostrar(idCampania) {
         });
         return results;
     } catch (error) {
-        console.error('Error al ejecutar la consulta:', error);
         throw error;
     }
 }
@@ -738,7 +716,6 @@ async function CampanasBotonesAppMostrar(idCampania) {
 const GetNumeroById = async (req, res) => {
     try {
         const { telefono } = req.params;
-        console.log("Número de teléfono recibido:", telefono);
 
         const envio = await EnviaPremio.findOne({
             where: {
@@ -755,7 +732,6 @@ const GetNumeroById = async (req, res) => {
 
         return res.json(envio);
     } catch (error) {
-        console.error('Error al obtener la campania:', error);
         return res.status(403).send({ errors: 'Ha ocurrido un error al obtener la campania.' });
     }
 };

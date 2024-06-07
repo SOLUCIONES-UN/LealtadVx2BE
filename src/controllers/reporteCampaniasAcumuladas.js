@@ -24,7 +24,6 @@ const fechaminimavalida = async (req, res) => {
 
         return result[0].fechaApartir;
     } catch (error) {
-        console.error('Error en obtener fechaminimavalida:', error);
         throw error;
     };
 }
@@ -43,7 +42,6 @@ const fechamaximavalida = async (req, res) => {
 
         return result[0].fechaApartir;
     } catch (error) {
-        console.error('Error en obtener fechamaximavalida:', error);
         throw error;
     };
 }
@@ -68,10 +66,8 @@ const transaccionesDelUsuarioPendientes = async (req, res) => {
             type: sequelize.QueryTypes.SELECT
         });
 
-        console.log(`transacciones del usuario:`, result);
         res.status(200).json(result);
     } catch (error) {
-        console.error('Error al obtener las transacciones del usuario:', error);
         res.status(500).json({ error: 'Error al procesar la solicitud' });
 
     }
@@ -118,7 +114,6 @@ async function usuarioParticipantes_get(fechaI, fechaF) {
 
         return results;
     } catch (error) {
-        console.error('Error in usuarioParticipantes_get:', error);
         throw error;
     }
 }
@@ -153,7 +148,6 @@ async function informacionGeneralUsuario(usuarioId) {
 
 
     } catch (error) {
-        console.error('Error en informacionGeneralUsuario:', error);
         throw error;
     }
 }
@@ -176,7 +170,6 @@ async function campanaPremiosInfoCliente(idTransaccion) {
             throw error;
         }
     } catch (error) {
-        console.error('Error al obtener información del cliente:', error);
         throw error;
     }
 }
@@ -184,57 +177,42 @@ async function campanaPremiosInfoCliente(idTransaccion) {
 const reporteClientesContraCampanas = async (req, res) => {
 
     try {
-        console.log("Obteniendo fechas mínima y máxima válidas...");
         const fechaI = await fechaminimavalida();
         const fechaF = await fechamaximavalida();
         const infoParticipantes = await usuarioParticipantes_get(fechaI, fechaF);
-        console.log(`Fechas obtenidas: ${fechaI} a ${fechaF}`, infoParticipantes);
 
         if (!fechaI || !fechaF) {
-            console.error('Las fechas no se han obtenido correctamente:', fechaI, fechaF);
             return res.status(500).json({ error: 'Fechas no válidas' });
         }
-
-        console.log(`Participantes obtenidos: ${infoParticipantes.length} encontrados`);
 
         const campaniasActivasEnc = await CampanasActualesActivas();
 
         const results = await processParticipations(infoParticipantes, campaniasActivasEnc);
-        console.log("Procesamiento completado.", results);
 
         return res.status(200).json(results);
     } catch (error) {
-        console.error('Error al procesar el reporte de campañas.', error);
         return res.status(500).json({ error: 'Fallo al procesar el reporte de camapañas' });
     }
 }
 
 async function processParticipations(participants, campaniasActivasEnc) {
     const results = [];
-    console.log("Iniciando el procesamiento de cada participante...");
 
     for (const participant of participants) {
         const { idUsuarioParticipante, telno, nombre } = participant;
-        console.log(`Procesando participante: ${idUsuarioParticipante}`, participant);
 
         const customerInfo = await campanaPremiosInfoCliente(idUsuarioParticipante);
         const userInfo = await informacionGeneralUsuario(idUsuarioParticipante);
-        console.log(`Datos de usuario obtenidos:`, userInfo);
 
         if (!customerInfo || !userInfo) {
-            console.log(`Información insuficiente para el participante: ${idUsuarioParticipante}. Continuando con el siguiente...`);
             continue;
         }
 
-        console.log(`Evaluando campañas para el participante: ${idUsuarioParticipante}`);
         for (const campania of campaniasActivasEnc) {
             const userInfo = await informacionGeneralUsuario(idUsuarioParticipante);
-            console.log(`Datos de usuario obtenidos:`, userInfo);
 
             if (await isEligibleForCampaign(participant, campania, userInfo, customerInfo)) {
-                console.log(`Participante ${idUsuarioParticipante} es elegible para la campaña ${campania.nombre}`);
                 const recompensas = await calcularRecompensas(idUsuarioParticipante, campania.id);
-                console.log(`participantes permitidos o ganandores`, recompensas);
 
                 results.push({
                     telefono: telno,
@@ -246,16 +224,13 @@ async function processParticipations(participants, campaniasActivasEnc) {
         }
     }
 
-    console.log("Procesamiento de participantes completado.");
     return results;
 }
 
 async function isEligibleForCampaign(participant, campaign, userInfo, customerInfo) {
     const { edadInicial, edadFinal, sexo, id: idCampania } = campaign;
-    console.log("userInfo para depuración:", userInfo);
 
     if (userInfo.edad < edadInicial || userInfo.edad > edadFinal) {
-        console.log(`Usuario ${participant.idUsuarioParticipante} no cumple con el criterio de edad.`);
         return false;
     }
 
@@ -263,7 +238,7 @@ async function isEligibleForCampaign(participant, campaign, userInfo, customerIn
    
     if (sexo !== 0) { 
         if ((sexo === 1 && userInfo.genero !== 'MALE') || (sexo === 2 && userInfo.genero !== 'FEMALE')) {
-            console.log(`Usuario ${participant.idUsuarioParticipante} no cumple con el criterio de género. Requerido: ${sexo}, actual: ${userInfo.genero}`);
+            
             return false;
         }
     }
@@ -275,7 +250,7 @@ async function isEligibleForCampaign(participant, campaign, userInfo, customerIn
     );
 
     if (!usuarioRegionValida) {
-        console.log(`Usuario ${participant.idUsuarioParticipante} no está en una región válida para la campaña.`, usuarioRegionValida);
+
         return false;
     }
 
@@ -293,11 +268,9 @@ async function calcularRecompensas(idUsuarioParticipante, idCampania) {
     return recompensa;
 }
 
-
 module.exports = {
-
     reporteClientesContraCampanas,
     campaniaNumerosRestringidos,
     validarLimiteParticipacionesPorUsuario,
-
 }
+
