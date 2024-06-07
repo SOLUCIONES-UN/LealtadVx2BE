@@ -187,7 +187,6 @@ const UpdateCampania = async (req, res) => {
             throw new Error('La campaña no existe');
         }
 
-        
         await campania.update({
             nombre,
             descripcion,
@@ -214,7 +213,6 @@ const UpdateCampania = async (req, res) => {
             emails
         }, { transaction });
 
-        // Actualizar o crear etapas
         if (Array.isArray(etapas)) {
             for (const etapa of etapas) {
                 const [etapaInstancia, etapaCreada] = await Etapa.findOrCreate({
@@ -247,7 +245,6 @@ const UpdateCampania = async (req, res) => {
                     }
                 }
 
-                
                 if (Array.isArray(etapa.presupuestos)) {
                     for (const presupuesto of etapa.presupuestos) {
                         await Presupuesto.upsert({ ...presupuesto, idEtapa: etapaInstancia.id }, { transaction });
@@ -369,7 +366,6 @@ const PausarCampaña = async (req, res) => {
 
     }
 }
-
 
 const ActivarCampaña = async (req, res) => {
 
@@ -513,7 +509,6 @@ const TestearTransaccion = async(req, res) => {
 
 
             let otrasValidaciones = [];
-
 
             const fechaNacimineto = datosPersonales.fechaNacimineto.split('-');
             const edad = 2023 - parseInt(fechaNacimineto[0]);
@@ -741,14 +736,6 @@ const ParticipacionRecurente = async(transaccionesCampanias, transaccion, idCamp
     if (filterTransaccion.length === 0) {
         return { premiado: false, guardaParticipacion: false, result: false, message: 'No aplica Transaccion' }
     }
-
-
-
-    
-
-
-
-
     console.log(etapaActual.periodo)
 
     switch (etapaActual.periodo) {
@@ -938,7 +925,6 @@ const GetTransaccionesXCategoria = async(idCategoria) => {
 const GetCampaniasSEm = async (req, res) => {
     try {
         const fechaActual = new Date();
-
         const treintaDiasAntes = new Date(fechaActual);
         treintaDiasAntes.setDate(treintaDiasAntes.getDate() + 30);
 
