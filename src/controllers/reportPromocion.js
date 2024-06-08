@@ -3,7 +3,7 @@ const { DetallePromocion } = require("../models/detallePromocion");
 const { Op, sequelize, } = require("sequelize");
 const { Premio } = require("../models/premio");
 const { PremioPromocion } = require("../models/premioPromocion");
-const { TransaccionPremio } = require("../models/transaccionPremio");
+const { Configuraciones } = require("../models/configuraciones");
 const { Transaccion } = require("../models/transaccion");
 const { Participacion } = require("../models/Participacion");
 const { Premiacion } = require("../models/premiacion");
@@ -16,28 +16,26 @@ const { Etapa } = require("../models/etapa");
 
 const postDatosCupon = async (req, res) => {
   try {
-    const { promocion, fechaInicial, fechaFinal } = req.body;
+    const { promocion, fechaInicio, fechaFinal } = req.body;
 
-    const fechafin = new Date(fechaFinal);
-    const fechaInicio = new Date(fechaInicial);
-    
-
-    console.log("estoy buscando inicial", fechaInicio);
-    console.log("fecha final", fechafin)
     
     const trxAll = await CangePromocion.findAll({
       include: {
         model: DetallePromocion,
         include: {
-          model: PremioPromocion,
+          model: Promocion,
           include: {
-            model: Premio,
+            model: PremioPromocion,
              include: {
-               model: PremioCampania,
+               model: Premio,
               include: {
-                model: Etapa,
+                model: PremioCampania,
                 include: {
-                  model: Campania,
+                  model: Etapa,
+                  include: {
+                    model: Campania,
+                    
+                  }
                 }
               },
              },
