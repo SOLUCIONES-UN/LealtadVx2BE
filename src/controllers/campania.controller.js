@@ -45,8 +45,7 @@ const AddCampania = async(req, res) =>{
         } = req.body;
 
         
-        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
-        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
+       
 
         const newCampains = await Campania.create({
             nombre,
@@ -61,8 +60,8 @@ const AddCampania = async(req, res) =>{
             tipoUsuario,
             tituloNotificacion,
             descripcionNotificacion,
-            imgPush: imgPushBase64,
-            imgAkisi: imgAkisiBase64,
+            imgPush,
+            imgAkisi,
             estado,
             maximoParticipaciones,
             campaniaTerceros,
@@ -178,8 +177,7 @@ const UpdateCampania = async (req, res) => {
             participacion,
             emails
         } = req.body;
-        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
-        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
+        
 
 
         const campania = await Campania.findByPk(id, { transaction });
@@ -201,8 +199,8 @@ const UpdateCampania = async (req, res) => {
             tipoUsuario,
             tituloNotificacion,
             descripcionNotificacion,
-            imgPush:imgPushBase64,
-            imgAkisi :imgAkisiBase64,
+            imgPush,
+            imgAkisi ,
             estado,
             maximoParticipaciones,
             campaniaTerceros,
@@ -321,13 +319,6 @@ const GetcampanasActivasById = async (req, res) => {
             ]
         });
 
-        if (etapa) {
-            etapa.imgPush = decodeURIComponent(etapa.imgPush); 
-            etapa.imgAkisi = decodeURIComponent(etapa.imgAkisi);
-
-            etapa.imgPush = removeFakePath(etapa.imgPush);
-            etapa.imgAkisi = removeFakePath(etapa.imgAkisi);
-        }
 
         res.json(etapa);
 
@@ -337,13 +328,48 @@ const GetcampanasActivasById = async (req, res) => {
     }
 }
 
-function removeFakePath(path) {
-    const fakePathIndex = path.indexOf("C:/fakepath/");
-    if (fakePathIndex !== -1) {
-        path = path.substring(fakePathIndex + "C:/fakepath/".length);
-    }
-    return path;
-}
+
+
+
+
+
+
+// const GetcampanasActivasById = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const etapa = await Campania.findByPk(id, {
+//             where: { estado: 1 },
+//             include: [
+//                 {
+//                     model: Etapa,
+//                     include: [
+//                         { model: Parametro, attributes: { exclude: ['idCampania'] } },
+//                         { model: PremioCampania },
+//                         { model: Presupuesto }
+//                     ]
+//                 },
+//                 { model: Participantes },
+//                 { model: Bloqueados }
+
+//             ]
+//         });
+
+//         // Decodificar imágenes base64
+//         const imgPushDecoded = etapa.imgPush ? Buffer.from(etapa.imgPush, 'base64').toString('binary') : null;
+//         const imgAkisiDecoded = etapa.imgAkisi ? Buffer.from(etapa.imgAkisi, 'base64').toString('binary') : null;
+        
+//         // Asignar las imágenes decodificadas de nuevo a la campaña
+//         etapa.imgPush = imgPushDecoded;
+//         etapa.imgAkisi = imgAkisiDecoded;
+
+//         res.json(etapa);
+
+//     } catch (error) {
+//         res.status(403)
+//         res.send({ errors: 'Ha sucedido un error al intentar consultar la Campaña.', details: error.message });
+//     }
+// }
+
 
 const PausarCampaña = async (req, res) => {
 
