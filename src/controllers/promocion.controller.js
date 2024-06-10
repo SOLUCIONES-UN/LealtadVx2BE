@@ -134,8 +134,7 @@ const AddPromocion = async(req, res) => {
 }
 
 
-//controllador para actualizar Columnaes
-const PausarPromocion = async(req, res) => {
+const PausarPromocion = async (req, res) => {
 
     try {
         const { id } = req.params;
@@ -157,7 +156,7 @@ const PausarPromocion = async(req, res) => {
 
 
 //controllador para actualizar Columnaes
-const ActivarPromocion = async(req, res) => {
+const ActivarPromocion = async (req, res) => {
 
     try {
         const { id } = req.params;
@@ -178,6 +177,8 @@ const ActivarPromocion = async(req, res) => {
     }
 
 }
+
+
 
 //controllador para actualizar Columnaes
 const UpdatePromocion = async(req, res) => {
