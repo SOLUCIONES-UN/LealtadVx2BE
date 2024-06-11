@@ -14,10 +14,16 @@ const GetConfiguraciones = async(req, res) => {
             where: {
                 tiporeporte,
                 estado: {
-                    [Op.or]: [1, 2] 
+                    [Op.or]: [1, 2]
                 }
             },
-            include: [{ model: Configuraciones, include: [Campania],include:[Promocion] }] 
+            include: [{
+                model: Configuraciones,
+                include: [
+                    { model: Campania },
+                    { model: Promocion }
+                ]
+            }]
         });
 
         res.json(configReport);
@@ -27,12 +33,11 @@ const GetConfiguraciones = async(req, res) => {
     }
 };
 
-
-const AddConfiguration = async (req, res) => {
+const AddConfiguration = async(req, res) => {
     try {
         const { emails, tiporeporte, frecuencia, campanias, promocions, diasemana, diames } = req.body;
 
-      
+
         const nuevaConfiguracion = await ConfigReport.create({
             diaSemana: diasemana,
             diaMes: diames,
@@ -43,7 +48,7 @@ const AddConfiguration = async (req, res) => {
 
         const configReportId = nuevaConfiguracion.id;
 
-        
+
         if (campanias.length === 0 && promocions.length > 0) {
             for (let promocion of promocions) {
                 await Configuraciones.create({
@@ -60,6 +65,12 @@ const AddConfiguration = async (req, res) => {
                     idPromocion: null
                 });
             }
+        } else if (campanias.length === 0 && promocions.length === 0) {
+            await Configuraciones.create({
+                idConfigReport: configReportId,
+                idCampania: null,
+                idPromocion: null
+            });
         } else {
             for (let campania of campanias) {
                 for (let promocion of promocions) {
@@ -79,9 +90,11 @@ const AddConfiguration = async (req, res) => {
     }
 }
 
+
+
 const UpdateReport = async(req, res) => {
     try {
-        const { diasemana, diames, campanias, frecuencia, tiporeporte, emails } = req.body;
+        const { diasemana, diames, campanias, promocions, frecuencia, tiporeporte, emails } = req.body;
         const { id } = req.params;
 
         await ConfigReport.update({
@@ -96,8 +109,24 @@ const UpdateReport = async(req, res) => {
 
         const configuracion = await Configuraciones.findOne({ where: { idConfigReport: id } });
         if (configuracion) {
-            await configuracion.update({ idCampania: campanias });
-        } else {}
+            if (campanias.length > 0 && promocions.length > 0) {
+                for (let campania of campanias) {
+                    for (let promocion of promocions) {
+                        await configuracion.update({ idCampania: campania, idPromocion: promocion });
+                    }
+                }
+            } else if (campanias.length > 0) {
+                for (let campania of campanias) {
+                    await configuracion.update({ idCampania: campania, idPromocion: null });
+                }
+            } else if (promocions.length > 0) {
+                for (let promocion of promocions) {
+                    await configuracion.update({ idCampania: null, idPromocion: promocion });
+                }
+            } else {
+                await configuracion.update({ idCampania: null, idPromocion: null });
+            }
+        }
 
         res.json({ code: 'ok', message: 'Reporte actualizado con éxito.' });
     } catch (error) {
@@ -113,7 +142,7 @@ const GetReportById = async(req, res) => {
     try {
         const configuraciones = await Configuraciones.findAll({
             where: { idConfigReport: id },
-            include: [ConfigReport, Campania] 
+            include: [ConfigReport, Campania, Promocion]
         });
 
         res.json(configuraciones);
@@ -122,7 +151,6 @@ const GetReportById = async(req, res) => {
         res.status(500).json({ error: 'Error al obtener las configuraciones.' });
     }
 };
-
 
 
 
@@ -146,7 +174,7 @@ const DeleteReport = async(req, res) => {
     }
 }
 
-const StateReport = async (req, res) => {
+const StateReport = async(req, res) => {
     try {
         const { id, estate } = req.params;
 

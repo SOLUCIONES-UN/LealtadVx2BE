@@ -1,10 +1,10 @@
 const cron = require('node-cron');
-const {sendEmail} = require('./sendEmail.js');
-const {Campania} = require('../models/campanias');
+const { sendEmail } = require('./sendEmail.js');
+const { Campania } = require('../models/campanias');
 const { Configuraciones } = require('../models/configuraciones');
 const { ConfigReport } = require('../models/configReport');
 
-const {generarReportereReferidos, generarReporteClientesParticipando,generarReporteOferCraft,generarReportePromociones} = require('./generarReportes.js');
+const { generarReportereReferidos, generarReporteClientesParticipando, generarReporteOferCraft, generarReportePromociones } = require('./generarReportes.js');
 // const { generarReporteOferCraft } = require('../controllers/reporteOfercraft.controller.js')
 
 
@@ -17,7 +17,7 @@ const {generarReportereReferidos, generarReporteClientesParticipando,generarRepo
 
 // '0 * * * *'
 
-const taskSendEmail = cron.schedule('00 00 * * * *', async () => {
+const taskSendEmail = cron.schedule('*/15 * * * * *', async() => {
     console.log('Ejecutando una tarea cada minuto');
 
     try {
@@ -29,45 +29,43 @@ const taskSendEmail = cron.schedule('00 00 * * * *', async () => {
             where: { estado: 1 }
         });
 
-        configs.forEach(async (config) => {
+        configs.forEach(async(config) => {
             const campania = config.campanium;
 
             if (campania) {
                 console.log('ID de la configuración:', config.id);
-                                console.log('ID de la campaña:', campania.id);
-                                console.log('Nombre de la campaña:', campania.nombre);
-                                console.log('Descripción de la campaña:', campania.descripcion);
-                                console.log('fechaInicio de la campaña:', campania.fechaInicio);
-                                console.log('ID del reporte de configuración:', config.configreporte.id);
-                                console.log('Frecuencia del reporte de configuración:', config.configreporte.frecuencia);
-                                console.log('Día de la semana del reporte de configuración:', config.configreporte.diaSemana);
-                                console.log('Día del mes del reporte de configuración:', config.configreporte.diaMes);
-                                console.log('Tipo de reporte del reporte de configuración:', config.configreporte.tiporeporte);
-                                console.log('Email de reporte del reporte de configuración:', config.configreporte.emails);
-                                console.log('---------------------------');
-                
-              
+                console.log('ID de la campaña:', campania.id);
+                console.log('Nombre de la campaña:', campania.nombre);
+                console.log('Descripción de la campaña:', campania.descripcion);
+                console.log('fechaInicio de la campaña:', campania.fechaInicio);
+                console.log('ID del reporte de configuración:', config.configreporte.id);
+                console.log('Frecuencia del reporte de configuración:', config.configreporte.frecuencia);
+                console.log('Día de la semana del reporte de configuración:', config.configreporte.diaSemana);
+                console.log('Día del mes del reporte de configuración:', config.configreporte.diaMes);
+                console.log('Tipo de reporte del reporte de configuración:', config.configreporte.tiporeporte);
+                console.log('Email de reporte del reporte de configuración:', config.configreporte.emails);
+                console.log('---------------------------');
+
+
                 const fechaInicio = new Date(campania.fechaInicio);
                 let fechaFin = new Date();
-               
+
 
                 if (config.configreporte.frecuencia === 'dia') {
                     fechaFin = new Date();
-                }
-                else if (config.configreporte.frecuencia === 'semana') {
-                    
+                } else if (config.configreporte.frecuencia === 'semana') {
+
                     fechaFin.setDate(fechaFin.getDate() + 6);
-                }
-                else if (config.configreporte.frecuencia === 'mes') {
-                   
+                } else if (config.configreporte.frecuencia === 'mes') {
+
                     fechaFin.setMonth(fechaFin.getMonth() + 1);
                     fechaFin.setDate(0);
                 }
 
                 fecha1 = fechaInicio,
-                fecha2 = fechaFin,
+                    fecha2 = fechaFin,
 
-                console.log('Fecha de inicio:', fecha1);
+                    console.log('Fecha de inicio:', fecha1);
                 console.log('Fecha de fin:', fecha2);
 
                 let correos = config.configreporte.emails;
@@ -76,7 +74,7 @@ const taskSendEmail = cron.schedule('00 00 * * * *', async () => {
 
                 const campanas = campania.nombre;
 
-                
+
 
                 if (config.configreporte.frecuencia === 'dia') {
                     console.log("La frecuencia de la campaña es 'dia'. Enviando correo electrónico...");
@@ -85,14 +83,14 @@ const taskSendEmail = cron.schedule('00 00 * * * *', async () => {
                         console.log("Generando reporte de OfferCraft...");
                         reportes.push({
                             filename: 'ReporteOferCraft.xlsx',
-                            content: await generarReporteOferCraft(idCampanas,fecha1,fecha2)
+                            content: await generarReporteOferCraft(idCampanas, fecha1, fecha2)
                         });
 
                     } else if (config.configreporte.tiporeporte === 'Referidos') {
                         console.log("Generando reporte de Referidos...");
                         reportes.push({
                             filename: 'ReporteReferidos.xlsx',
-                            content: await generarReportereReferidos(campanas,fecha1, fecha2)
+                            content: await generarReportereReferidos(campanas, fecha1, fecha2)
                         });
                     } else if (config.configreporte.tiporeporte === 'Pomociones') {
                         console.log("Generando reporte de Pomociones...");
@@ -187,3 +185,195 @@ function isToday(dayOfWeek) {
 }
 
 module.exports = { taskSendEmail };
+
+
+
+
+
+
+// '*/15 * * * * *'
+
+// const taskSendEmail = cron.schedule('*/15 * * * * *', async() => {
+//     console.log('Ejecutando una tarea cada minuto');
+
+//     try {
+//         const configs = await Configuraciones.findAll({
+//             include: [
+//                 { model: Campania, attributes: ['id', 'nombre', 'descripcion', 'fechaInicio'] },
+//                 { model: Promocion, attributes: ['id', 'nombre', 'descripcion', 'fechaInicio'] },
+//                 { model: ConfigReport, attributes: ['id', 'frecuencia', 'diaSemana', 'diaMes', 'tiporeporte', 'emails'] }
+//             ],
+//             where: { estado: 1 }
+//         });
+
+//         console.log("Configuraciones obtenidas:", configs);
+
+//         configs.forEach(async(config) => {
+//             const campania = config.campanium;
+//             const configreporte = config.configreporte;
+
+
+
+
+
+//             if (configreporte) {
+//                 console.log('ID del reporte de configuración:', configreporte.id);
+//                 console.log('Frecuencia del reporte de configuración:', configreporte.frecuencia);
+//                 console.log('Día de la semana del reporte de configuración:', configreporte.diaSemana);
+//                 console.log('Día del mes del reporte de configuración:', configreporte.diaMes);
+//                 console.log('Tipo de reporte del reporte de configuración:', configreporte.tiporeporte);
+//                 console.log('Email de reporte del reporte de configuración:', configreporte.emails);
+//                 console.log('---------------------------');
+
+
+
+
+
+
+
+
+//                 if (configreporte.frecuencia === 'dia') {
+//                     fechaFin = new Date();
+//                 } else if (configreporte.frecuencia === 'semana') {
+//                     fechaFin.setDate(fechaFin.getDate() + 6);
+//                 } else if (configreporte.frecuencia === 'mes') {
+//                     fechaFin.setMonth(fechaFin.getMonth() + 1);
+//                     fechaFin.setDate(0);
+//                 }
+
+
+//                 const idCampanas = campania ? campania.id : null;
+//                 const fecha1 = campania ? campania.fechaInicio : null;
+//                 const fecha2 = fechaFin;
+
+//                 let correos = configreporte.emails;
+//                 const reportes = [];
+
+//                 if (configreporte.frecuencia === 'dia' || (campania && configreporte.frecuencia === 'semana' && isToday(configreporte.diaSemana)) || (campania && configreporte.frecuencia === 'mes' && isTodayOfMonth(configreporte.diaMes))) {
+//                     console.log(`La frecuencia del reporte es '${configreporte.frecuencia}'. Enviando correo electrónico...`);
+
+//                     if (configreporte.tiporeporte === 'OfferCraft') {
+//                         console.log("Generando reporte de OfferCraft...");
+//                         reportes.push({
+//                             filename: 'ReporteOferCraft.xlsx',
+//                             content: await generarReporteOferCraft(idCampanas, fecha1, fecha2)
+//                         });
+//                     } else if (configreporte.tiporeporte === 'Referidos') {
+//                         console.log("Generando reporte de Referidos...");
+//                         reportes.push({
+//                             filename: 'ReporteReferidos.xlsx',
+//                             content: await generarReportereReferidos(campanias, fecha1, fecha2)
+//                         });
+//                     } else if (configreporte.tiporeporte === 'Promocion') {
+//                         console.log("Generando reporte de Promociones...");
+//                         reportes.push({
+//                             filename: 'ReportePromociones.xlsx',
+//                             content: await generarReportePromociones()
+//                         });
+//                     } else if (configreporte.tiporeporte === 'Acumulativas') {
+//                         console.log("Generando reporte de Acumulativas...");
+//                         reportes.push({
+//                             filename: 'ReporteAcumulativas.xlsx',
+//                             content: await reporteClientesContraCampanasAcumulativas()
+//                         });
+//                     }
+
+//                     if (reportes.length > 0) {
+//                         console.log("Enviando correo electrónico...");
+//                         sendEmail(correos, 'Reporte de campaña', 'Reporte de la campaña', reportes);
+//                     }
+//                 }
+
+//                 if (configreporte.frecuencia === 'semana' && isToday(configreporte.diaSemana)) {
+//                     console.log("La frecuencia del reporte es 'semana' y hoy es el día especificado en la configuración. Enviando correo electrónico...");
+
+//                     if (configreporte.tiporeporte === 'OfferCraft') {
+//                         console.log("Generando reporte de OfferCraft...");
+//                         reportes.push({
+//                             filename: 'ReporteOferCraft.xlsx',
+//                             content: await generarReporteOferCraft(idCampanas, fecha1, fecha2)
+//                                 //                         });
+//                         });
+//                     } else if (configreporte.tiporeporte === 'Referidos') {
+//                         console.log("Generando reporte de Referidos...");
+//                         reportes.push({
+//                             filename: 'ReporteReferidos.xlsx',
+//                             content: await generarReportereReferidos(campanas, fecha1, fecha2)
+//                         });
+//                     } else if (configreporte.tiporeporte === 'Pomociones') {
+//                         console.log("Generando reporte de Promociones...");
+//                         reportes.push({
+//                             filename: 'ReportePromociones.xlsx',
+//                             content: await generarReportePromociones()
+//                         });
+//                     }
+
+//                     if (reportes.length > 0) {
+//                         console.log("Enviando correo electrónico...");
+//                         sendEmail(correos, 'Reporte de campaña', 'Reporte de la campaña', reportes);
+//                     }
+//                 }
+
+//                 if (configreporte.frecuencia === 'mes' && isTodayOfMonth(configreporte.diaMes)) {
+//                     console.log("La frecuencia del reporte es 'mes' y hoy es el día especificado en la configuración. Enviando correo electrónico...");
+
+//                     if (configreporte.tiporeporte === 'OfferCraft') {
+//                         console.log("Generando reporte de OfferCraft...");
+//                         reportes.push({
+//                             filename: 'ReporteOferCraft.xlsx',
+//                             content: await generarReporteOferCraft(idCampanas, fecha1, fecha2)
+//                                 //                         });
+//                         });
+//                     } else if (configreporte.tiporeporte === 'Referidos') {
+//                         console.log("Generando reporte de Referidos...");
+//                         reportes.push({
+//                             filename: 'ReporteReferidos.xlsx',
+//                             content: await generarReportereReferidos(campanas, fecha1, fecha2)
+//                         });
+//                     } else if (configreporte.tiporeporte === 'Pomociones') {
+//                         console.log("Generando reporte de Promociones...");
+//                         reportes.push({
+//                             filename: 'ReportePromociones.xlsx',
+//                             content: await generarReportePromociones()
+//                         });
+//                     }
+
+//                     if (reportes.length > 0) {
+//                         console.log("Enviando correo electrónico...");
+//                         sendEmail(correos, 'Reporte de campaña', 'Reporte de la campaña', reportes);
+//                     }
+//                 }
+//             } else {
+//                 console.log("No se encontró configreporte para la configuración con ID:", config.id);
+//             }
+
+//             // Enviar reporte "Acumulativas" si no hay campaña asociada
+//             if (!campania && configreporte.tiporeporte === 'Acumulativas') {
+//                 console.log("Generando reporte de Acumulativas sin campaña...");
+//                 const reportes = [{
+//                     filename: 'ReporteAcumulativas.xlsx',
+//                     content: await reporteClientesContraCampanasAcumulativas()
+//                 }];
+//                 let correos = configreporte.emails;
+//                 console.log("Enviando correo electrónico...");
+//                 sendEmail(correos, 'Reporte Acumulativas', 'Reporte de acumulativas', reportes);
+//             }
+//         });
+
+//     } catch (error) {
+//         console.error('Error al obtener las configuraciones:', error);
+//     }
+// });
+
+// function isTodayOfMonth(dayOfMonth) {
+//     const today = new Date().getDate();
+//     return dayOfMonth === today;
+// }
+
+// function isToday(dayOfWeek) {
+//     const today = new Date().getDay();
+//     const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+//     return dayOfWeek.toLowerCase() === days[today];
+// }
+
+// module.exports = { taskSendEmail };

@@ -11,13 +11,15 @@ const { ConfigReport } = require('../models/configReport');
 
 const { Op } = require('sequelize');
 
-const getUsuariosNotificacionesOfferCraftSel = async (idCampanas, fecha1, fecha2, archivadas) => {
+const getUsuariosNotificacionesOfferCraftSel = async(idCampanas, fecha1, fecha2, archivadas) => {
     try {
         let whereConditions = {
             id: idCampanas,
             [Op.or]: [{ estado: [1, 2, 3] }],
-            fechaInicio: { [Op.gte]: fecha1 },
-            fechaFin: { [Op.lte]: fecha2 },
+            fechaInicio: {
+                [Op.gte]: fecha1 },
+            fechaFin: {
+                [Op.lte]: fecha2 },
             estado: 1,
             esArchivada: archivadas ? 1 : 0,
         };
@@ -78,7 +80,7 @@ const getUsuariosNotificacionesOfferCraftSel = async (idCampanas, fecha1, fecha2
     }
 };
 
-const getCustomerInfoById = async (customerId) => {
+const getCustomerInfoById = async(customerId) => {
     try {
         const customerInfo = await pronet.query(`
             SELECT 
