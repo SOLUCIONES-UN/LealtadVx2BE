@@ -164,12 +164,17 @@ Parametro.belongsTo(Campania,{
 
 Campania.hasMany(Configuraciones, {
     foreignKey: 'idCampania',
-    sourceKey: 'id'
+    sourceKey: 'id',
+    allowNull: false
+
 });
 
 Configuraciones.belongsTo(Campania, {
     foreignKey: 'idCampania',
     targetId: 'id',
+    allowNull: false
+
+    
 });
 
 

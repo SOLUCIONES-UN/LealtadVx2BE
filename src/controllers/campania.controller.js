@@ -326,48 +326,6 @@ const GetcampanasActivasById = async (req, res) => {
 }
 
 
-
-
-
-
-
-// const GetcampanasActivasById = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const etapa = await Campania.findByPk(id, {
-//             where: { estado: 1 },
-//             include: [
-//                 {
-//                     model: Etapa,
-//                     include: [
-//                         { model: Parametro, attributes: { exclude: ['idCampania'] } },
-//                         { model: PremioCampania },
-//                         { model: Presupuesto }
-//                     ]
-//                 },
-//                 { model: Participantes },
-//                 { model: Bloqueados }
-
-//             ]
-//         });
-
-//         // Decodificar imágenes base64
-//         const imgPushDecoded = etapa.imgPush ? Buffer.from(etapa.imgPush, 'base64').toString('binary') : null;
-//         const imgAkisiDecoded = etapa.imgAkisi ? Buffer.from(etapa.imgAkisi, 'base64').toString('binary') : null;
-        
-//         // Asignar las imágenes decodificadas de nuevo a la campaña
-//         etapa.imgPush = imgPushDecoded;
-//         etapa.imgAkisi = imgAkisiDecoded;
-
-//         res.json(etapa);
-
-//     } catch (error) {
-//         res.status(403)
-//         res.send({ errors: 'Ha sucedido un error al intentar consultar la Campaña.', details: error.message });
-//     }
-// }
-
-
 const PausarCampaña = async (req, res) => {
 
     try {

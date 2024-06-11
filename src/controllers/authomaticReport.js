@@ -2,6 +2,7 @@ const { Op, Sequelize } = require('sequelize');
 const { Configuraciones } = require('../models/configuraciones');
 const { ConfigReport } = require('../models/configReport');
 const { Campania } = require('../models/campanias');
+const { Promocion } = require('../models/promocion');
 
 
 
@@ -16,7 +17,7 @@ const GetConfiguraciones = async(req, res) => {
                     [Op.or]: [1, 2] 
                 }
             },
-            include: [{ model: Configuraciones, include: [Campania] }] 
+            include: [{ model: Configuraciones, include: [Campania],include:[Promocion] }] 
         });
 
         res.json(configReport);
@@ -27,25 +28,49 @@ const GetConfiguraciones = async(req, res) => {
 };
 
 
-const AddConfiguration = async(req, res) => {
+const AddConfiguration = async (req, res) => {
     try {
-        const { emails, tiporeporte, frecuencia, campanias, diasemana, diames } = req.body;
+        const { emails, tiporeporte, frecuencia, campanias, promocions, diasemana, diames } = req.body;
 
+      
         const nuevaConfiguracion = await ConfigReport.create({
             diaSemana: diasemana,
             diaMes: diames,
             frecuencia: frecuencia,
             tiporeporte: tiporeporte,
             emails: emails
-
         });
 
         const configReportId = nuevaConfiguracion.id;
 
-        await Configuraciones.create({
-            idConfigReport: configReportId,
-            idCampania: campanias
-        });
+        
+        if (campanias.length === 0 && promocions.length > 0) {
+            for (let promocion of promocions) {
+                await Configuraciones.create({
+                    idConfigReport: configReportId,
+                    idCampania: null,
+                    idPromocion: promocion
+                });
+            }
+        } else if (campanias.length > 0 && promocions.length === 0) {
+            for (let campania of campanias) {
+                await Configuraciones.create({
+                    idConfigReport: configReportId,
+                    idCampania: campania,
+                    idPromocion: null
+                });
+            }
+        } else {
+            for (let campania of campanias) {
+                for (let promocion of promocions) {
+                    await Configuraciones.create({
+                        idConfigReport: configReportId,
+                        idCampania: campania,
+                        idPromocion: promocion
+                    });
+                }
+            }
+        }
 
         res.json({ code: 'ok', message: 'Configuración creada con éxito.', nuevaConfiguracion });
     } catch (error) {
@@ -53,8 +78,6 @@ const AddConfiguration = async(req, res) => {
         res.status(403).json({ error: 'Ha ocurrido un error al intentar ingresar la configuración.' });
     }
 }
-
-
 
 const UpdateReport = async(req, res) => {
     try {
