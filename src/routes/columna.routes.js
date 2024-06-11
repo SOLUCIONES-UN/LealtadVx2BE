@@ -15,6 +15,6 @@ router.put(`/${path}/:id`,validateCreate,authUser,UpdateColumna);
 router.delete(`/${path}/:id`,authUser,DeleteColumna);
 router.get(`/${path}/:id`,authUser,GetColumnaById);
 router.get(`/${path_tabla}/:idProyectos`,GetTablaByProyectos);
-router.get(`/${path}bytablas/:idTablas`,authUser,GetColumnasByTablas);
+router.get(`/${path}/bytablas/:idTablas`,authUser,GetColumnasByTablas);
 
 module.exports = router;

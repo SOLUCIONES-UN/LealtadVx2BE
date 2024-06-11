@@ -1,6 +1,5 @@
 const {  ConfigReferido } = require('../models/configReferidos');
 
-//controllador paa obtener la lista de páginas
 const GetConfigReferidos = async (req, res) => {
     try {
         const trx = await ConfigReferido.findAll();
