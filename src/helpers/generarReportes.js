@@ -1,6 +1,5 @@
 const { QueryTypes } = require('sequelize');
 const XLSX = require('xlsx');
-// const XLSXStyle = require('xlsx-style');
 const { reporteClientesParticipando } = require('../controllers/reports.controller.js')
 const { Campania } = require('../models/campanias');
 const { Configuraciones } = require('../models/configuraciones');
@@ -84,14 +83,6 @@ const reporteClientesContraCampanasAcumulativas = async() => {
 
 
 
-
-
-
-
-
-
-
-
 const generarReportereGeneralReferidos = async(fecha1, fecha2) => {
 
     const datas = await getParticipacionesFechasGeneral(fecha1, fecha2);
@@ -136,7 +127,7 @@ const generarReportereGeneralReferidos = async(fecha1, fecha2) => {
                 { v: data["userno"], t: 's' },
                 { v: data["nombreReferido"], t: 's' },
                 { v: data["noReferido"], t: 's' },
-                { v: data["fecha"], t: 's' }, // Asegúrate de que la propiedad "fecha" tenga el formato adecuado
+                { v: data["fecha"], t: 's' },
             ];
             infoFinal.push(rowInfo);
             contador += 1;
@@ -152,7 +143,7 @@ const generarReportereGeneralReferidos = async(fecha1, fecha2) => {
         { wch: 15 },
         { wch: 12 },
         { wch: 25 },
-        { wch: 25 }, // Ajuste de ancho para 'Campaña' y 'Fecha Participacion'
+        { wch: 25 }, 
         { wch: 20 },
         { wch: 20 },
     ];
@@ -167,15 +158,6 @@ const generarReportereGeneralReferidos = async(fecha1, fecha2) => {
 
     return file;
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -243,7 +225,6 @@ const generarReporteClientesParticipando = async() => {
     });
 
     const ws = XLSX.utils.aoa_to_sheet(infoFinal);
-    // ws['!cols'] = [{ width: 30 }, { width: 20 }, { width: 20 }]
     ws['!cols'] = [
         { width: 15 },
         { width: longitud1 + 2 },
@@ -362,7 +343,6 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
 
     const wb = XLSX.utils.book_new();
 
-    // Definir las filas con estilos
     let row1 = [
         { v: '', t: 's', s: { font: { name: 'Courier', sz: 18 } } },
         { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
@@ -425,7 +405,7 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
         { wch: 15 },
         { wch: 12 },
         { wch: 25 },
-        { wch: 25 }, // Ajuste de ancho para 'Campaña' y 'Fecha Participacion'
+        { wch: 25 }, 
         { wch: 20 },
         { wch: 20 },
         { wch: 12 },
@@ -445,17 +425,28 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
 
 
 
-
-
-
-
-
 const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) => {
     // Obtener datos de promociones
     const datas = await postDatosCupon(idpromocions, fechaInicio, fechaFinal);
 
     // Crear un libro de Excel
     const wb = XLSX.utils.book_new();
+
+    // Encabezado del reporte
+    let row1 = [
+        { v: '', t: 's', s: { font: { name: 'Courier', sz: 18 } } },
+        { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
+        { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
+        { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
+        { v: 'REPORTE DE PROMOCIONES', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
+    ];
+
+    let row2 = [
+        { v: '', t: 's', s: { font: { name: 'Courier', sz: 12 } } },
+        { v: '', t: 's', s: { font: { sz: 12 }, alignment: { horizontal: 'center' } } },
+    ];
+
+    let row3 = [''];
 
     // Encabezados de las columnas
     const headers = [
@@ -472,20 +463,28 @@ const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) 
     ];
 
     // Crear hoja de cálculo
-    const ws = XLSX.utils.json_to_sheet([], { header: headers });
+    const ws = XLSX.utils.aoa_to_sheet([[],[],[],headers]);
+
+    // Agregar encabezado de reporte (row1, row2, row3)
+    XLSX.utils.sheet_add_aoa(ws, [row1], { origin: 'A1' });
+    XLSX.utils.sheet_add_aoa(ws, [row2], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(ws, [row3], { origin: 'A3' });
 
     // Agregar datos a la hoja de cálculo
     datas.forEach(data => {
         // Obtener información relevante
         const nombre = data.detallepromocion?.promocion?.nombre || '';
-        const telefono = data.numeroTelefono || '';
-        const campania = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[8].etapa?.campanium?.nombre    || '';
+        let telefono = data.numeroTelefono || '';
+        if (telefono.length === 8) {
+            telefono = '(502) ' + telefono;
+        }
+        const campania = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[8].etapa?.campanium?.nombre || '';
         const premio = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.descripcion || '';
         const monto = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[0].valor || '';
         const transaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.idTransaccion || '';
         const codigo = data.detallepromocion?.cupon || '';
         const montotransaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].valor || '';
-        const fechacreditacion =data.detallepromocion?.promocion?.fechaInicio || '';
+        const fechacreditacion = data.detallepromocion?.promocion?.fechaInicio || '';
         const fechaParticipacion = data.fecha || '';
 
         // Agregar fila con los datos
@@ -512,9 +511,6 @@ const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) 
 
     return file;
 };
-
-
-
 
 
 module.exports = {

@@ -302,6 +302,8 @@ const { generarReportereReferidos, generarReporteClientesParticipando, generarRe
 
 // 0 * * * *'
 
+// '*/15 * * * * *'
+
 const taskSendEmail = cron.schedule('0 * * * *', async () => {
     console.log('Ejecutando una tarea cada minuto');
 
