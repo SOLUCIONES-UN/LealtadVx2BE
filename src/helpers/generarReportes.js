@@ -18,7 +18,7 @@ const reporteClientesContraCampanasAcumulativas = async() => {
 
 
 
-
+    console.log('Entrando en generarReportePromociones');
     const datas = await reporteClientesContraCampanas();
 
     console.log('esto biene aqui', datas)
@@ -450,95 +450,68 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
 
 
 
+const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) => {
+    // Obtener datos de promociones
+    const datas = await postDatosCupon(idpromocions, fechaInicio, fechaFinal);
 
-const generarReportePromociones = async(promocion, fecha1, fecha2) => {
-
-
-    const datas = await postDatosCupon(promocion, fecha1, fecha2);
-
-
-    console.log('esto biene en datas datas', datas)
-
-
-
+    // Crear un libro de Excel
     const wb = XLSX.utils.book_new();
 
-    let row1 = [
-        { v: '', t: 's', s: { font: { name: 'Courier', sz: 18 } } },
-        { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
-        { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
-        { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
-        { v: ' REPORTE DE PROMOCIONES', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
+    // Encabezados de las columnas
+    const headers = [
+        'NOMBRE',
+        'TELEFONO',
+        'CAMPAÑA',
+        'PREMIO',
+        'MONTO PREMIO',
+        'TRANSACCIÓN',
+        'CÓDIGO',
+        'MONTO TRANSACCIONES',
+        'FECHA ACREDITACIÓN',
+        'FECHA PARTICIPACIÓN'
     ];
 
-    let row2 = [
-        { v: '', t: 's', s: { font: { name: 'Courier', sz: 12 } } },
-        { v: '', t: 's', s: { font: { sz: 12 }, alignment: { horizontal: 'center' } } },
-    ];
+    // Crear hoja de cálculo
+    const ws = XLSX.utils.json_to_sheet([], { header: headers });
 
-    let row3 = [''];
-
-    let row4 = [
-        '',
-        { v: 'NOMBRE', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'TELEFONO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'CAMPAÑA', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'PREMIO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'MONTO PREMIO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'TRANSACCIÓN', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'CÓDIGO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'MONTO TRANSACCIONES', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'FECHA ACREDITACIÓN', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'FECHA PARTICIPACIÓN', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-    ];
-
-    let infoFinal = [row1, row2, row3, row4];
-    let contador = 1;
-
+    // Agregar datos a la hoja de cálculo
     datas.forEach(data => {
-        let rowInfo = [
-            '',
-            { v: data["NOMBRE"], t: 's' },
-            { v: data["Telefono"], t: 's' },
-            { v: data["CAMPAÑA"], t: 's' },
-            { v: data["PREMIO"], t: 's' },
-            { v: data["MONTO PREMIO"], t: 's' },
-            { v: data["TRANSACCIÓN"], t: 'n' },
-            { v: data["CÓDIGO"], t: 's' },
-            { v: data["MONTO TRANSACCIONES"], t: 's' },
-            { v: data["FECHA ACREDITACIÓN"], t: 'n' },
-            { v: data["FECHA PARTICIPACIÓN"], t: 's' },
-        ];
+        // Obtener información relevante
+        const nombre = data.detallepromocion?.promocion?.nombre || '';
+        const telefono = data.numeroTelefono || '';
+        const campania = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[8].etapa?.campanium?.nombre    || '';
+        const premio = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.descripcion || '';
+        const monto = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[0].valor || '';
+        const transaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.idTransaccion || '';
+        const codigo = data.detallepromocion?.cupon || '';
+        const montotransaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].valor || '';
+        const fechacreditacion =data.detallepromocion?.promocion?.fechaInicio || '';
+        const fechaParticipacion = data.fecha || '';
 
-        infoFinal.push(rowInfo);
-        contador += 1;
+        // Agregar fila con los datos
+        const row = [
+            nombre,
+            telefono,
+            campania,
+            premio,
+            monto,
+            transaccion,
+            codigo,
+            montotransaccion,
+            fechacreditacion,
+            fechaParticipacion
+        ];
+        XLSX.utils.sheet_add_aoa(ws, [row], { origin: -1 });
     });
 
-    const ws = XLSX.utils.aoa_to_sheet(infoFinal);
+    // Agregar hoja de cálculo al libro
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuarios Notificados');
 
-    ws['!cols'] = [
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 12 },
-        { wch: 25 },
-        { wch: 25 }, // Ajuste de ancho para 'Campaña' y 'Fecha Participacion'
-        { wch: 20 },
-        { wch: 20 },
-        { wch: 12 },
-        { wch: 20 },
-        { wch: 12 },
-    ];
-
-    if (!ws['!merges']) ws['!merges'] = [];
-    ws['!merges'].push({ s: { r: 0, c: 4 }, e: { r: 0, c: 6 } });
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Usuario notificados');
-
-    const file = await XLSX.write(wb, { bookType: "xlsx", bookSST: false, type: "buffer" });
+    // Convertir el libro a un buffer
+    const file = await XLSX.write(wb, { bookType: 'xlsx', bookSST: false, type: 'buffer' });
 
     return file;
 };
-
 
 
 

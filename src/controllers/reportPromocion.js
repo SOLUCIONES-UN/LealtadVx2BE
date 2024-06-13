@@ -18,6 +18,9 @@ const postDatosCupon = async (req, res) => {
   try {
     const { promocion, fechaInicio, fechaFinal } = req.body;
 
+
+    console.log("Fecha Inicio:", fechaInicio);
+    console.log("Fecha Final:", fechaFinal);
     
     const trxAll = await CangePromocion.findAll({
       include: {
@@ -46,10 +49,12 @@ const postDatosCupon = async (req, res) => {
         },
       },
       where: {
-        [Op.and]: [
-          { fecha: { [Op.gte]: fechaInicio } },
-          { fecha: { [Op.lte]: fechaFinal } }
-        ]
+        fecha: {
+          [Op.gte]: fechaInicio,
+        },
+        fecha: {
+          [Op.lte]: fechaFinal,
+        },
       }
     });
     res.json(trxAll)
