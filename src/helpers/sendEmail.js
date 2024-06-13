@@ -2,10 +2,8 @@ const nodemailer = require("nodemailer");
 const env = require("../bin/env");
 const { report } = require("../routes/campania.routes");
 
-//metodo usado para enviar los reportes de las campñas a los correos configurados
 const sendEmail = async (to, subject, text, files, reportType) => {
     try {
-        // Configuración de los correos
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -14,11 +12,9 @@ const sendEmail = async (to, subject, text, files, reportType) => {
             },
         });
 
-        // Configuración del mensaje
         let reportName = '';
         let reportContent = '';
 
-        // Determina el nombre y el contenido del reporte dependiendo del tipo
         if (reportType === 'Promocion') {
             reportName = 'Reporte de Promoción';
             reportContent = 'Hemos generado el siguiente reporte de la promoción:';
@@ -35,7 +31,6 @@ const sendEmail = async (to, subject, text, files, reportType) => {
             reportName = 'Reporte   Referidos';
             reportContent = 'Hemos generado el siguiente reporte General de Referidos:';
         }  else {
-            // Por defecto, si no se especifica un tipo de reporte válido, se utiliza el asunto y el contenido genéricos
             reportName = 'Reporte de campañas';
             reportContent = 'Hemos generado el siguiente reporte de la campaña:';
         }
@@ -52,7 +47,6 @@ const sendEmail = async (to, subject, text, files, reportType) => {
             attachments: files,
         };
 
-        // Envío del correo
         const info = await transporter.sendMail(mailOptions);
         console.log("Message sent: %s", info.messageId);
     } catch (error) {

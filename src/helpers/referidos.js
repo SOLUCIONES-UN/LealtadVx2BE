@@ -4,7 +4,6 @@ const { Campania } = require('../models/campanias');
 const { participacionReferidos } = require('../models/participacionReferidos');
 const { Participacion } = require('../models/Participacion');
 const { codigoReferido } = require('../models/codigoReferidos');
-// const { referidosIngresos } = require('../models/ReferidosIngresos'); // Aquí se agregó la importación faltante
 const { ConfigReferido } = require('../models/configReferidos');
 const { Usuario } = require('../models/usuario');
 const { Op } = require('sequelize');
@@ -35,7 +34,7 @@ const getParticipaciones = async (campanas, fecha1, fecha2) => {
 
 
 
-        
+
     const participaciones = await sequelize.query(`
          SELECT 
         c.id AS campania_id,
@@ -70,7 +69,7 @@ const getParticipaciones = async (campanas, fecha1, fecha2) => {
     
     const participacionesConCliente = await Promise.all(participaciones.map(async (participacion) => {
       const customerInfo = await getCustomerById(participacion.customerId);
-      participacion.customerInfo = customerInfo; // Asignar la información del cliente a la participación
+      participacion.customerInfo = customerInfo; 
       return participacion;
     }));
 
@@ -86,7 +85,7 @@ catch (error) {
 
 const getCustomerById = async (customerid) => {
   try {
-    // const { customerid, fechaInicio, fechaFin } = req.body;
+   
     const customerInfo = await pronet.query(`
     SELECT ui.userid,
           ui.userno as noreferido,
@@ -118,7 +117,6 @@ WHERE
       type: pronet.QueryTypes.SELECT
     });
 
-    // res.status(200).json(customerInfo);
 return customerInfo;
 
   } catch (error) {
