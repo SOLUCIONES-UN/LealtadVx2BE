@@ -14,37 +14,8 @@ const { sequelize } = require('../database/database');
 
 const AddCampania = async(req, res) =>{
     const transaction = await sequelize.transaction();
-    try{
+    try {
         const {
-            nombre,
-            descripcion,
-            fechaCreacion,
-            fechaRegistro,
-            fechaInicio,
-            fechaFin,
-            edadInicial,
-            edadFinal,
-            sexo,
-            tipoUsuario,
-            tituloNotificacion ,
-            descripcionNotificacion,
-            imgPush, 
-            imgAkisi,
-            estado,
-            maximoParticipaciones,
-            campaniaTerceros,
-            terminosCondiciones,
-            observaciones,
-            esArchivada,
-            restriccionUser,
-            idProyecto,
-            etapas,
-            bloqueados,
-            participacion,
-            emails,
-        } = req.body;
-    
-        const newCampains = await Campania.create({
             nombre,
             descripcion,
             fechaCreacion,
@@ -67,11 +38,45 @@ const AddCampania = async(req, res) =>{
             esArchivada,
             restriccionUser,
             idProyecto,
+            etapas,
+            bloqueados,
+            participacion,
+            emails,
+        } = req.body;
+
+        
+        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
+        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
+
+        const newCampains = await Campania.create({
+            nombre,
+            descripcion,
+            fechaCreacion,
+            fechaRegistro,
+            fechaInicio,
+            fechaFin,
+            edadInicial,
+            edadFinal,
+            sexo,
+            tipoUsuario,
+            tituloNotificacion,
+            descripcionNotificacion,
+            imgPush: imgPushBase64,
+            imgAkisi: imgAkisiBase64,
+            estado,
+            maximoParticipaciones,
+            campaniaTerceros,
+            terminosCondiciones,
+            observaciones,
+            esArchivada,
+            restriccionUser,
+            idProyecto,
             emails
-        },{transaction});
+        }, { transaction });
+
         const { id } = newCampains.dataValues;
 
-        const etapaData = etapas.map(etapa =>({
+        const etapaData = etapas.map(etapa => ({
             ...etapa,
             idCampania: id,
             periodo: etapa.periodo ? parseInt(etapa.periodo) : null,
@@ -80,42 +85,40 @@ const AddCampania = async(req, res) =>{
             intervaloMensual: etapa.intervaloMensual ? parseInt(etapa.intervaloMensual) : null,
             valorAcumulado: etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null
         }));
-        const nuevaEtapa = await Etapa.bulkCreate(etapaData,{transaction});
+        const nuevaEtapa = await Etapa.bulkCreate(etapaData, { transaction });
 
         const etapasConId = nuevaEtapa.map((etapa, index) => ({
             ...etapas[index],
             id: etapa.id,
         }));
 
-        const parametrosData = etapasConId.flatMap(etapa => etapa.parametros.map(parametros =>({...parametros, idEtapa: etapa.id})));
-        await Parametro.bulkCreate(parametrosData,{transaction});
+        const parametrosData = etapasConId.flatMap(etapa => etapa.parametros.map(parametros => ({ ...parametros, idEtapa: etapa.id })));
+        await Parametro.bulkCreate(parametrosData, { transaction });
 
-        const presupuestoData = etapasConId.flatMap(etapa => etapa.presupuesto.map(presupuesto =>({...presupuesto, idEtapa: etapa.id})));
-        await Presupuesto.bulkCreate(presupuestoData,{transaction});
+        const presupuestoData = etapasConId.flatMap(etapa => etapa.presupuesto.map(presupuesto => ({ ...presupuesto, idEtapa: etapa.id })));
+        await Presupuesto.bulkCreate(presupuestoData, { transaction });
 
-        const premioData = etapasConId.flatMap(etapa => etapa.premio.map(premio =>({...premio, idEtapa: etapa.id})));
-        await PremioCampania.bulkCreate(premioData,{transaction});
+        const premioData = etapasConId.flatMap(etapa => etapa.premio.map(premio => ({ ...premio, idEtapa: etapa.id })));
+        await PremioCampania.bulkCreate(premioData, { transaction });
 
         if (bloqueados) {
             const bloqueoData = bloqueados.map(bloqueo => ({ ...bloqueo, idCampania: id }));
             await Bloqueados.bulkCreate(bloqueoData, { transaction });
         }
 
-        if(participacion){
-            const participacionData = participacion.map(participacion =>({...participacion, idCampania: id}));
-            await Participantes.bulkCreate(participacionData ,{transaction});                
+        if (participacion) {
+            const participacionData = participacion.map(participacion => ({ ...participacion, idCampania: id }));
+            await Participantes.bulkCreate(participacionData, { transaction });
         }
 
-
         await transaction.commit();
-        res.json({code: 'ok', message: 'Campaña creada con exito'});
-    }catch(error){
+        res.json({ code: 'ok', message: 'Campaña creada con exito' });
+    } catch (error) {
         await transaction.rollback();
         console.error('Error al crear la campaña:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar crear la campaña', details: error.message });
     }
-      
-} 
+}
 
 const GetCampania = async (req, res) => {
     try {
@@ -175,14 +178,15 @@ const UpdateCampania = async (req, res) => {
             participacion,
             emails
         } = req.body;
+        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
+        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
 
-        // Verificar si la campaña existe
+
         const campania = await Campania.findByPk(id, { transaction });
         if (!campania) {
             throw new Error('La campaña no existe');
         }
 
-        // Actualizar los datos de la campaña
         await campania.update({
             nombre,
             descripcion,
@@ -196,8 +200,8 @@ const UpdateCampania = async (req, res) => {
             tipoUsuario,
             tituloNotificacion,
             descripcionNotificacion,
-            imgPush,
-            imgAkisi,
+            imgPush:imgPushBase64,
+            imgAkisi :imgAkisiBase64,
             estado,
             maximoParticipaciones,
             campaniaTerceros,
@@ -209,7 +213,6 @@ const UpdateCampania = async (req, res) => {
             emails
         }, { transaction });
 
-        // Actualizar o crear etapas
         if (Array.isArray(etapas)) {
             for (const etapa of etapas) {
                 const [etapaInstancia, etapaCreada] = await Etapa.findOrCreate({
@@ -236,21 +239,18 @@ const UpdateCampania = async (req, res) => {
                     }, { transaction });
                 }
 
-                // Actualizar o crear parámetros de la etapa
                 if (Array.isArray(etapa.parametros)) {
                     for (const parametro of etapa.parametros) {
                         await Parametro.upsert({ ...parametro, idEtapa: etapaInstancia.id }, { transaction });
                     }
                 }
 
-                // Actualizar o crear presupuestos de la etapa
                 if (Array.isArray(etapa.presupuestos)) {
                     for (const presupuesto of etapa.presupuestos) {
                         await Presupuesto.upsert({ ...presupuesto, idEtapa: etapaInstancia.id }, { transaction });
                     }
                 }
 
-                // Actualizar o crear premios de la etapa
                 if (Array.isArray(etapa.premiocampania)) {
                     for (const premio of etapa.premiocampania) {
                         await PremioCampania.upsert({ ...premio, idEtapa: etapaInstancia.id }, { transaction });
@@ -259,14 +259,12 @@ const UpdateCampania = async (req, res) => {
             }
         }
 
-        // Actualizar o crear bloqueados de la campaña
         if (Array.isArray(bloqueados)) {
             for (const bloqueo of bloqueados) {
                 await Bloqueados.upsert({ ...bloqueo, idCampania: id }, { transaction });
             }
         }
 
-        // Actualizar o crear participantes de la campaña
         if (Array.isArray(participacion)) {
             for (const participante of participacion) {
                 await Participantes.upsert({ ...participante, idCampania: id }, { transaction });
@@ -275,7 +273,6 @@ const UpdateCampania = async (req, res) => {
 
         await transaction.commit();
 
-        // Obtener la campaña actualizada con las relaciones
         const campaniaActualizada = await Campania.findByPk(id, {
             include: [
                 {
@@ -301,10 +298,8 @@ const UpdateCampania = async (req, res) => {
     }
 };
 
-
 const GetcampanasActivasById = async (req, res) => {
     try {
-
         const { id } = req.params;
         const etapa = await Campania.findByPk(id, {
             where: { estado: 1 },
@@ -312,16 +307,25 @@ const GetcampanasActivasById = async (req, res) => {
                 {
                     model: Etapa,
                     include: [
-                        { model: Parametro , attributes: { exclude: ['idCampania'] }},
+                        { model: Parametro, attributes: { exclude: ['idCampania'] } },
                         { model: PremioCampania },
                         { model: Presupuesto }
                     ]
                 },
-                { model: Participantes},
-                {model: Bloqueados}
+                { model: Participantes },
+                { model: Bloqueados }
 
             ]
-        })
+        });
+
+        if (etapa) {
+            etapa.imgPush = decodeURIComponent(etapa.imgPush); 
+            etapa.imgAkisi = decodeURIComponent(etapa.imgAkisi);
+
+            etapa.imgPush = removeFakePath(etapa.imgPush);
+            etapa.imgAkisi = removeFakePath(etapa.imgAkisi);
+        }
+
         res.json(etapa);
 
     } catch (error) {
@@ -330,7 +334,14 @@ const GetcampanasActivasById = async (req, res) => {
     }
 }
 
-//metodo para pausar campanias (La uso)
+function removeFakePath(path) {
+    const fakePathIndex = path.indexOf("C:/fakepath/");
+    if (fakePathIndex !== -1) {
+        path = path.substring(fakePathIndex + "C:/fakepath/".length);
+    }
+    return path;
+}
+
 const PausarCampaña = async (req, res) => {
 
     try {
@@ -356,8 +367,6 @@ const PausarCampaña = async (req, res) => {
     }
 }
 
-//metodo para activas campanias (La uso)
-//metodo para activas campanias (La uso)
 const ActivarCampaña = async (req, res) => {
 
     try {
@@ -383,7 +392,6 @@ const ActivarCampaña = async (req, res) => {
     }
 }
 
-//metodo para deshabilitar campanias (La uso)
 const DeleteCampania = async (req, res) => {
 
     try {
@@ -502,8 +510,6 @@ const TestearTransaccion = async(req, res) => {
 
             let otrasValidaciones = [];
 
-
-            //validacion de la edad
             const fechaNacimineto = datosPersonales.fechaNacimineto.split('-');
             const edad = 2023 - parseInt(fechaNacimineto[0]);
             let edadValidacion = { icono: 'gift', nombre: 'edad', 'inicial': element.edadInicial, 'final': element.edadFinal, valorActual: edad }
@@ -515,7 +521,6 @@ const TestearTransaccion = async(req, res) => {
                 enviaPremio = false;
             }
 
-            //validacion fecha registro
             let registroValidacion = { icono: 'calendar', nombre: 'Fecha Registro', 'inicial': format(datosPersonales.fechaRegistro), 'valorActual': format(new Date(element.fechaRegistro)) };
 
             if (new Date(2023, 0, 1) <= datosPersonales.fechaRegistro) {
@@ -525,7 +530,6 @@ const TestearTransaccion = async(req, res) => {
                 enviaPremio = false;
             }
 
-            //validacion del sexo del usuario
             let generos = ['Todos', 'Masculino', 'Femenino']
             let sexoValidacion = { icono: 'user-check', nombre: 'Genero', 'inicial': generos[element.sexo], 'final': "", valorActual: generos[datosPersonales.sexo] };
 
@@ -536,7 +540,6 @@ const TestearTransaccion = async(req, res) => {
                 enviaPremio = false;
             }
 
-            //validacion Tipo Usuarop
             let tiposUsuarios = ["TODOS", "Adquiriente", "Final"]
 
             let tipoUsuarioValidacion = { icono: 'user', nombre: 'Tipo Usuario', 'inicial': tiposUsuarios[element.tipoUsuario], 'final': "", valorActual: tiposUsuarios[datosPersonales.tipoUsuario] };
@@ -556,7 +559,6 @@ const TestearTransaccion = async(req, res) => {
 
 
             let transaccionAct = { descripcion: "Recarga de Saldo", valor: 9.00 };
-            //muestra las tranacciones
             let TransaccionesValidas = [];
             for (const param of tranasccionesX) {
                 const transaccion = await transaccionesValidas(param.idTransaccion);
@@ -574,7 +576,6 @@ const TestearTransaccion = async(req, res) => {
             otrasValidaciones = [...otrasValidaciones, edadValidacion, registroValidacion, sexoValidacion, tipoUsuarioValidacion];
             let test = await validacionTransaccion(TransaccionesValidas, transaccionAct, dataEtapaActual, element.id, '123456', dataEtapaActual.valorAcumulado);
 
-            // 
             const validacion = { datosCampania, validacionPresupuesto, premios, validacionEtapa, otrasValidaciones, enviaPremio, TransaccionesValidas, test }
 
             result = [...result, validacion]
@@ -590,11 +591,9 @@ const TestearTransaccion = async(req, res) => {
     }
 }
 
-//devuelve la lista de transacciones validas
 const transaccionesValidas = async(id) => {
     try {
         const transaccion = await Transaccion.findOne({ where: { id: id } });
-        // console.log(transaccion.dataValues);
         return transaccion;
     } catch (error) {
         console.log(error)
@@ -602,7 +601,6 @@ const transaccionesValidas = async(id) => {
     }
 }
 
-//formatea la fecha
 const format = (inputDate) => {
     let date, month, year;
 
@@ -638,14 +636,12 @@ const validacionTransaccion = async(transaccionesCampanias, transaccionActual, e
             result = await ParticipacionRecurente(transaccionesCampanias, transaccionActual, idCampania, etapaActual);
             break;
         case 4:
-            //acumulativa recurente
             break;
         case 5:
 
             result = await ParticipacionValorAcumulado(transaccionesCampanias, transaccionActual, idCampania, etapaActual, customerId);
             break;
         case 6:
-            //conbinar Transaccion
             break;
 
         default:
@@ -656,7 +652,6 @@ const validacionTransaccion = async(transaccionesCampanias, transaccionActual, e
 
 
 const ParticipacionPorParametro = async(transaccionesCampanias, transaccion, idCampania, etapaActual) => {
-    // console.log(transaccionesCampanias)
     let filterTransaccion = transaccionesCampanias.filter(x => x.transaccion.descripcion.includes(transaccion.descripcion));
 
 
@@ -694,7 +689,6 @@ const ParticipacionPorParametro = async(transaccionesCampanias, transaccion, idC
 
 
 const ParticipacionPorAcumular = async(transaccionesCampanias, transaccion, idCampania, etapaActual) => {
-    // console.log(transaccionesCampanias)
     let filterTransaccion = transaccionesCampanias.filter(x => x.transaccion.descripcion.includes(transaccion.descripcion));
 
     if (filterTransaccion.length === 0) {
@@ -736,22 +730,12 @@ const ParticipacionPorAcumular = async(transaccionesCampanias, transaccion, idCa
 
 
 const ParticipacionRecurente = async(transaccionesCampanias, transaccion, idCampania, etapaActual) => {
-    // console.log(transaccionesCampanias)
     console.log(transaccion)
     let filterTransaccion = transaccionesCampanias.filter(x => x.transaccion.descripcion.includes(transaccion.descripcion));
 
     if (filterTransaccion.length === 0) {
         return { premiado: false, guardaParticipacion: false, result: false, message: 'No aplica Transaccion' }
     }
-
-
-
-    //const { limiteParticipacion, idTransaccion, tipoTransaccion, nombre, ValorMinimo, ValorMaximo, periodo, intervalo } = filterTransaccion[0];
-
-
-
-
-
     console.log(etapaActual.periodo)
 
     switch (etapaActual.periodo) {
@@ -819,7 +803,6 @@ const GetParticipacionsXdias = async(dias, startDate, endDate) => {
             group: [Sequelize.fn('date', Sequelize.col('fecha'))]
         });
 
-        // Comprobar si hay registros en tres días seguidos
         if (registros.length >= 0) {
             let diasSeguidos = 0;
             let ultimaFecha = null;
@@ -845,7 +828,6 @@ const GetParticipacionsXdias = async(dias, startDate, endDate) => {
                 return { premiado: false, guardaParticipacion: true, result: false, message: 'El Registro no se hizo por tres dias seguidos. 1ra Transaccion Agregada' }
             }
         } else {
-            // console.log('no hay registro')
             return { premiado: false, guardaParticipacion: true, result: false, message: '1ra Transaccion Agregada' }
         }
 
@@ -942,10 +924,7 @@ const GetTransaccionesXCategoria = async(idCategoria) => {
 
 const GetCampaniasSEm = async (req, res) => {
     try {
-        // Obtener la fecha actual
         const fechaActual = new Date();
-
-        // Calcular las fechas límite para las diferentes condiciones
         const treintaDiasAntes = new Date(fechaActual);
         treintaDiasAntes.setDate(treintaDiasAntes.getDate() + 30);
 
@@ -954,11 +933,9 @@ const GetCampaniasSEm = async (req, res) => {
 
         const cincoDiasAntes = new Date(fechaActual);
         cincoDiasAntes.setDate(cincoDiasAntes.getDate() + 5);
-
-        // Obtener campañas que cumplen con las condiciones
         const campanias = await Campania.findAll({
             where: {
-                estado: 1, // Estado activo
+                estado: 1, 
                 [Op.or]: [
                     {
                         fechaFin: {
@@ -1008,12 +985,10 @@ const Getcampanascount = async (req, res) => {
 
 const getnewCampanias = async (req, res) => {
     try {
-        // Obtener la fecha actual y la fecha hace 7 días
         const currentDate = new Date();
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(currentDate.getDate() - 7);
 
-        // Obtener las campañas que tienen fecha de creación en los últimos 7 días
         const newCampanias = await Campania.count({
             where: {
                 fechaCreacion: {

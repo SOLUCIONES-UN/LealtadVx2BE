@@ -44,8 +44,8 @@ Pagina.belongsTo(Menu, {
 
 
 
-//  Menu.sync({ alter: true }).then(() => {
-//     console.log('tabla Menu creada');
+//  Pagina.sync({ alter: true }).then(() => {
+//     console.log('tabla Pagina creada');
 // });
 
 
