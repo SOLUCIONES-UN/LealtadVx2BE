@@ -426,13 +426,10 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
 
 
 const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) => {
-    // Obtener datos de promociones
     const datas = await postDatosCupon(idpromocions, fechaInicio, fechaFinal);
 
-    // Crear un libro de Excel
     const wb = XLSX.utils.book_new();
 
-    // Encabezado del reporte
     let row1 = [
         { v: '', t: 's', s: { font: { name: 'Courier', sz: 18 } } },
         { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
@@ -448,7 +445,6 @@ const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) 
 
     let row3 = [''];
 
-    // Encabezados de las columnas
     const headers = [
         'NOMBRE',
         'TELEFONO',
@@ -462,17 +458,13 @@ const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) 
         'FECHA PARTICIPACIÓN'
     ];
 
-    // Crear hoja de cálculo
     const ws = XLSX.utils.aoa_to_sheet([[],[],[],headers]);
 
-    // Agregar encabezado de reporte (row1, row2, row3)
     XLSX.utils.sheet_add_aoa(ws, [row1], { origin: 'A1' });
     XLSX.utils.sheet_add_aoa(ws, [row2], { origin: 'A2' });
     XLSX.utils.sheet_add_aoa(ws, [row3], { origin: 'A3' });
 
-    // Agregar datos a la hoja de cálculo
     datas.forEach(data => {
-        // Obtener información relevante
         const nombre = data.detallepromocion?.promocion?.nombre || '';
         let telefono = data.numeroTelefono || '';
         if (telefono.length === 8) {
@@ -487,7 +479,6 @@ const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) 
         const fechacreditacion = data.detallepromocion?.promocion?.fechaInicio || '';
         const fechaParticipacion = data.fecha || '';
 
-        // Agregar fila con los datos
         const row = [
             nombre,
             telefono,
@@ -503,10 +494,8 @@ const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) 
         XLSX.utils.sheet_add_aoa(ws, [row], { origin: -1 });
     });
 
-    // Agregar hoja de cálculo al libro
     XLSX.utils.book_append_sheet(wb, ws, 'Usuarios Notificados');
 
-    // Convertir el libro a un buffer
     const file = await XLSX.write(wb, { bookType: 'xlsx', bookSST: false, type: 'buffer' });
 
     return file;

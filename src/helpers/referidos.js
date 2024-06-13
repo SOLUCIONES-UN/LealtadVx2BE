@@ -12,15 +12,32 @@ const { Op } = require('sequelize');
 
 const getParticipaciones = async (campanas, fecha1, fecha2) => {
   try {
-    const fechaInicioFormatted = fecha1.toISOString().split('T')[0];
-    const fechaFinFormatted = fecha2.toISOString().split('T')[0];    let campanias = "";
 
-    campanas.forEach((c, index) => {
-      campanias += index > 0 ? `, '${c}'`: `'${c}'`;
-    });
+    const fecha1Obj = fecha1 instanceof Date ? fecha1 : new Date(fecha1);
+        const fecha2Obj = fecha2 instanceof Date ? fecha2 : new Date(fecha2);
 
+
+        const fechaInicioFormatted = fecha1Obj.toISOString().split('T')[0];
+        const fechaFinFormatted = fecha2Obj.toISOString().split('T')[0];
+        
+
+        console.log('Campanias:', campanas);
+        console.log('Fecha de inicio:', fechaInicioFormatted);
+        console.log('Fecha de fin:', fechaFinFormatted);
+        
+
+        const campanasArray = Array.isArray(campanas) ? campanas : [campanas];
+
+        let campanias = "";
+        campanasArray.forEach((c, index) => {
+          campanias += index > 0 ? `, '${c}'`: `'${c}'`;
+        });
+
+
+
+        
     const participaciones = await sequelize.query(`
-      SELECT 
+         SELECT 
         c.id AS campania_id,
         c.nombre AS nombre_campania,
         c.descripcionNotificacion,
@@ -47,8 +64,8 @@ const getParticipaciones = async (campanas, fecha1, fecha2) => {
       usuarios u ON u.nombre = u.username 
       LEFT JOIN 
       participacionreferidos p2 ON p2.referido = cr.codigo
-      WHERE p.fecha BETWEEN '${fechaInicioFormatted}' AND '${fechaFinFormatted}'
-      AND c.nombre in (${campanias});		
+      WHERE p.fecha BETWEEN '${fechaInicioFormatted}00:00:00' AND '${fechaFinFormatted}00:00:00'
+      AND c.nombre in (${campanias});	
     `, { type: sequelize.QueryTypes.SELECT });
     
     const participacionesConCliente = await Promise.all(participaciones.map(async (participacion) => {
@@ -58,14 +75,13 @@ const getParticipaciones = async (campanas, fecha1, fecha2) => {
     }));
 
     return participacionesConCliente;
-  } catch (error) {
-    console.error('Error al obtener las participaciones:', error);
-    res.status(500).json({ error: 'Error al obtener las participaciones' });
   }
+
+catch (error) {
+  console.error('Error al obtener las participaciones":', error);
+  throw new Error('Error al obtener las participaciones' );
+}
 };
-
-
-
 
 
 const getCustomerById = async (customerid) => {
@@ -110,21 +126,6 @@ return customerInfo;
     throw new Error('Error al obtener participaciones');
 }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 module.exports = { getParticipaciones, getCustomerById };

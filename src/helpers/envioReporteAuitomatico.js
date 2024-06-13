@@ -5,7 +5,7 @@ const { Configuraciones } = require('../models/configuraciones');
 const { ConfigReport } = require('../models/configReport');
 const { Promocion } = require('../models/promocion.js');
 
-const { generarReportereReferidos, generarReporteClientesParticipando, generarReporteOferCraft, generarReportePromociones,reporteClientesContraCampanasAcumulativas } = require('./generarReportes.js');
+const { generarReportereReferidos, generarReporteClientesParticipando,generarReportereGeneralReferidos, generarReporteOferCraft, generarReportePromociones,reporteClientesContraCampanasAcumulativas } = require('./generarReportes.js');
 // const { generarReporteOferCraft } = require('../controllers/reporteOfercraft.controller.js')
 
 
@@ -304,7 +304,7 @@ const { generarReportereReferidos, generarReporteClientesParticipando, generarRe
 
 // '*/15 * * * * *'
 
-const taskSendEmail = cron.schedule('0 * * * *', async () => {
+const taskSendEmail = cron.schedule( '*/15 * * * * *', async () => {
     console.log('Ejecutando una tarea cada minuto');
 
     try {
@@ -333,7 +333,7 @@ const taskSendEmail = cron.schedule('0 * * * *', async () => {
             console.log('Día del mes del reporte de configuración:', configreporte.diaMes);
             console.log('Tipo de reporte del reporte de configuración:', configreporte.tiporeporte);
             console.log('Email de reporte del reporte de configuración:', configreporte.emails);
-            console.log('fecha inicio promocion:', promocion.fechaInicio);
+            // console.log('fecha inicio promocion:', promocion.fechaInicio);
 
             console.log('---------------------------');
 
@@ -360,11 +360,21 @@ const taskSendEmail = cron.schedule('0 * * * *', async () => {
                         filename: 'ReporteOferCraft.xlsx',
                         content: await generarReporteOferCraft(campania ? campania.id : null, fechaInicio, fechaFin)
                     });
-                } else if (configreporte.tiporeporte === 'Referidos') {
+                }
+                
+                else if (configreporte.tiporeporte === 'Referidos') {
                     console.log("Generando reporte de Referidos...");
                     reportes.push({
                         filename: 'ReporteReferidos.xlsx',
-                        content: await generarReportereReferidos(campania ? campania.nombre : null, fechaInicio, fechaFin)
+                        content: await generarReportereReferidos(campania ? campania.nombre : null, campania ? campania.fechaInicio : null, fechaFin)
+                    });
+                }
+
+                else if (configreporte.tiporeporte === 'General') {
+                    console.log("Generando reporte de General...");
+                    reportes.push({
+                        filename: 'ReporteGeneralReferidos.xlsx',
+                        content: await generarReportereGeneralReferidos(campania ? campania.fechaInicio : null, fechaFin)
                     });
                 } else if (configreporte.tiporeporte === 'Promocion') {
                     console.log("Generando reporte de Promociones...");
@@ -376,7 +386,7 @@ const taskSendEmail = cron.schedule('0 * * * *', async () => {
 
                 if (reportes.length > 0) {
                     console.log("Enviando correo electrónico...");
-                    sendEmail(correos, 'Reporte de campaña', 'Reporte de la campaña', reportes);
+                    sendEmail(correos, 'Reporte de campaña', 'Reporte de la campaña', reportes,configreporte.tiporeporte);
                 }
             }
         });
