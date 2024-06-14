@@ -13,13 +13,15 @@
        },
 
        descripcion: {
-           type: DataTypes.TEXT('medium'),
-           allowNull: true
+           type: DataTypes.STRING(200),
+           allowNull: true,
+           unique: true
        },
 
        ruta: {
            type: DataTypes.STRING(200),
-           allowNull: true
+           allowNull: true,
+           unique: true
        },
 
        estado: {
@@ -70,21 +72,16 @@ Proyectos.hasMany(Departamento_Proyectos,{
        foreignKey: 'idProyecto',
        targetKey: 'id',
    });
+ 
 
+// (async () => {
+//     try{ 
+//     await Proyectos.sync({ alter: true });
+//     console.log("Se cargo correctamente");
 
-//    (async () => {
-//        await Proyectos.sync({ alter: true });
-
-//    })();
-
-// Departamento_Proyectos.sync({ alter: true }).then(() => {
-//     console.log('tabla TransaccionPremio creada');
-// });
-
-
-//    Campania.sync({ alter: true }).then(() => {
-//        console.log('tabla Campania creada');
-//    });
-
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 module.exports = { Proyectos }

@@ -12,7 +12,7 @@ const codigoReferido = sequelize.define('codigosreferidos', {
         autoIncrement: true,
     },
     codigoReferido: {   
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(200),
         allowNull: false
     },
     estado : {
@@ -44,7 +44,15 @@ codigoReferido.belongsTo(ConfigReferido, {
 });
 
 // (async () => {
+//     try{ 
 //     await codigoReferido.sync({ alter: true });
-//  })();
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
+
 
 module.exports = {codigoReferido}

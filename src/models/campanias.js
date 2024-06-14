@@ -17,6 +17,7 @@ const Campania = sequelize.define('campania', {
     nombre: {
         type: DataTypes.STRING(150),
         allowNull: false
+    
     },
     descripcion: {
         type: DataTypes.STRING(1000),

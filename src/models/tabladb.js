@@ -12,6 +12,7 @@ const TablaDB = sequelize.define('tabladb',{
     nombre_tabla:{
         type: DataTypes.STRING(100),
         allowNull: false,
+        unique: true
     },
     estado : {
         type: DataTypes.INTEGER,
@@ -31,11 +32,15 @@ Columna.belongsTo(TablaDB,{
 
 
 
-//  (async ()=> {
-//    await Transaccion.sync({alter:true})
-// })()
-// (async ()=> {
-//     await TablaDB.sync({alter:true})
-//  })()
+
+// (async () => {
+//     try{ 
+//     await TablaDB.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
+
 
 module.exports = {TablaDB}

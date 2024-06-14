@@ -11,7 +11,8 @@ const Pagina = sequelize.define('pagina', {
     },
     descripcion: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     path: {
         type: DataTypes.STRING(150),
@@ -38,8 +39,16 @@ permisoUsuario.belongsTo(Pagina, {
     targetId: 'id',
 });
 
+
 // (async () => {
+//     try{ 
 //     await Pagina.sync({ alter: true });
-//  })();
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 module.exports = {Pagina}

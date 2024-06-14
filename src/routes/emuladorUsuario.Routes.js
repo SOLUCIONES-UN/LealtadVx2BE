@@ -13,9 +13,9 @@ const authUser = require('../middlewares/auth.js');
 
 const path = 'ConsultaNumber';
 
-router.get(`/${path}/:telefono`,authUser, campanasUsuariosEmulador_get);
-router.get(`/${path}/mistransacciones/:customerId/:idProyecto`,authUser, obtenerMistransacciones);
-router.get(`/${path}/transaccionesValidas/:customerId/:idProyecto`,authUser, obtenerTransaccionesValidas);
+router.get(`/${path}/:telefono`, campanasUsuariosEmulador_get);
+router.get(`/${path}/mistransacciones/:customerId/:idProyecto`, obtenerMistransacciones);
+router.get(`/${path}/transaccionesValidas/:customerId/:idProyecto`, obtenerTransaccionesValidas);
 
 
 
