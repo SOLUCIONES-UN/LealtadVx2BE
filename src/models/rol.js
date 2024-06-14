@@ -3,31 +3,26 @@ const { sequelize } = require('../database/database');
 const { permisoUsuario } = require('./permisoUsuario');
 const { Usuario } = require('./usuario');
 
-
-
 const Rol = sequelize.define('rol', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-
     },
-
     descripcion: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true 
+        
     },
-  
-    estado : {
+    estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1,
-        allowNull:false
+        allowNull: false
     },
+}, { timestamps: false });
 
-
-},{timestamps: false});
-
-Rol.hasMany(Usuario,{
+Rol.hasMany(Usuario, {
     foreignKey: {
         name: 'idRol',
         allowNull: false,
@@ -36,7 +31,7 @@ Rol.hasMany(Usuario,{
     allowNull: false
 });
 
-Usuario.belongsTo(Rol,{
+Usuario.belongsTo(Rol, {
     foreignKey: 'idRol',
     targetId: 'id',
     allowNull: false
@@ -52,17 +47,14 @@ permisoUsuario.belongsTo(Rol, {
     targetId: 'id',
 });
 
+
 // (async () => {
-//     await Campania.sync({ alter: true });
-//  })();
+//     try {
+//         await sequelize.sync({ alter: true });
+//         console.log('La tabla R sincronizada');
+//     } catch (error) {
+//         console.error('Error al sincro:', error);
+//     }
+// })();
 
-// (async ()=> {
-//     await Rol.sync({alter:true})
-//  })()
-
-
-// Usuario.sync({ alter: true }).then(() => {
-//     console.log('tabla Campania creada');
-// });
-
-module.exports = {Rol}
+module.exports = { Rol };

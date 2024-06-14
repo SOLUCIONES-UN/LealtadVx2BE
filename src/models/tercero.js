@@ -9,8 +9,11 @@ const Tercero = sequelize.define('tercero', {
     },
     nombre: {
         type: DataTypes.STRING(150),
-        allowNull: false
-    }, 
+        allowNull: false,
+        unique: true, 
+    },
+
+
     // nemonico: {
     //     type: DataTypes.STRING(15),
     //     allowNull: false,
@@ -25,8 +28,10 @@ const Tercero = sequelize.define('tercero', {
     }
 }, {timestamps: false});
 
+
 // (async () => {
 //     await Tercero.sync({alter: true})
 // })();
+
 
 module.exports = {Tercero}

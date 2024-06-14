@@ -34,7 +34,7 @@ const Participacion = sequelize.define('participacions', {
         allowNull: false
     },
     descripcionTrx: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(200),
         allowNull: false
     },
     tipo: {
@@ -42,7 +42,7 @@ const Participacion = sequelize.define('participacions', {
         allowNull: false
     },
     valor: {
-        type: DataTypes.DECIMAL(),
+        type: DataTypes.DECIMAL(15),
         allowNull: false
     },
     urlPremio: {
@@ -89,36 +89,22 @@ Participacion.hasMany(codigoReferido,{
     foreignKey: 'customerId',
     sourceKey: 'customerId' 
 });
-Participacion.belongsTo(codigoReferido, {
+
+codigoReferido.belongsTo(Participacion, {
     foreignKey: 'customerId', // Columna en este modelo
     targetKey: 'customerId',
     as: 'codigoReferidoAssociation'
 }); 
-// Participacion.belongsTo(referidosIngresos, { 
-//     foreignKey: 'idRefIngresos' 
-// });
-
-// Participacion.hasMany(participacionReferidos, {
-//      as: 'p2', 
-//      foreignKey: 'id' 
-//     });
-
-//     Participacion.belongsTo(codigoReferido, { 
-//         foreignKey: 'id'
-//      });
-
 
 // (async () => {
+//     try{ 
 //     await Participacion.sync({ alter: true });
-//     //Code here
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
 // })();
-
-// TransaccionPremio.sync({ alter: true }).then(() => {
-//     console.log('tabla TransaccionPremio creada');
-// });
-
-// Participacion.sync({ alter: true }).then(() => {
-//     console.log('tabla Participacion creada');
-// });
 
 module.exports = { Participacion }
