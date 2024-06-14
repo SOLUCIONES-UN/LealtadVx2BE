@@ -13,7 +13,7 @@
        },
 
        descripcion: {
-           type: DataTypes.TEXT('medium'),
+           type: DataTypes.STRING(200),
            allowNull: true,
            unique: true
        },
@@ -79,14 +79,17 @@ Proyectos.hasMany(Departamento_Proyectos,{
 
    // })();
 
-// Departamento_Proyectos.sync({ alter: true }).then(() => {
-//     console.log('tabla TransaccionPremio creada');
-// });
 
 
-//    Campania.sync({ alter: true }).then(() => {
-//        console.log('tabla Campania creada');
-//    });
+// (async () => {
+//     try{ 
+//     await Proyectos.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+    
 
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 module.exports = { Proyectos }

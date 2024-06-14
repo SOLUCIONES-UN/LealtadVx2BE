@@ -32,11 +32,17 @@ Columna.belongsTo(TablaDB,{
 
 
 
-//  (async ()=> {
-//    await Transaccion.sync({alter:true})
-// })()
-// (async ()=> {
-//     await TablaDB.sync({alter:true})
-//  })()
+
+// (async () => {
+//     try{ 
+//     await TablaDB.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
+
 
 module.exports = {TablaDB}

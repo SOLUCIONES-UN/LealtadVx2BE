@@ -35,9 +35,17 @@ asignarCategoria.belongsTo(Categoria, {
     allowNull: false
 });
 
+
+
 // (async () => {
+//     try{ 
 //     await Categoria.sync({ alter: true });
-//     // Code here
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
 // })();
 
 

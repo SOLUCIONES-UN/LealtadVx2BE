@@ -18,12 +18,12 @@ const Columna = sequelize.define('columna', {
     fila_insertada : {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-        unique: true
+        // unique: true
     },
     fila_actualizada : {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-        unique: true
+        // unique: true
     },
     estado : {
         type: DataTypes.INTEGER,
@@ -46,8 +46,15 @@ Transaccion.belongsTo(Columna, {
 
 
 // (async () => {
-//    await Columna.sync({ true: true });
-//   //  Code here
-//   })();
+//     try{ 
+//     await Columna.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
+
 
 module.exports = {Columna}

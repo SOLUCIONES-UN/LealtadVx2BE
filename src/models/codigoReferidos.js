@@ -44,7 +44,15 @@ codigoReferido.belongsTo(ConfigReferido, {
 });
 
 // (async () => {
+//     try{ 
 //     await codigoReferido.sync({ alter: true });
-//  })();
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
+
 
 module.exports = {codigoReferido}

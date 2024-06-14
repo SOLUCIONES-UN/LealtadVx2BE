@@ -98,13 +98,21 @@ PremioCampania.belongsTo(Etapa, {
     targetId: 'id',
 });
 
-// Etapa.sync({ alter: true }).then(() => {
-//     console.log('Tabla Etapa creada o actualizada correctamente');
-//  });
 
 // Campania.sync({ alter: true }).then(() => {
 //     console.log('tabla Campania creada');
 // });
+
+// (async () => {
+//     try{ 
+//     await Etapa.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 
 module.exports = {Etapa}
