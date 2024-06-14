@@ -470,12 +470,12 @@ const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) 
         if (telefono.length === 8) {
             telefono = '(502) ' + telefono;
         }
-        const campania = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[8].etapa?.campanium?.nombre || '';
-        const premio = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.descripcion || '';
-        const monto = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[0].valor || '';
-        const transaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.idTransaccion || '';
+        const campania = data.detallepromocion?.promocion?.premiopromocions?.[2].premio?.premiocampania?.[0].etapa?.campanium?.nombre || '';
+        const premio = data.detallepromocion?.promocion?.premiopromocions?.[2].premio?.descripcion || '';
+        const monto = data.detallepromocion?.promocion?.premiopromocions?.[2].premio?.premiocampania?.[0].valor || '';
+        const transaccion = data.detallepromocion?.promocion?.premiopromocions?.[2].premio?.idTransaccion || '';
         const codigo = data.detallepromocion?.cupon || '';
-        const montotransaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].valor || '';
+        const montotransaccion = data.detallepromocion?.promocion?.premiopromocions?.[2].valor || '';
         const fechacreditacion = data.detallepromocion?.promocion?.fechaInicio || '';
         const fechaParticipacion = data.fecha || '';
 

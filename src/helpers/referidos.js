@@ -63,7 +63,7 @@ const getParticipaciones = async (campanas, fecha1, fecha2) => {
       usuarios u ON u.nombre = u.username 
       LEFT JOIN 
       participacionreferidos p2 ON p2.referido = cr.codigo
-      WHERE p.fecha BETWEEN '${fechaInicioFormatted}00:00:00' AND '${fechaFinFormatted}00:00:00'
+      WHERE p.fecha BETWEEN '${fechaInicioFormatted}' AND '${fechaFinFormatted}'
       AND c.nombre in (${campanias});	
     `, { type: sequelize.QueryTypes.SELECT });
     
