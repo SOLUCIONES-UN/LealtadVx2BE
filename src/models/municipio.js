@@ -12,7 +12,8 @@ const Municipio = sequelize.define('municipio', {
 
     nombre: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
   
     estado : {

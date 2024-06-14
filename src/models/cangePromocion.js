@@ -9,7 +9,7 @@ const CangePromocion = sequelize.define('cangepromocions', {
         autoIncrement: true
     },
     descripcion: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(150),
         allowNull: false
     },
     fecha: {

@@ -9,7 +9,7 @@ const Presupuesto = sequelize.define('presupuesto', {
 
     },
     idDepartamento: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(150),
         allowNull: false
     },
     idMunicipio: {

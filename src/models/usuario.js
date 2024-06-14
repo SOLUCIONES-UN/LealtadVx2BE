@@ -8,11 +8,13 @@ const Usuario = sequelize.define('usuario', {
     username: {
         type: DataTypes.STRING(100),
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     nombre: {
         type: DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     password: {
         type: DataTypes.STRING(150),
@@ -21,10 +23,12 @@ const Usuario = sequelize.define('usuario', {
     telefono:{
         type: DataTypes.STRING(15),
         allowNull:true
+        
     },
     emailNotificacion: {
         type: DataTypes.STRING(150),
-        allowNull: true
+        allowNull: true,
+        unique: true
     },
     tipoUsuario: {
         type:  DataTypes.INTEGER,

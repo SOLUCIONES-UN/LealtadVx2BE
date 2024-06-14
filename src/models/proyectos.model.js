@@ -14,12 +14,14 @@
 
        descripcion: {
            type: DataTypes.TEXT('medium'),
-           allowNull: true
+           allowNull: true,
+           unique: true
        },
 
        ruta: {
            type: DataTypes.STRING(200),
-           allowNull: true
+           allowNull: true,
+           unique: true
        },
 
        estado: {

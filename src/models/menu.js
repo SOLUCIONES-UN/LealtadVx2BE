@@ -12,6 +12,7 @@ const Menu = sequelize.define('menus', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: false,
+        unique: true
 
         
     }, icono: {

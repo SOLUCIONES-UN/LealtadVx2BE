@@ -15,7 +15,8 @@ const Transaccion = sequelize.define('transaccion', {
   
     descripcion: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     idBotton: {
         type: DataTypes.INTEGER,

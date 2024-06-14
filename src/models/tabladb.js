@@ -12,6 +12,7 @@ const TablaDB = sequelize.define('tabladb',{
     nombre_tabla:{
         type: DataTypes.STRING(100),
         allowNull: false,
+        unique: true
     },
     estado : {
         type: DataTypes.INTEGER,

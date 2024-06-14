@@ -11,7 +11,8 @@ const Pagina = sequelize.define('pagina', {
     },
     descripcion: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     path: {
         type: DataTypes.STRING(150),

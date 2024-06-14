@@ -15,11 +15,13 @@ const Etapa = sequelize.define('etapa', {
     },
     nombre: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     descripcion: {
         type: DataTypes.STRING(500),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     orden: {
         type: DataTypes.INTEGER,
