@@ -99,9 +99,7 @@ PremioCampania.belongsTo(Etapa, {
 });
 
 
-// Campania.sync({ alter: true }).then(() => {
-//     console.log('tabla Campania creada');
-// });
+
 
 // (async () => {
 //     try{ 

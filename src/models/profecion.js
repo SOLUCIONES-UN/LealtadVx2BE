@@ -30,8 +30,6 @@ const Profecion = sequelize.define('profesiones', {
 //     try{ 
 //     await Profecion.sync({ alter: true });
 //     console.log("Se cargo correctamente");
-    
-
 //     } catch (error){
 //         console.error("hay problema al cargar el modelo",error);
 //     }

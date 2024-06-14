@@ -18,12 +18,12 @@ const Columna = sequelize.define('columna', {
     fila_insertada : {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-        // unique: true
+  
     },
     fila_actualizada : {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-        // unique: true
+    
     },
     estado : {
         type: DataTypes.INTEGER,

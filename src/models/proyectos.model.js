@@ -74,12 +74,7 @@ Proyectos.hasMany(Departamento_Proyectos,{
    });
 
 
-   // (async () => {
-   //     await Proyectos.sync({ alter: true });
-
-   // })();
-
-
+ 
 
 // (async () => {
 //     try{ 
