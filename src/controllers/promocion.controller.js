@@ -6,8 +6,9 @@ const { Op } = require("sequelize");
 const { GetColumnaById } = require('./columna.controller');
 
 
+
 //controllador paa obtener la lista de Columnaes
-const GetPromocion = async(req, res) => {
+const GetPromocion = async (req, res) => {
     try {
         const trx = await Promocion.findAll({
             where: {
@@ -23,14 +24,11 @@ const GetPromocion = async(req, res) => {
 }
 
 
-
-
-
-
-//controllador para agregar nuevas Columnaes
-const AddPromocion = async(req, res) => {
-
+const AddPromocion = async (req, res) => {
+    
     try {
+        console.log('Datos recibidos:', req.body); // Log para verificar los datos
+
         const {
             nemonico,
             nombre,
@@ -46,6 +44,17 @@ const AddPromocion = async(req, res) => {
             codigos,
             premios
         } = req.body;
+
+        // Validar que los datos requeridos estén presentes
+        if (!nemonico || !nombre || !fechaInicio || !fechaFin || !PremioXcampania || !estado || !codigos || !premios) {
+            return res.status(400).send({ errors: 'Faltan datos requeridos en la solicitud.' });
+        }
+
+        // Verificar si el nemonico ya existe
+        const existingPromo = await Promocion.findOne({ where: { nemonico } });
+        if (existingPromo) {
+            return res.status(400).send({ errors: 'El nemonico ya existe en la base de datos.' });
+        }
 
         const estadotext = estado === 3 ? 'en Borrador' : '';
         const newPromo = await Promocion.create({
@@ -63,79 +72,104 @@ const AddPromocion = async(req, res) => {
         });
 
         const { id } = newPromo.dataValues;
+        console.log('Promoción creada con ID:', id);
 
-
-        //if (PremioXcampania != 1) {
         premios.forEach(element => {
             const { cantidad } = element;
             const cantCodigos = codigos.length;
 
             for (let index = 0; index < cantidad;) {
                 let random = Math.floor(Math.random() * cantCodigos);
-
+               
                 if (codigos[random].esPremio === 0) {
-
-                    codigos[random] = {...codigos[random], esPremio: 1 }
-
+                    codigos[random] = { ...codigos[random], esPremio: 1 };
                     index++;
-                };
-
+                }
             }
-
         });
 
-        const nuevoArrarPremios = premios.map((item) => ({...item, idPromocion: id }));
+  
+
+        const nuevoArrarPremios = premios.map((item) => ({
+            ...item,
+            idPromocion: id,
+            valor: item.valor || 0, // Proporciona un valor por defecto para 'valor'
+            nombre: item.nombre || 'Desconocido', // Proporciona un valor por defecto para 'nombre'
+            cupon: item.cupon.cupon || '', // Proporciona un valor por defecto para 'cupon'
+            porcentaje: item.porcentaje || 0 // Proporciona un valor por defecto para 'porcentaje'
+        }));
+
+        console.log('Premios a insertar:', nuevoArrarPremios);
+
         const premiosInsertados = await PremioPromocion.bulkCreate(nuevoArrarPremios);
+        console.log('Premios insertados:', premiosInsertados);
 
-        //  }
-
-
-
-
-        // cost nuevoArray = codigos.map((item) => ({ ...item, idPromocion: id }));
         let nuevoArray = [];
 
-        let premiosCreados = premiosInsertados.map((item) => ({ idPremio: item.id, cantidad: item.cantidad, entregados: 0 }));
+        let premiosCreados = premiosInsertados.map((item) => ({
+            idPremio: item.id,
+            cantidad: item.cantidad,
+            cupon: item.cupon,
+            porcentaje: item.porcentaje,
+            entregados: 0
+        }));
+
         let indexact = 0;
 
         for (const item of codigos) {
-            var newData = {...item, idPromocion: id }
+            var newData = {
+                ...item,
+                idPromocion: id,
+                cupon: item.cupon || '' // Proporciona un valor por defecto para 'cupon'
+            };
 
             if (item.esPremio === 1) {
-
                 newData.idPremioPromocion = premiosCreados[indexact].idPremio;
                 premiosCreados[indexact].entregados = premiosCreados[indexact].entregados + 1;
 
-                if (premiosCreados[indexact].cantidad == premiosCreados[indexact].entregados) {
+                if (premiosCreados[indexact].cantidad === premiosCreados[indexact].entregados) {
                     indexact++;
                 }
-
             }
 
-
-            nuevoArray.push(newData)
-
+            nuevoArray.push(newData);
         }
 
-        console.log(nuevoArrarPremios)
-
-
+        console.log('Detalles de la promoción a insertar:', nuevoArray);
 
         await DetallePromocion.bulkCreate(nuevoArray);
 
-        res.json({ code: 'ok', message: 'Promocion creada ' + estadotext + ' con exito' });
+        return res.status(200).json({ code: 'ok', message: 'Promocion creada ' + estadotext + ' con exito' });
 
     } catch (error) {
-        console.error(error)
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar Crear la Promocion.' });
+        console.error('Error al crear la promoción:', error);
+        return res.status(403).send({ errors: 'Ha sucedido un error al intentar Crear la Promocion.', detail: error.message });
     }
+};
 
-}
 
+
+const checkNemonico = async (req, res) => {
+    try {
+      const { nemonico } = req.body;
+      const promocion = await Promocion.findOne({ where: { nemonico } });
+  
+      if (promocion) {
+        return res.json({ exists: true });
+      } else {
+        return res.json({ exists: false });
+      }
+    } catch (error) {
+      console.error('Error al verificar nemonico:', error);
+      res.status(500).send({ errors: 'Error al verificar nemonico.' });
+    }
+  };
+   
+  
+  
 
 //controllador para actualizar Columnaes
-const PausarPromocion = async(req, res) => {
+const PausarPromocion = async (req, res) => {
 
     try {
         const { id } = req.params;
@@ -157,7 +191,7 @@ const PausarPromocion = async(req, res) => {
 
 
 //controllador para actualizar Columnaes
-const ActivarPromocion = async(req, res) => {
+const ActivarPromocion = async (req, res) => {
 
     try {
         const { id } = req.params;
@@ -179,49 +213,137 @@ const ActivarPromocion = async(req, res) => {
 
 }
 
-//controllador para actualizar Columnaes
-const UpdatePromocion = async(req, res) => {
+
+
+
+
+
+
+
+const UpdatePromocion = async (req, res) => {
+    const { id } = req.params; // Obtiene el ID de los parámetros de la URL
 
     try {
-        const { nombre, nemonico, descripcion, mesajeExito, mesajeFail, fechaInicio, fechaFin } = req.body;
-        console.log(req.body)
-        const { id } = req.params
-        await Promocion.update({
+        console.log('Datos recibidos para actualización:', req.body);
+
+        const {
             nemonico,
             nombre,
             descripcion,
             mesajeExito,
             mesajeFail,
+            imgSuccess,
+            imgFail,
             fechaInicio,
-            fechaFin
-        }, {
-            where: {
-                id: id
-            }
+            fechaFin,
+            PremioXcampania,
+            estado,
+            codigos,
+            premios
+        } = req.body;
+
+        // Validar que los datos requeridos estén presentes
+        if (!nemonico || !nombre || !fechaInicio || !fechaFin || !PremioXcampania || !estado || !codigos || !premios) {
+            return res.status(400).send({ errors: 'Faltan datos requeridos en la solicitud.' });
+        }
+
+        const estadotext = estado === 3 ? 'en Borrador' : '';
+        const promoExistente = await Promocion.findByPk(id);
+
+        if (!promoExistente) {
+            return res.status(404).send({ errors: 'Promoción no encontrada.' });
+        }
+
+        await promoExistente.update({
+            nemonico,
+            nombre,
+            descripcion,
+            mesajeExito,
+            mesajeFail,
+            imgSuccess,
+            imgFail,
+            fechaInicio,
+            fechaFin,
+            estado,
+            PremioXcampania
         });
 
+        console.log('Promoción actualizada con ID:', id);
 
-        res.json({ code: 'ok', message: 'Promocion actualizada con exito' });
+        // Actualizar los premios
+        await PremioPromocion.destroy({ where: { idPromocion: id } });
+
+        const nuevoArrarPremios = premios.map(item => ({
+            ...item,
+            idPromocion: id,
+            valor: item.valor || 0,
+            nombre: item.nombre || 'Desconocido',
+            cupon: item.cupon || '',
+            porcentaje: item.porcentaje || 0
+        }));
+
+        console.log('Premios a insertar:', nuevoArrarPremios);
+
+        const premiosInsertados = await PremioPromocion.bulkCreate(nuevoArrarPremios);
+        console.log('Premios insertados:', premiosInsertados);
+
+        let nuevoArray = [];
+
+        let premiosCreados = premiosInsertados.map(item => ({
+            idPremio: item.id,
+            cantidad: item.cantidad,
+            cupon: item.cupon,
+            porcentaje: item.porcentaje,
+            entregados: 0
+        }));
+
+        let indexact = 0;
+
+        for (const item of codigos) {
+            var newData = {
+                ...item,
+                idPromocion: id,
+                cupon: item.cupon || ''
+            };
+
+            if (item.esPremio === 1) {
+                newData.idPremioPromocion = premiosCreados[indexact].idPremio;
+                premiosCreados[indexact].entregados = premiosCreados[indexact].entregados + 1;
+
+                if (premiosCreados[indexact].cantidad === premiosCreados[indexact].entregados) {
+                    indexact++;
+                }
+            }
+
+            nuevoArray.push(newData);
+        }
+
+        console.log('Detalles de la promoción a insertar:', nuevoArray);
+
+        await DetallePromocion.destroy({ where: { idPromocion: id } });
+        await DetallePromocion.bulkCreate(nuevoArray);
+
+        return res.status(200).json({ code: 'ok', message: 'Promocion actualizada ' + estadotext + ' con exito' });
 
     } catch (error) {
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar realizar la Promocion.' });
+        console.error('Error al actualizar la promoción:', error);
+        return res.status(403).send({ errors: 'Ha sucedido un error al intentar actualizar la Promocion.', detail: error.message });
     }
+};
 
-}
 
-const GetPromocionById = async(req, res) => {
+const GetPromocionById = async (req, res) => {
     try {
         const { id } = req.params;
         const project = await Promocion.findByPk(id, {
 
             include: [
                 { model: DetallePromocion },
-                {
+                { 
                     model: PremioPromocion,
                     include: [Premio]
                 }
-
+            
             ]
         });
         console.log(project)
@@ -233,30 +355,50 @@ const GetPromocionById = async(req, res) => {
 
 }
 
-//eliminado logico de Promociones
-const DeletePromocion = async(req, res) => {
+
+
+const GetCuponByDetallePromocionId = async (req, res) => {
     try {
-
         const { id } = req.params;
-        console.log(id);
-
-        await Promocion.update({
-            estado: 0
-        }, {
-            where: {
-                id: id
-            }
+        const detallePromocion = await DetallePromocion.findByPk(id, {
+            attributes: ['cupon'] // Incluye solo el campo cupon
         });
 
-        res.json({ code: 'ok', message: 'Promocion inhabilitado con exito.' });
+        if (!detallePromocion) {
+            return res.status(404).json({ error: 'DetallePromocion no encontrado.' });
+        }
 
-    } catch (e) {
-        res.status(403);
-        res.send({ errors: 'Ha ocurrido un error al intentar inhabilitar la promocion.' });
+        res.json(detallePromocion);
+    } catch (error) {
+        res.status(403).json({ errors: 'Ha sucedido un error al intentar consultar el cupon de la Promoción.' });
     }
-}
+};
 
-const TestearCodigo = async(req, res) => {
+
+    //eliminado logico de Promociones
+    const DeletePromocion = async (req, res) => {
+        try{
+    
+            const {id} = req.params;
+            console.log(id);
+    
+            await Promocion.update({
+                estado: 0
+            }, {
+                where: {
+                    id: id
+                }
+            });
+    
+            res.json({code: 'ok', message: 'Promocion inhabilitado con exito.'});
+    
+        } catch (e) {
+            res.status(403);
+            res.send({errors: 'Ha ocurrido un error al intentar inhabilitar la promocion.'});
+        }
+    }
+
+const TestearCodigo = async (req, res) => {
     const { cupon } = req.body;
     const cantidadCupones = await DetallePromocion.count({
         where: {
@@ -271,12 +413,13 @@ const TestearCodigo = async(req, res) => {
     //code 02 cupon no valido
 
     if (cantidadCupones === 0) {
-        res.json({
-            code: '03',
-            messagge: 'Lo sentimos, el cupon no existe o no esta disponible.'
-        })
+        res.json(
+            {
+                code: '03',
+                messagge: 'Lo sentimos, el cupon no existe o no esta disponible.'
+            })
 
-    } else {
+    }else{
         const cuponDentroActivo = await Promocion.count({
             include: {
                 model: DetallePromocion,
@@ -287,22 +430,23 @@ const TestearCodigo = async(req, res) => {
             where: {
                 estado: 1,
                 fechaInicio: {
-                    [Op.lte]: new Date(),
+                     [Op.lte]: new Date(),
                 },
-                fechaFin: {
-                    [Op.gte]: new Date(),
+                 fechaFin: {
+                     [Op.gte]: new Date(),
                 }
             }
         });
-
+    
         console.log('cuponDentroActivo', cuponDentroActivo)
-
+    
         if (cuponDentroActivo === 0) {
-            res.json({
-                code: '04',
-                messagge: 'Lo sentimos, La Promocion ha caducado.'
-            })
-
+            res.json(
+                {
+                    code: '04',
+                    messagge: 'Lo sentimos, La Promocion ha caducado.'
+                })
+    
         } else {
             const promoxionx = await Promocion.findOne({
                 include: {
@@ -312,80 +456,56 @@ const TestearCodigo = async(req, res) => {
                     }
                 }
             });
-
-
+    
+    
             const datax = promoxionx.dataValues;
-
+    
             const detallePromocions = datax.detallepromocions;
             const cuponValido = detallePromocions[0].dataValues;
             if (datax.estado === 2) {
-                res.json({
-                    code: '05',
-                    messagge: 'Lo sentimos este cupon ya ha sido cangeado.',
-                    data: {}
-                })
+                res.json(
+                    {
+                        code: '05',
+                        messagge: 'Lo sentimos este cupon ya ha sido cangeado.',
+                        data: {}
+                    })
             } else {
-                if (cuponValido.esPremio === 0) {
-
-                    res.json({
-                        code: '02',
-                        messagge: datax.mesajeFail,
-                        data: {
-                            imgFail: datax.imgFail,
-                            promocion: datax.nombre,
-                            nemonico: datax.nemonico,
-                            descripcion: datax.descripcion,
+                 if (cuponValido.esPremio === 0) {
+    
+                    res.json(
+                        {
+                            code: '02',
+                            messagge: datax.mesajeFail,
+                            data: {
+                                imgFail: datax.imgFail,
+                                promocion: datax.nombre,
+                                nemonico: datax.nemonico,
+                                descripcion: datax.descripcion,
+                            }
                         }
-                    })
-
+                    )
+    
                 } else {
-
-                    res.json({
-                        code: '01',
-                        messagge: datax.mesajeExito,
-                        data: {
-                            imgFail: datax.imgSuccess,
-                            promocion: datax.nombre,
-                            nemonico: datax.nemonico,
-                            descripcion: datax.descripcion,
-                        }
-                    })
+    
+                    res.json(
+                        {
+                            code: '01',
+                            messagge: datax.mesajeExito,
+                            data: {
+                                imgFail: datax.imgSuccess,
+                                promocion: datax.nombre,
+                                nemonico: datax.nemonico,
+                                descripcion: datax.descripcion,
+                            }
+                        })
                 }
             }
-
-
+    
+    
         }
-
+    
     }
 
 }
 
-
-Getpromocionescount = async (req, res) => {
-    try {
-        // Obtener la fecha actual y la fecha hace 7 días
-        const currentDate = new Date();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(currentDate.getDate() - 7);
-
-        // Contar las promociones que tienen fecha de inicio en los últimos 7 días
-        const promoCount = await Promocion.count({
-            where: {
-                fechaInicio: {
-                    [Op.between]: [sevenDaysAgo, currentDate]
-                }
-            }
-        });
-
-        res.json({ cantidad: promoCount });
-    } catch (error) {
-        res.status(403);
-        res.send({ errors: 'Ha sucedido un error al intentar realizar la Transaccion.' });
-    }
-};
-
-
-
-
-
-module.exports = { GetPromocion, AddPromocion, PausarPromocion, ActivarPromocion, UpdatePromocion, DeletePromocion, GetPromocionById, TestearCodigo,Getpromocionescount }
+module.exports = { GetPromocion, AddPromocion, PausarPromocion, ActivarPromocion, UpdatePromocion, DeletePromocion, GetPromocionById, TestearCodigo,GetCuponByDetallePromocionId,checkNemonico }

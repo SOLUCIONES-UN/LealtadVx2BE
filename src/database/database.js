@@ -2,6 +2,11 @@
 const { Sequelize } = require("sequelize");
 
 
+// const sequelize = new Sequelize("lealtadv2", "root", "test", {
+//   host: "localhost",
+//   port: "3307",
+//   dialect: "mysql",
+// });
 
 const sequelize = new Sequelize(
     "dbepco7agwmwba",

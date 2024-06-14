@@ -1,23 +1,37 @@
-const { Router } = require('express');
+const {Router} = require('express');
 const router = Router();
-const { GetPromocion, AddPromocion, GetPromocionById, UpdatePromocion, PausarPromocion, ActivarPromocion, TestearCodigo, DeletePromocion, GetPromocioncount ,Getpromocionescount} = require('../controllers/promocion.controller')
+const {GetPromocion,AddPromocion, GetPromocionById, UpdatePromocion, PausarPromocion, ActivarPromocion,TestearCodigo, DeletePromocion,checkNemonico} = require('../controllers/promocion.controller')
 const authUser = require('../middlewares/auth.js');
+const { Promocion } = require('../models/promocion.js');
 
 //declarampos nuestra constante para almacenar el path`
 const path = 'Promocion';
 
 
 //rutas del proyecto
-router.get(`/${path}`, authUser, GetPromocion);
-router.get(`/${path}/count`, authUser, Getpromocionescount);
-router.get(`/${path}/:id`, authUser, GetPromocionById);
-router.post(`/${path}`, authUser, AddPromocion);
-router.put(`/${path}/:id`, authUser, UpdatePromocion);
-router.put(`/${path}/Pau/:id`, authUser, PausarPromocion);
-router.put(`/${path}/Act/:id`, authUser, ActivarPromocion);
+router.get(`/${path}`, GetPromocion);
+router.get(`/${path}/:id`, GetPromocionById);
+router.post(`/${path}`, AddPromocion);
+router.put(`/${path}/:id`, UpdatePromocion);
+router.put(`/${path}/Pau/:id`,PausarPromocion);
+ router.post('/api/check-nemonico', checkNemonico);
+router.put(`/${path}/Act/:id`, ActivarPromocion);
 //router.post(`/${path}/Testear`,TestearCodigo);
-router.delete(`/${path}/:id`, authUser, DeletePromocion);
-
+router.delete(`/${path}/:id`, DeletePromocion);
+router.get('/Promocion/exists', async (req, res) => {
+    const { nombre } = req.query;
+    try {
+      const promocion = await Promocion.findOne({ nombre: nombre.trim() });
+      if (promocion) {
+        return res.json({ exists: true });
+      } else {
+        return res.json({ exists: false });
+      }
+    } catch (error) {
+      console.error('Error checking if name exists:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
 
 module.exports = router

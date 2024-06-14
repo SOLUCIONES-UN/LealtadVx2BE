@@ -46,10 +46,12 @@ const postDatosCupon = async (req, res) => {
         },
       },
       where: {
-        [Op.and]: [
-          { fecha: { [Op.gte]: fechaInicio } },
-          { fecha: { [Op.lte]: fechaFinal } }
-        ]
+        fecha: {
+          [Op.gte]: fechaInicio,
+        },
+        fecha: {
+          [Op.lte]: fechaFinal,
+        },
       }
     });
     res.json(trxAll)

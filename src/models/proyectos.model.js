@@ -72,10 +72,10 @@ Proyectos.hasMany(Departamento_Proyectos,{
    });
 
 
-   // (async () => {
-   //     await Proyectos.sync({ alter: true });
+//    (async () => {
+//        await Proyectos.sync({ alter: true });
 
-   // })();
+//    })();
 
 // Departamento_Proyectos.sync({ alter: true }).then(() => {
 //     console.log('tabla TransaccionPremio creada');
