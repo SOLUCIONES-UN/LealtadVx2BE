@@ -12,6 +12,7 @@ const Menu = sequelize.define('menus', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: false,
+        unique: true
 
         
     }, icono: {
@@ -37,16 +38,18 @@ Pagina.belongsTo(Menu, {
 });
 
 
-/*(async () => {
-    await sequelize.sync({ force: false });
- })();*/
+// (async () => {
+//     try{ 
+//     await Menu.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 
-
-
-//  Pagina.sync({ alter: true }).then(() => {
-//     console.log('tabla Pagina creada');
-// });
 
 
 

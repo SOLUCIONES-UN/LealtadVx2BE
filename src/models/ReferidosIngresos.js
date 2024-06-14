@@ -26,17 +26,7 @@ const referidosIngresos = sequelize.define('referidosingresos', {
     
 },{timestamps: false});
 
-// ConfigReferido.belongsTo(referidosIngresos, {
-//     foreignKey: 'idConfiguracion',
-//     targetKey: 'id',
-    
-// });
 
-//relacion entre tablas, menu tiene muchas paginas
-/*Menu.hasMany(Pagina,{
-    foreignKey: 'idMenu',
-    sourceKey: 'id'
-});*/
 
 
 // (async () => {
