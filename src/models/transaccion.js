@@ -15,7 +15,8 @@ const Transaccion = sequelize.define('transaccion', {
   
     descripcion: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     idBotton: {
         type: DataTypes.INTEGER,
@@ -72,8 +73,12 @@ Participacion.belongsTo(Transaccion,{
 
 
 // (async () => {
+//     try{ 
 //     await Transaccion.sync({ alter: true });
-//     // Code here
+//     console.log("Se cargo correctamente");
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
 // })();
 
 module.exports = {Transaccion}

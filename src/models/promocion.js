@@ -94,9 +94,6 @@ Configuraciones.belongsTo(Promocion, {
 });
 
 
-// Configuraciones.sync({ alter: true }).then(() => {
-//     console.log('Tabla Configuraciones creada o actualizada correctamente');
-// });
 
 
 // (async () => {
@@ -105,8 +102,5 @@ Configuraciones.belongsTo(Promocion, {
 // // })();
 
 
-// Configuraciones.sync({ alter: true }).then(() => {
-//     console.log('tabla Campania creada');
-// });
 
 module.exports = { Promocion, sequelize }

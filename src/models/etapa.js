@@ -15,11 +15,13 @@ const Etapa = sequelize.define('etapa', {
     },
     nombre: {
         type: DataTypes.STRING(150),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     descripcion: {
-        type: DataTypes.STRING(500),
-        allowNull: false
+        type: DataTypes.STRING(150),
+        allowNull: false,
+        unique: true
     },
     orden: {
         type: DataTypes.INTEGER,
@@ -96,13 +98,19 @@ PremioCampania.belongsTo(Etapa, {
     targetId: 'id',
 });
 
-// Etapa.sync({ alter: true }).then(() => {
-//     console.log('Tabla Etapa creada o actualizada correctamente');
-//  });
 
-// Campania.sync({ alter: true }).then(() => {
-//     console.log('tabla Campania creada');
-// });
+
+
+// (async () => {
+//     try{ 
+//     await Etapa.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 
 module.exports = {Etapa}
