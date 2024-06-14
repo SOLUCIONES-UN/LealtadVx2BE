@@ -29,11 +29,11 @@ const Premio = sequelize.define('premios', {
         allowNull: true
     },
     link: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(200),
         allowNull: true
     },
     claveSecreta: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(200),
         allowNull: true,
         unique: true
     },

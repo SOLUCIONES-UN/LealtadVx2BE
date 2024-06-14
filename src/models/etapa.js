@@ -19,7 +19,7 @@ const Etapa = sequelize.define('etapa', {
         unique: true
     },
     descripcion: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(150),
         allowNull: false,
         unique: true
     },

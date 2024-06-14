@@ -12,7 +12,7 @@ const codigoReferido = sequelize.define('codigosreferidos', {
         autoIncrement: true,
     },
     codigoReferido: {   
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(200),
         allowNull: false
     },
     estado : {

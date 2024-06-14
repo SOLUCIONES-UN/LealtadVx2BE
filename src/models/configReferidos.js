@@ -10,7 +10,7 @@ const ConfigReferido = sequelize.define('configReferido', {
         autoIncrement: true,
     },
     descripcion: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(255),
         allowNull: false
     },
     estado : {
@@ -65,5 +65,17 @@ const ConfigReferido = sequelize.define('configReferido', {
 //   (async () => {
 //     await ConfigReferido.sync({ alter: true });
 //   })(); 
+
+
+// (async () => {
+//     try{ 
+//     await ConfigReferido.sync({ alter: true });
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 module.exports = {ConfigReferido}
