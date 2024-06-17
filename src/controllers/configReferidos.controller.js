@@ -1,6 +1,5 @@
 const {  ConfigReferido } = require('../models/configReferidos');
 
-//controllador paa obtener la lista de páginas
 const GetConfigReferidos = async (req, res) => {
     try {
         const trx = await ConfigReferido.findAll();
@@ -30,7 +29,6 @@ const GetConfigReferidos = async (req, res) => {
 
 
 
-//controllador para actualizar 
 const UpdateConfigReferidos = async (req, res) => {
     try {
         const { descripcion, duracion} = req.body;
@@ -54,7 +52,6 @@ const UpdateConfigReferidos = async (req, res) => {
     }
 }
 
-//controllador para eliminar
 const DeleteConfigReferidos = async (req, res) => {
     try {
         const { id } = req.params

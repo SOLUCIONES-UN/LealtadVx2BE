@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const { Op } = require('sequelize');
 const { Campania } = require('../models/campanias');
-const {sendEmails} = require('./sendEmail');
+const { sendEmails } = require('./sendEmail');
 
 function validateEmails(emails) {
     if (!emails) {
@@ -14,10 +14,10 @@ function validateEmails(emails) {
     if (invalidEmails.length > 0) {
         return false;
     }
-    return  true;
+    return true;
 }
 
-const tareaVerificarCampanias = cron.schedule('0 0 * * *', async () => {
+const tareaVerificarCampanias = cron.schedule('0 0 * * *', async() => {
 
     const hoy = new Date();
 
@@ -26,7 +26,9 @@ const tareaVerificarCampanias = cron.schedule('0 0 * * *', async () => {
 
     const campanias = await Campania.findAll({
         where: {
-            fechaFin: { [Op.between]: [inicioVentana, finVentana] },
+            fechaFin: {
+                [Op.between]: [inicioVentana, finVentana]
+            },
             estado: [1, 2, 3]
         },
         attributes: ['id', 'nombre', 'fechaFin', 'emails']
@@ -38,17 +40,9 @@ const tareaVerificarCampanias = cron.schedule('0 0 * * *', async () => {
 
         if (validateEmails(campania.emails)) {
             try {
-                const info = await sendEmails(
-                    campania.emails, 
-                    `Aviso de finalización de campaña: ${campania.nombre}`,
-                    `<p>La Campaña <strong>${campania.nombre}</strong> vencerá en ${diasRestantes} días.</p>`,
-                    []
-                );
-                console.log(`Correo enviado: ${info.messageId}`);
-            } catch (error) {
-            }
-        } else {
-        }
+               
+            } catch (error) {}
+        } else {}
     }
 });
 module.exports = { tareaVerificarCampanias };

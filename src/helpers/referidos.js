@@ -4,7 +4,6 @@ const { Campania } = require('../models/campanias');
 const { participacionReferidos } = require('../models/participacionReferidos');
 const { Participacion } = require('../models/Participacion');
 const { codigoReferido } = require('../models/codigoReferidos');
-// const { referidosIngresos } = require('../models/ReferidosIngresos'); // Aquí se agregó la importación faltante
 const { ConfigReferido } = require('../models/configReferidos');
 const { Usuario } = require('../models/usuario');
 const { Op } = require('sequelize');
@@ -12,15 +11,32 @@ const { Op } = require('sequelize');
 
 const getParticipaciones = async (campanas, fecha1, fecha2) => {
   try {
-    const fechaInicioFormatted = fecha1.toISOString().split('T')[0];
-    const fechaFinFormatted = fecha2.toISOString().split('T')[0];    let campanias = "";
 
-    campanas.forEach((c, index) => {
-      campanias += index > 0 ? `, '${c}'`: `'${c}'`;
-    });
+    const fecha1Obj = fecha1 instanceof Date ? fecha1 : new Date(fecha1);
+        const fecha2Obj = fecha2 instanceof Date ? fecha2 : new Date(fecha2);
+
+
+        const fechaInicioFormatted = fecha1Obj.toISOString().split('T')[0];
+        const fechaFinFormatted = fecha2Obj.toISOString().split('T')[0];
+        
+
+        console.log('Campanias:', campanas);
+        console.log('Fecha de inicio:', fechaInicioFormatted);
+        console.log('Fecha de fin:', fechaFinFormatted);
+        
+
+        const campanasArray = Array.isArray(campanas) ? campanas : [campanas];
+
+        let campanias = "";
+        campanasArray.forEach((c, index) => {
+          campanias += index > 0 ? `, '${c}'`: `'${c}'`;
+        });
+
+
+
 
     const participaciones = await sequelize.query(`
-      SELECT 
+         SELECT 
         c.id AS campania_id,
         c.nombre AS nombre_campania,
         c.descripcionNotificacion,
@@ -48,29 +64,28 @@ const getParticipaciones = async (campanas, fecha1, fecha2) => {
       LEFT JOIN 
       participacionreferidos p2 ON p2.referido = cr.codigo
       WHERE p.fecha BETWEEN '${fechaInicioFormatted}' AND '${fechaFinFormatted}'
-      AND c.nombre in (${campanias});		
+      AND c.nombre in (${campanias});	
     `, { type: sequelize.QueryTypes.SELECT });
     
     const participacionesConCliente = await Promise.all(participaciones.map(async (participacion) => {
       const customerInfo = await getCustomerById(participacion.customerId);
-      participacion.customerInfo = customerInfo; // Asignar la información del cliente a la participación
+      participacion.customerInfo = customerInfo; 
       return participacion;
     }));
 
     return participacionesConCliente;
-  } catch (error) {
-    console.error('Error al obtener las participaciones:', error);
-    res.status(500).json({ error: 'Error al obtener las participaciones' });
   }
+
+catch (error) {
+  console.error('Error al obtener las participaciones":', error);
+  throw new Error('Error al obtener las participaciones' );
+}
 };
-
-
-
 
 
 const getCustomerById = async (customerid) => {
   try {
-    // const { customerid, fechaInicio, fechaFin } = req.body;
+   
     const customerInfo = await pronet.query(`
     SELECT ui.userid,
           ui.userno as noreferido,
@@ -102,7 +117,6 @@ WHERE
       type: pronet.QueryTypes.SELECT
     });
 
-    // res.status(200).json(customerInfo);
 return customerInfo;
 
   } catch (error) {
@@ -110,21 +124,6 @@ return customerInfo;
     throw new Error('Error al obtener participaciones');
 }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 module.exports = { getParticipaciones, getCustomerById };

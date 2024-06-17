@@ -4,8 +4,15 @@ const { pronet, genesis } = require('../database/database');
 
 const  getParticipacionesFechasGeneral = async (fecha1, fecha2) => {
     try {
-        const fechaInicioFormatted = fecha1.toISOString().split('T')[0];
-    const fechaFinFormatted = fecha2.toISOString().split('T')[0];
+        
+
+        const fecha1Obj = fecha1 instanceof Date ? fecha1 : new Date(fecha1);
+        const fecha2Obj = fecha2 instanceof Date ? fecha2 : new Date(fecha2);
+
+
+        const fechaInicioFormatted = fecha1Obj.toISOString().split('T')[0];
+        const fechaFinFormatted = fecha2Obj.toISOString().split('T')[0];
+
 
         const results = await genesis.query(`
             SELECT uic.userno, CONCAT(uic.fname, ' ', uic.lname) AS nombreReferidor, codRef.codigo, uir.userno AS noReferido,

@@ -50,7 +50,9 @@ Pagina.belongsTo(Menu, {
 // })();
 
 
-
+// Pagina.sync({ alter: true }).then(() => {
+//     console.log('Tabla Pagina creada o actualizada correctamente');
+// });
 
 
 module.exports = {Menu}

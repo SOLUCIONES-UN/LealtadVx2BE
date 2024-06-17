@@ -45,8 +45,7 @@ const AddCampania = async(req, res) =>{
         } = req.body;
 
         
-        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
-        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
+       
 
         const newCampains = await Campania.create({
             nombre,
@@ -61,8 +60,8 @@ const AddCampania = async(req, res) =>{
             tipoUsuario,
             tituloNotificacion,
             descripcionNotificacion,
-            imgPush: imgPushBase64,
-            imgAkisi: imgAkisiBase64,
+            imgPush,
+            imgAkisi,
             estado,
             maximoParticipaciones,
             campaniaTerceros,
@@ -178,8 +177,7 @@ const UpdateCampania = async (req, res) => {
             participacion,
             emails
         } = req.body;
-        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
-        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
+        
 
 
         const campania = await Campania.findByPk(id, { transaction });
@@ -200,8 +198,8 @@ const UpdateCampania = async (req, res) => {
             tipoUsuario,
             tituloNotificacion,
             descripcionNotificacion,
-            imgPush:imgPushBase64,
-            imgAkisi :imgAkisiBase64,
+            imgPush,
+            imgAkisi ,
             estado,
             maximoParticipaciones,
             campaniaTerceros,
@@ -318,13 +316,6 @@ const GetcampanasActivasById = async (req, res) => {
             ]
         });
 
-        if (etapa) {
-            etapa.imgPush = decodeURIComponent(etapa.imgPush); 
-            etapa.imgAkisi = decodeURIComponent(etapa.imgAkisi);
-
-            etapa.imgPush = removeFakePath(etapa.imgPush);
-            etapa.imgAkisi = removeFakePath(etapa.imgAkisi);
-        }
 
         res.json(etapa);
 
@@ -334,13 +325,6 @@ const GetcampanasActivasById = async (req, res) => {
     }
 }
 
-function removeFakePath(path) {
-    const fakePathIndex = path.indexOf("C:/fakepath/");
-    if (fakePathIndex !== -1) {
-        path = path.substring(fakePathIndex + "C:/fakepath/".length);
-    }
-    return path;
-}
 
 const PausarCampaña = async (req, res) => {
 
