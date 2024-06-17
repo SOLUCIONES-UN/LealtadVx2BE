@@ -144,15 +144,7 @@ Campania.hasMany(Participacion,{
     sourceKey: 'id'
 });
 
-// Campania.hasMany(Participacion, {
-//     as: 'participaciones',
-//     foreignKey: {
-//         name: 'idCampania',
-//         allowNull: false,
-//     },
-//     sourceKey: 'id',
-//     allowNull: false
-// });
+
 
 Participacion.belongsTo(Campania,{
     foreignKey: 'idCampania',
