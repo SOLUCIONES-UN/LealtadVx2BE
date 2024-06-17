@@ -17,10 +17,6 @@ const { Etapa } = require("../models/etapa");
 const postDatosCupon = async (req, res) => {
   try {
     const { promocion, fechaInicio, fechaFinal } = req.body;
-
-
-    console.log("Fecha Inicio:", fechaInicio);
-    console.log("Fecha Final:", fechaFinal);
     
     const trxAll = await CangePromocion.findAll({
       include: {

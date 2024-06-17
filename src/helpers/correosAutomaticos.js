@@ -40,13 +40,7 @@ const tareaVerificarCampanias = cron.schedule('0 0 * * *', async() => {
 
         if (validateEmails(campania.emails)) {
             try {
-                // const info = await sendEmails(
-                //     campania.emails, 
-                //     `Aviso de finalización de campaña: ${campania.nombre}`,
-                //     `<p>La Campaña <strong>${campania.nombre}</strong> vencerá en ${diasRestantes} días.</p>`,
-                //     []
-                // );
-                console.log(`Correo enviado: ${info.messageId}`);
+               
             } catch (error) {}
         } else {}
     }

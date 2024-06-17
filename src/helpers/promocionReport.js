@@ -17,7 +17,6 @@ const { Etapa } = require("../models/etapa");
 
 const postDatosCupon = async (idpromocions, fechaInicio, fechaFinal ) => {
     try {
-    //   const { idpromocions, fechaInicio, fechaFinal } = data;
   
       console.log("Fecha Inicio:", fechaInicio);
       console.log("Fecha Final:", fechaFinal);
