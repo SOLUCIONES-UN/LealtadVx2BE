@@ -16,8 +16,8 @@ const GetEnviaPremio = async(req, res) => {
             },
             include: [{
                 model: Campania,
-                as: 'campaign', // Así es como especificamos el alias de la asociación en el modelo EnviaPremio
-                attributes: ['nombre'] // Solo seleccionamos el nombre de la campaña para mostrar
+                as: 'campaign', 
+                attributes: ['nombre'] 
             }]
         });
 
@@ -31,10 +31,10 @@ const GetEnviaPremio = async(req, res) => {
 
 const AddEnvio = async(req, res) => {
     try {
-        const data = req.body; // El cuerpo de la solicitud contendrá un array de objetos
+        const data = req.body; 
         console.log('Estos son los datos recibidos:', data);
 
-        // Iterar sobre cada objeto en el array y crear una entrada en la base de datos
+       
         for (const item of data) {
             const { telefono, campania } = item;
             await EnviaPremio.create({

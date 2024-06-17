@@ -1,6 +1,5 @@
 const { sequelize, pronet } = require("../database/database");
 const { codigoReferidos } = require("../models/codigoReferidos");
-// Importa la instancia de Sequelize para la base de datos principal
 
 const generarCodigoReferido = () => {
   let codigo = "";
@@ -52,9 +51,7 @@ const getCodigoReferido = async (req, res) => {
 const getCodigoReferidoByPhone = async (req, res) => {
   const { phone } = req.body;
   try {
-    // Consulta a la base de datos lealtadV2
-
-    // Consulta a la base de datos pronet
+   
     const queryPronet = `
         SELECT c.customer_id as customer
         FROM tbl_customer c 
@@ -89,7 +86,6 @@ const actualizarCodigoReferido = async (req, res) => {
   const { id, codigo } = req.body;
 
   try {
-    // Actualizar el código de referido utilizando Sequelize
     const [rowsAffected, _] = await sequelize.query(
       `
       UPDATE codigosreferidos
