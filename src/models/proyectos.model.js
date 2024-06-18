@@ -59,14 +59,14 @@
        sourceKey: 'id',
    });
 
-Columna.belongsTo(Proyectos,{
-    foreignKey: 'idProyectos',
-    targetId: 'id',
-});
-Proyectos.hasMany(Departamento_Proyectos,{
-    foreignKey: 'idProyecto',
-    sourceKey: 'id'
-});
+   Columna.belongsTo(Proyectos, {
+       foreignKey: 'idProyectos',
+       targetId: 'id',
+   });
+   Proyectos.hasMany(Departamento_Proyectos, {
+       foreignKey: 'idProyecto',
+       sourceKey: 'id'
+   });
 
    Departamento_Proyectos.belongsTo(Proyectos, {
        foreignKey: 'idProyecto',
@@ -74,17 +74,23 @@ Proyectos.hasMany(Departamento_Proyectos,{
    });
 
 
- 
 
-// (async () => {
-//     try{ 
-//     await Proyectos.sync({ alter: true });
-//     console.log("Se cargo correctamente");
-    
 
-//     } catch (error){
-//         console.error("hay problema al cargar el modelo",error);
-//     }
-// })();
+   // (async () => {
+   //     try{ 
+   //     await Proyectos.sync({ alter: true });
+   //     console.log("Se cargo correctamente");
 
-module.exports = { Proyectos }
+
+   //     } catch (error){
+   //         console.error("hay problema al cargar el modelo",error);
+   //     }
+   // })();
+
+
+
+   //    TablaDB.sync({ alter: true }).then(() => {
+   //        console.log('tabla TablaDB creada');
+   //    });
+
+   module.exports = { Proyectos }
