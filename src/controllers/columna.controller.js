@@ -20,28 +20,34 @@ const GetColumnas = async(req, res) => {
     }
 };
 
-//controllador para agregar nuevas Columnaes
 const AddColumna = async(req, res) => {
     try {
-        const { nombre, fila_insertada, fila_actualizada, idProyectos, idTablas } =
-        req.body;
+        const { nombre, fila_insertada, fila_actualizada, idProyectos, idTablas } = req.body;
+
+        const columnaExistente = await Columna.findOne({ where: { nombre, idTablas } });
+        if (columnaExistente) {
+            return res.status(400).json({ code: 'error', message: 'La columna ya existe en esta tabla.' });
+        }
+
         await Columna.create({
             nombre,
             fila_insertada,
             fila_actualizada,
             idProyectos,
-            idTablas,
+            idTablas
         });
-        res.json({ code: "ok", message: "Columna creada con exito" });
+
+        res.json({ code: "ok", message: "Columna creada con éxito" });
     } catch (error) {
-        res.status(403);
-        res.send({
-            errors: "Ha sucedido un  error al intentar realizar la Columna.",
+        console.error(error);
+        res.status(500).send({
+            errors: "Ha sucedido un error al intentar realizar la columna.",
         });
     }
 };
 
-//controllador para actualizar Columnaes
+
+
 const UpdateColumna = async(req, res) => {
     try {
         const { nombre, fila_insertada, fila_actualizada, idProyectos, idTablas } =
