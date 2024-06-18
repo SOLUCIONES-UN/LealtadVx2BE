@@ -20,15 +20,15 @@ const TablaDB = sequelize.define('tabladbs', {
     }
 }, { timestamps: false });
 
-// TablaDB.hasMany(Columna, {
-//     foreignKey: 'idTablas',
-//     sourceKey: 'id'
-// });
+TablaDB.hasMany(Columna, {
+    foreignKey: 'idTablas',
+    sourceKey: 'id'
+});
 
-// Columna.belongsTo(TablaDB, {
-//     foreignKey: 'idTablas',
-//     sourceKey: 'id'
-// });
+Columna.belongsTo(TablaDB, {
+    foreignKey: 'idTablas',
+    sourceKey: 'id'
+});
 
 
 
@@ -43,8 +43,8 @@ const TablaDB = sequelize.define('tabladbs', {
 // })();
 
 
-// TablaDB.sync({ alter: true }).then(() => {
-//     console.log('tabla TablaDB creada');
+// Columna.sync({ alter: true }).then(() => {
+//     console.log('tabla TablaDB Columna');
 // });
 
 
