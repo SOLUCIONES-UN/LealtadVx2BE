@@ -92,5 +92,10 @@
    //    TablaDB.sync({ alter: true }).then(() => {
    //        console.log('tabla TablaDB creada');
    //    });
+   //    Columna.sync({ alter: true }).then(() => {
+   //        console.log('tabla TablaDB Columna');
+   //    });
+
+
 
    module.exports = { Proyectos }
