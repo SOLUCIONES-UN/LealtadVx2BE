@@ -2,7 +2,7 @@ const { Rol } = require('../models/rol')
 
 
 //controllador paa obtener la lista de roles
-const GetRoles = async (req, res) => {
+const GetRoles = async(req, res) => {
     try {
         const trx = await Rol.findAll({
             where: {
@@ -19,34 +19,41 @@ const GetRoles = async (req, res) => {
 }
 
 
-//controllador para agregar nuevos roles
-const AddRol = async (req, res) => {
 
+const AddRol = async(req, res) => {
     try {
-        console.log(req.body);
         const { descripcion } = req.body;
+
+        // Verifica si el rol ya existe
+        const rolExistente = await Rol.findOne({ where: { descripcion } });
+        if (rolExistente) {
+            return res.status(400).json({ code: 'error', message: 'El rol ya existe con esta Descripcion.' });
+        }
+
+        // Si no existe, crea el nuevo rol
         await Rol.create({
             descripcion,
-        })
-        res.json({ code: 'ok', message: 'Rol creado con exito' });
+        });
+
+        res.json({ code: 'ok', message: 'Rol creado con éxito' });
 
     } catch (error) {
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar agregar un nuevo rol.' });
+        console.error(error);
+        res.status(500).send({ errors: 'Ha sucedido un error al intentar agregar un nuevo rol.' });
     }
-
 }
 
 
+
 //controllador para actualizar los roles
-const UpdateRol = async (req, res) => {
+const UpdateRol = async(req, res) => {
 
     try {
         const { descripcion, } = req.body;
-        const {id} = req.params
+        const { id } = req.params
         await Rol.update({
             descripcion,
-            
+
         }, {
             where: {
                 id: id
@@ -65,12 +72,12 @@ const UpdateRol = async (req, res) => {
 
 
 //controllador para eliminar roles
-const DeleteRol = async (req, res) => {
+const DeleteRol = async(req, res) => {
 
     try {
-        const {id} = req.params
+        const { id } = req.params
         await Rol.update({
-            estado : 0
+            estado: 0
         }, {
             where: {
                 id: id
@@ -88,7 +95,7 @@ const DeleteRol = async (req, res) => {
 }
 
 
-const GetRolById = async (req, res) => {
+const GetRolById = async(req, res) => {
     try {
         const { id } = req.params;
         const project = await Rol.findByPk(id);

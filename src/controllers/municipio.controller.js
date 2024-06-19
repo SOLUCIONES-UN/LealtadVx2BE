@@ -3,7 +3,7 @@ const { Departamento } = require('../models/departamento')
 
 
 //controllador paa obtener la lista de municipios
-const GetMunicipios = async (req, res) => {
+const GetMunicipios = async(req, res) => {
     try {
         const trx = await Municipio.findAll({
             include: { model: Departamento },
@@ -22,11 +22,11 @@ const GetMunicipios = async (req, res) => {
 
 
 //controllador para agregar nuevos municipios
-const AddMunicipio = async (req, res) => {
+const AddMunicipio = async(req, res) => {
 
     try {
         console.log(req.body);
-        const { nombre, departamento,IdLocal } = req.body;
+        const { nombre, departamento, IdLocal } = req.body;
         await Municipio.create({
             nombre,
             IdLocal,
@@ -43,10 +43,10 @@ const AddMunicipio = async (req, res) => {
 
 
 //controllador para actualizar los municipios
-const UpdateMunicipio = async (req, res) => {
+const UpdateMunicipio = async(req, res) => {
 
     try {
-        const { nombre,IdLocal, departamento, } = req.body;
+        const { nombre, IdLocal, departamento, } = req.body;
         const { id } = req.params
         await Municipio.update({
             nombre,
@@ -71,7 +71,7 @@ const UpdateMunicipio = async (req, res) => {
 
 
 //controllador para eliminar municipios
-const DeleteMunicipio = async (req, res) => {
+const DeleteMunicipio = async(req, res) => {
 
     try {
         const { id } = req.params
@@ -94,7 +94,7 @@ const DeleteMunicipio = async (req, res) => {
 }
 
 
-const GetMunicipioById = async (req, res) => {
+const GetMunicipioById = async(req, res) => {
     try {
         const { id } = req.params;
         const project = await Municipio.findByPk(id);
@@ -107,7 +107,7 @@ const GetMunicipioById = async (req, res) => {
 
 }
 
-const getMunicipalitiesByDepartment = async (req, res) => {
+const getMunicipalitiesByDepartment = async(req, res) => {
     try {
         const { id } = req.params;
         const trx = await Municipio.findAll({
@@ -115,7 +115,7 @@ const getMunicipalitiesByDepartment = async (req, res) => {
             where: {
                 idDepartamento: id,
                 estado: 1
-                
+
             }
         })
         res.json(trx)

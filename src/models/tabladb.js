@@ -3,29 +3,29 @@ const { sequelize } = require('../database/database');
 const { Columna } = require('./columna');
 const { Transaccion } = require('./transaccion');
 
-const TablaDB = sequelize.define('tabladb',{
-    id:{
+const TablaDB = sequelize.define('tabladbs', {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-    }, 
-    nombre_tabla:{
+    },
+    nombre_tabla: {
         type: DataTypes.STRING(100),
         allowNull: false,
         unique: true
     },
-    estado : {
+    estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1,
     }
-},{timestamps: false});
+}, { timestamps: false });
 
-TablaDB.hasMany(Columna,{
+TablaDB.hasMany(Columna, {
     foreignKey: 'idTablas',
     sourceKey: 'id'
 });
 
-Columna.belongsTo(TablaDB,{
+Columna.belongsTo(TablaDB, {
     foreignKey: 'idTablas',
     sourceKey: 'id'
 });
@@ -43,4 +43,9 @@ Columna.belongsTo(TablaDB,{
 // })();
 
 
-module.exports = {TablaDB}
+// Columna.sync({ alter: true }).then(() => {
+//     console.log('tabla TablaDB Columna');
+// });
+
+
+module.exports = { TablaDB }
