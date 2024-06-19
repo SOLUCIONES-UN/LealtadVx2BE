@@ -23,41 +23,35 @@ const GetMenus = async(req, res) => {
 };
 
 
-
-
-
-
-
-
-
-const AddMenu = async(req, res) => {
+const AddMenu = async (req, res) => {
     try {
-        const { descripcion, icono, pagina } = req.body;
+        const { descripcion } = req.body;
+
+        const menuExistente = await Menu.findOne({ where: { descripcion } });
+        if (menuExistente) {
+            return res.status(400).json({ code: 'error', message: 'El menú ya existe con esta Descripcion' });
+        }
 
         await Menu.create({
             descripcion,
-            icono,
-            idPagina: pagina,
-        })
-        res.json({ code: 'ok', message: 'Menu creado con exito' });
+        });
 
+        res.json({ code: 'ok', message: 'Menú creado con éxito' });
     } catch (error) {
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar realizar el menu.' });
+        console.error(error);
+        res.status(500).send({ errors: 'Ha sucedido un error al intentar crear el menú.' });
     }
-}
-
+};
 
 
 
 // controllador para actualizar Menus
 const UpdateMenu = async(req, res) => {
     try {
-        const { descripcion, icono } = req.body;
+        const { descripcion } = req.body;
         const { id } = req.params
         await Menu.update({
             descripcion,
-            icono,
 
         }, {
             where: {
