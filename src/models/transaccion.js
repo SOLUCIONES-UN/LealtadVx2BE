@@ -16,28 +16,12 @@ const Transaccion = sequelize.define('transaccion', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: false,
-        unique: true
-    },
-    idBotton: {
-        type: DataTypes.INTEGER,
-        allowNull: true
     },
     estado : {
         type: DataTypes.INTEGER,
         defaultValue: 1,
         allowNull:false
     },
-    puntos: {
-        type: DataTypes.INTEGER,
-        defaultValue:0,
-        allowNull:true
-    },
-    idColumna: {
-        type: DataTypes.INTEGER,
-        defaultValue:0,
-        allowNull:false
-    }
-    
 
 },{timestamps: false});
 
@@ -80,5 +64,9 @@ Participacion.belongsTo(Transaccion,{
 //         console.error("hay problema al cargar el modelo",error);
 //     }
 // })();
+
+    // Transaccion.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Transaccion ');
+    //   });
 
 module.exports = {Transaccion}

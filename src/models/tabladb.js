@@ -30,7 +30,22 @@ Columna.belongsTo(TablaDB, {
     sourceKey: 'id'
 });
 
+TablaDB.hasMany(Transaccion, {
+    foreignKey: 'idTablas',
+    sourceKey: 'id'
+});
 
+Transaccion.belongsTo(TablaDB, {
+    foreignKey: 'idTablas',
+    sourceKey: 'id'
+});
+
+
+
+
+    //   Transaccion.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Transaccion ');
+    //   });
 
 
 // (async () => {

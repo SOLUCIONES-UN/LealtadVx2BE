@@ -119,6 +119,28 @@ const AddCampania = async(req, res) =>{
     }
 }
 
+
+
+const CheckNombreCampaña = async (req, res) => {
+    try {
+        const { nombre } = req.body; 
+        const existingCampaña = await Campania.findOne({
+            where: { nombre }
+        });
+        if (existingCampaña) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
+    } catch (error) {
+        console.error('Error al verificar el nombre de la campaña:', error);
+        res.status(500).json({ error: 'Ha sucedido un error al intentar verificar el nombre de la campaña' });
+    }
+};
+
+
+
+
 const GetCampania = async (req, res) => {
     try {
       const campanias = await Campania.findAll({
@@ -1002,7 +1024,8 @@ module.exports = {
     ActivarCampaña,
     DeleteCampania,GetCampaniasSEm,
     Getcampanascount,
-    getnewCampanias
+    getnewCampanias,
+    CheckNombreCampaña
 }
 
 

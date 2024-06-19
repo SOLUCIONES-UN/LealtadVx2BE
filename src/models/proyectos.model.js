@@ -2,6 +2,7 @@
    const { sequelize } = require('../database/database');
    const { TablaDB } = require('./tabladb');
    const { Columna } = require('./columna');
+   const { Transaccion } = require('./transaccion');
    const { Campania } = require('./campanias');
    const { Departamento_Proyectos } = require('./departamento_proyectos');
 
@@ -74,6 +75,16 @@
    });
 
 
+   Proyectos.hasMany(Transaccion, {
+    foreignKey: 'idProyecto',
+    sourceKey: 'id'
+});
+
+Transaccion.belongsTo(Proyectos, {
+    foreignKey: 'idProyecto',
+    targetKey: 'id',
+});
+
 
 
    // (async () => {
@@ -96,6 +107,10 @@
    //        console.log('tabla TablaDB Columna');
    //    });
 
+    //   Transaccion.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Transaccion ');
+    //   });
 
+   
 
    module.exports = { Proyectos }
