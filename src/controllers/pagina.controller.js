@@ -23,13 +23,11 @@ const AddPagina = async(req, res) => {
     try {
         const { descripcion, idMenu, path, icono } = req.body;
 
-        // Verifica si la página ya existe
         const paginaExistente = await Pagina.findOne({ where: { descripcion } });
         if (paginaExistente) {
             return res.status(400).json({ code: 'error', message: 'La página ya existe con esta descripcion' });
         }
 
-        // Si no existe, crea la nueva página
         await Pagina.create({
             descripcion,
             idMenu,
