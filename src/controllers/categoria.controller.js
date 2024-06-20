@@ -22,13 +22,11 @@ const AddCategoria = async(req, res) => {
     try {
         const { nombre } = req.body;
 
-        // Verifica si la categoría ya existe
         const categoriaExistente = await Categoria.findOne({ where: { nombre } });
         if (categoriaExistente) {
             return res.status(400).json({ code: 'error', message: 'La categoría ya existe con este nombre' });
         }
 
-        // Si no existe, crea la nueva categoría
         await Categoria.create({
             nombre
         });
