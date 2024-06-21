@@ -205,4 +205,10 @@ Configuraciones.belongsTo(Campania, {
 // });
 
 
+// Participacion.sync({ alter: true }).then(() => {
+//     console.log('tabla Participacion creada');
+// });
+
+
+
 module.exports={Campania}

@@ -17,12 +17,11 @@ const Premio = sequelize.define('premios', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: true,
-        unique: true
+       
     },
     usuario: {
         type: DataTypes.STRING(150),
         allowNull: true,
-        unique: true
     },
     tipo: {
         type: DataTypes.INTEGER,
@@ -42,11 +41,7 @@ const Premio = sequelize.define('premios', {
         defaultValue: 1,
         allowNull: false
     },
-    idTransaccion: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    }
-
+ 
 }, { timestamps: false });
 
 
@@ -99,6 +94,11 @@ Premiacion.belongsTo(Premio, {
 
 
 
+
+
+//  Premio.sync({ alter: true }).then(() => {
+//           console.log('se creo con exito la tabla  Premio ');
+//       });
 
 //  (async () => {
 //     await Premio.sync({ alter: true });

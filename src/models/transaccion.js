@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
 const { asignarCategoria } = require('./asignarCategoria');
 const { Participacion } = require('./Participacion');
+const { Premio } = require('./premio');
 
 
 
@@ -55,6 +56,19 @@ Participacion.belongsTo(Transaccion,{
     allowNull: false
 });
 
+Transaccion.hasMany(Premio, {
+    foreignKey: 'idTransaccion',
+    sourceKey: 'id',
+    allowNull: false
+
+});
+
+Premio.belongsTo(Transaccion, {
+    foreignKey: 'idTransaccion',
+    targetId: 'id',
+    allowNull: false
+});
+
 
 // (async () => {
 //     try{ 
@@ -65,8 +79,8 @@ Participacion.belongsTo(Transaccion,{
 //     }
 // })();
 
-    // Transaccion.sync({ alter: true }).then(() => {
-    //       console.log('se creo con exito la tabla  Transaccion ');
+    // Premio.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Premio ');
     //   });
 
 module.exports = {Transaccion}

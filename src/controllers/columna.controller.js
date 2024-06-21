@@ -24,7 +24,7 @@ const AddColumna = async(req, res) => {
     try {
         const { nombre, fila_insertada, fila_actualizada, idProyectos, idTablas } = req.body;
 
-        const columnaExistente = await Columna.findOne({ where: { nombre, idTablas } });
+        const columnaExistente = await Columna.findOne({ where: { nombre } });
         if (columnaExistente) {
             return res.status(400).json({ code: 'error', message: 'La columna ya existe en esta tabla.' });
         }
