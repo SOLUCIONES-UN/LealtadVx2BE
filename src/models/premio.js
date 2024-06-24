@@ -17,12 +17,12 @@ const Premio = sequelize.define('premios', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: true,
-        unique: true
+     
     },
     usuario: {
         type: DataTypes.STRING(150),
         allowNull: true,
-        unique: true
+   
     },
     tipo: {
         type: DataTypes.INTEGER,
@@ -35,7 +35,6 @@ const Premio = sequelize.define('premios', {
     claveSecreta: {
         type: DataTypes.STRING(200),
         allowNull: true,
-        unique: true
     },
     estado: {
         type: DataTypes.INTEGER,
