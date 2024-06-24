@@ -99,9 +99,16 @@ Premiacion.belongsTo(Premio, {
 
 
 
-//  (async () => {
+
+// (async () => {
+//     try{ 
 //     await Premio.sync({ alter: true });
-//     // Code here
-//  })();
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 module.exports = { Premio, sequelize }

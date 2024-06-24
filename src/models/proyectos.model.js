@@ -73,7 +73,6 @@ Proyectos.hasMany(Departamento_Proyectos,{
    });
 
 
- 
 
 // (async () => {
 //     try{ 
