@@ -105,4 +105,11 @@ Premiacion.belongsTo(Premio, {
 //     // Code here
 //  })();
 
+
+
+
+    //   Participacion.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Participacion ');
+    //   });
+
 module.exports = { Premio, sequelize }
