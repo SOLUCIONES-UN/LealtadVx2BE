@@ -1,6 +1,5 @@
-
 const { Sequelize } = require("sequelize");
-const { genesis, pronet, sequelize } = require("../database/database"); 
+const { genesis, pronet, sequelize } = require("../database/database");
 const { Campania } = require('../models/campanias');
 const { participacionReferidos } = require('../models/participacionReferidos');
 const { codigoReferido } = require('../models/codigoReferidos');
@@ -14,73 +13,84 @@ const { Transaccion } = require('../models/transaccion');
 
 
 
+
+
 const validarTransaccionesDuplicadas = (transaccionesConPremio) => {
-  const transaccionesValidadas = [];
-  const transaccionesDuplicadas = [];
+    const transaccionesValidadas = [];
+    const transaccionesDuplicadas = [];
 
-  transaccionesConPremio.forEach((transaccion, index, array) => {
-    const transaccionFecha = new Date(transaccion.fecha);
+    // Ordenamos las transacciones por fecha
+    transaccionesConPremio.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-    const duplicado = array.some((otraTransaccion, otraIndex) => {
-      if (index === otraIndex) return false;
+    transaccionesConPremio.forEach((transaccion, index, array) => {
+        if (index === 0) {
+            transaccionesValidadas.push(transaccion);
+            return;
+        }
 
-      const otraTransaccionFecha = new Date(otraTransaccion.fecha);
+        const transaccionActual = new Date(transaccion.fecha);
+        const transaccionAnterior = new Date(array[index - 1].fecha);
 
-      return (
-        otraTransaccion.descripcionTrx === transaccion.descripcionTrx &&
-        otraTransaccion.customerId === transaccion.customerId &&
-        otraTransaccion.idPremio === transaccion.idPremio &&
-        Math.abs(otraTransaccionFecha - transaccionFecha) < 2 * 60 * 1000 
-      );
+        const diferenciaMinutos = Math.abs((transaccionActual - transaccionAnterior) / (1000 * 60));
+
+        if (diferenciaMinutos < 2) {
+            if (!transaccionesDuplicadas.includes(array[index - 1])) {
+                transaccionesDuplicadas.push(array[index - 1]);
+            }
+            transaccionesDuplicadas.push(transaccion);
+        } else {
+            transaccionesValidadas.push(transaccion);
+        }
+
+        if (index === array.length - 1 && diferenciaMinutos < 2 && !transaccionesDuplicadas.includes(transaccion)) {
+            transaccionesDuplicadas.push(transaccion);
+        }
     });
 
-    if (duplicado) {
-      transaccionesDuplicadas.push(transaccion);
-    } else {
-      transaccionesValidadas.push(transaccion);
-    }
-  });
-
-  return {
-    transaccionesValidadas,
-    transaccionesDuplicadas
-  };
+    return {
+        transaccionesValidadas,
+        transaccionesDuplicadas
+    };
 };
+
+
+
+
+
 
 const validarTransaccionesConPremio = (participaciones) => {
-  const transaccionesConPremio = participaciones.filter(p => p.urlPremio && p.urlPremio.trim() !== "");
-  const transaccionesSinPremio = participaciones.filter(p => !p.urlPremio || p.urlPremio.trim() === "");
+    const transaccionesConPremio = participaciones.filter(p => p.idPremio !== null && p.idPremio !== undefined);
 
-  const { transaccionesValidadas, transaccionesDuplicadas } = validarTransaccionesDuplicadas(transaccionesConPremio);
+    const { transaccionesValidadas, transaccionesDuplicadas } = validarTransaccionesDuplicadas(transaccionesConPremio);
 
-  return {
-    transaccionesConPremio: transaccionesValidadas,
-    transaccionesSinPremio,
-    transaccionesDuplicadas
-  };
+    return {
+        transaccionesConPremio: transaccionesValidadas,
+        transaccionesDuplicadas
+    };
 };
 
-const getransaccion = async (req, res) => {
-  try {
-    const participaciones = await Participacion.findAll({
-      where: {
-        estado: 1
-      },
-      include: {
-        model: Transaccion,
-      }
-    });
 
-    const { transaccionesConPremio, transaccionesSinPremio, transaccionesDuplicadas } = validarTransaccionesConPremio(participaciones);
+const getransaccion = async(req, res) => {
+    try {
+        const participaciones = await Participacion.findAll({
+            where: {
+                estado: 1
+            },
+            include: {
+                model: Transaccion,
+            }
+        });
 
-    res.status(200).json({
-      transaccionesConPremio,
-      transaccionesSinPremio,
-      transaccionesDuplicadas
-    });
-  } catch (error) {
-    console.error('Error al obtener participaciones en la base de datos:', error);
-    res.status(500).json({ error: 'Error al obtener participaciones' });
-  }
+
+        const { transaccionesConPremio, transaccionesDuplicadas } = validarTransaccionesConPremio(participaciones);
+
+        res.status(200).json({
+            transaccionesConPremio,
+            transaccionesDuplicadas
+        });
+    } catch (error) {
+        console.error('Error al obtener participaciones en la base de datos:', error);
+        res.status(500).json({ error: 'Error al obtener participaciones' });
+    }
 };
 module.exports = { getransaccion };
