@@ -1,5 +1,5 @@
 // const {Participantes} = require("../models/participantes");
-const {Participacion} = require("../models/Participacion");
+const { Participacion } = require("../models/Participacion");
 const { TransaccionPremio } = require("../models/transaccionPremio");
 const { Campania } = require('../models/campanias');
 const { pronet, genesis } = require('../database/database');
@@ -7,7 +7,7 @@ const { pronet, genesis } = require('../database/database');
 
 
 
-const getCustomerInfoById = async (customerId) => {
+const getCustomerInfoById = async(customerId) => {
     try {
         const customerInfo = await pronet.query(`
             SELECT 
@@ -34,7 +34,7 @@ const getCustomerInfoById = async (customerId) => {
 };
 
 // Función para obtener los participantes y la información del cliente
-const getParticipantes = async (req, res) => {
+const getParticipantes = async(req, res) => {
     try {
         const participantes = await Participacion.findAll({
             include: {

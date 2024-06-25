@@ -1,12 +1,16 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
-const { asignarCategoria } = require('./asignarCategoria');
 
-const failTransaccion = sequelize.define('failTransaccion', {
+const FailTransaccion = sequelize.define('failTransaccion', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+    },
+
+    failmessage: {
+        type: DataTypes.STRING(1000),
+        allowNull: false
     },
 
     estado: {
@@ -32,16 +36,21 @@ const failTransaccion = sequelize.define('failTransaccion', {
 
 
 
-// (async () => {
-//     try{ 
-//     await Categoria.sync({ alter: true });
-//     console.log("Se cargo correctamente");
+// (async() => {
+//     try {
+//         await FailTransaccion.sync({ alter: true });
+//         console.log("Se cargo correctamente");
 
 
-//     } catch (error){
-//         console.error("hay problema al cargar el modelo",error);
+//     } catch (error) {
+//         console.error("hay problema al cargar el modelo", error);
 //     }
 // })();
 
+// FailTransaccion.sync({ alter: true }).then(() => {
+//     console.log('tabla failTransaccion creada');
+// });
 
-module.exports = { Categoria };
+
+
+module.exports = { FailTransaccion };

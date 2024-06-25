@@ -3,6 +3,8 @@ const { sequelize } = require('../database/database');
 const { asignarCategoria } = require('./asignarCategoria');
 const { Participacion } = require('./Participacion');
 const { Premio } = require('./premio');
+const { FailTransaccion } = require('./failTransaccion');
+
 
 
 
@@ -13,20 +15,20 @@ const Transaccion = sequelize.define('transaccion', {
         autoIncrement: true,
 
     },
-  
+
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: false,
     },
-    estado : {
+    estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1,
-        allowNull:false
+        allowNull: false
     },
 
-},{timestamps: false});
+}, { timestamps: false });
 
-Transaccion.hasMany(asignarCategoria,{
+Transaccion.hasMany(asignarCategoria, {
     foreignKey: {
         name: 'idTransaccion',
         allowNull: false,
@@ -35,13 +37,13 @@ Transaccion.hasMany(asignarCategoria,{
     allowNull: false
 });
 
-asignarCategoria.belongsTo(Transaccion,{
+asignarCategoria.belongsTo(Transaccion, {
     foreignKey: 'idTransaccion',
     targetId: 'id',
     allowNull: false
 });
 
-Transaccion.hasMany(Participacion,{
+Transaccion.hasMany(Participacion, {
     foreignKey: {
         name: 'idTransaccion',
         allowNull: false,
@@ -50,7 +52,7 @@ Transaccion.hasMany(Participacion,{
     allowNull: false
 });
 
-Participacion.belongsTo(Transaccion,{
+Participacion.belongsTo(Transaccion, {
     foreignKey: 'idTransaccion',
     targetId: 'id',
     allowNull: false
@@ -69,6 +71,19 @@ Premio.belongsTo(Transaccion, {
     allowNull: false
 });
 
+Transaccion.hasMany(FailTransaccion, {
+    foreignKey: 'idTransaccion',
+    sourceKey: 'id',
+    allowNull: false
+
+});
+
+FailTransaccion.belongsTo(Transaccion, {
+    foreignKey: 'idTransaccion',
+    targetId: 'id',
+    allowNull: false
+});
+
 
 // (async () => {
 //     try{ 
@@ -79,8 +94,17 @@ Premio.belongsTo(Transaccion, {
 //     }
 // })();
 
-    // Premio.sync({ alter: true }).then(() => {
-    //       console.log('se creo con exito la tabla  Premio ');
-    //   });
+// Premio.sync({ alter: true }).then(() => {
+//       console.log('se creo con exito la tabla  Premio ');
+//   });
 
-module.exports = {Transaccion}
+
+
+// FailTransaccion.sync({ alter: true }).then(() => {
+//     console.log('tabla failTransaccion creada');
+// });
+
+
+
+
+module.exports = { Transaccion }
