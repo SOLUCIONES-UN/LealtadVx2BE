@@ -20,25 +20,6 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 
 
-// const getransaccion = async (req, res) => {
-//     try {
-//       const customerInfo = await pronet.query(`
-//         SELECT * FROM pronet.tbl_customer_transaction;
-//       `, {
-//         type: pronet.QueryTypes.SELECT
-//       });
-//       console.log('Data obtenida de pronet:', customerInfo);
-//       const { transaccionesValidadas, transaccionesSospechosas } = await validarTransaccion(customerInfo);
-  
-//       console.log('Transacciones validadas:', transaccionesValidadas);
-//       console.log('Transacciones sospechosas:', transaccionesSospechosas);
-  
-//       res.status(200).json({ transaccionesValidadas, transaccionesSospechosas });
-//     } catch (error) {
-//       console.error('Error al obtener participaciones en la base de datos "genesis":', error);
-//       res.status(500).json({ message: 'Error al obtener participaciones' });
-//     }
-//   };
 
 
 
@@ -49,8 +30,8 @@ const getransaccion = async (req, res) => {
         {
           id: 1,
           fk_customer_id: 130,
-          fecha: '2024-09-06',
-        //   fecha: '2024-09-06T00:32:00.000Z',
+        //   fecha: '2024-09-06',
+          fecha: '2024-09-06T00:31:00.000Z',
           descripcionTrx: 'Recarga de Saldo',
           idPremio: 24,
           idCampania: 33,
@@ -80,7 +61,6 @@ const getransaccion = async (req, res) => {
 
 
 
-  
   const validarTransaccion = async (customerInfo) => {
     const transaccionesValidadas = [];
     const transaccionesSospechosas = [];
@@ -98,14 +78,14 @@ const getransaccion = async (req, res) => {
                 const { fk_customer_id, fecha, idCampania } = info;
 
                 if (fk_customer_id === customerId) {
+                    const fechaInicio = new Date(new Date(fecha).getTime() - 2 * 60 * 1000);
+                    const fechaFin = new Date(new Date(fecha).getTime() + 2 * 60 * 1000);
+
                     const participacionExistente = await Participacion.findOne({
                         where: {
                             customerId: fk_customer_id,
                             fecha: {
-                                [Op.between]: [
-                                    new Date(fecha + 'T00:00:00Z'),
-                                    new Date(fecha + 'T23:59:59Z')
-                                ]
+                                [Op.between]: [fechaInicio, fechaFin]
                             },
                             idCampania
                         }
@@ -120,10 +100,7 @@ const getransaccion = async (req, res) => {
                         where: {
                             customerId: fk_customer_id,
                             fecha: {
-                                [Op.between]: [
-                                    new Date(fecha + 'T00:00:00Z'),
-                                    new Date(fecha + 'T23:59:59Z')
-                                ]
+                                [Op.between]: [fechaInicio, fechaFin]
                             },
                             idCampania
                         },
