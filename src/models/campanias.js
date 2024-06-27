@@ -139,16 +139,12 @@ Bloqueados.belongsTo(Campania, {
     foreignKey: 'idCampania',
     targetId: 'id',
 });
-
-Campania.hasMany(Participacion, {
-    as: 'participaciones',
-    foreignKey: {
-        name: 'idCampania',
-        allowNull: false,
-    },
-    sourceKey: 'id',
-    allowNull: false
+Campania.hasMany(Participacion,{
+    foreignKey: 'idCampania',
+    sourceKey: 'id'
 });
+
+
 
 Participacion.belongsTo(Campania,{
     foreignKey: 'idCampania',
@@ -165,12 +161,17 @@ Parametro.belongsTo(Campania,{
 
 Campania.hasMany(Configuraciones, {
     foreignKey: 'idCampania',
-    sourceKey: 'id'
+    sourceKey: 'id',
+    allowNull: false
+
 });
 
 Configuraciones.belongsTo(Campania, {
     foreignKey: 'idCampania',
     targetId: 'id',
+    allowNull: false
+
+    
 });
 
 

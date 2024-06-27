@@ -21,17 +21,17 @@ const getUsuariosParticipantesFechasCampanasSel = async (req, res) => {
         u.nombre AS nombre_usuario,
         u.telefono AS telefono_usuario
       FROM 
-        Campania c
+        campania c
       LEFT JOIN 
-        Participacions pr ON c.id = pr.idCampania 
+        participacions pr ON c.id = pr.idCampania 
       LEFT JOIN 
-        CodigosReferidos cr ON cr.customerId = pr.customerId 
+        codigosreferidos cr ON cr.customerId = pr.customerId 
       LEFT JOIN 
-        ConfigReferidos crf ON cr.codigo = crf.id
+        configreferidos crf ON cr.codigo = crf.id
       LEFT JOIN 
         premios p ON p.id = pr.id 
       LEFT JOIN 
-        Usuarios u ON u.nombre = u.username 
+        usuarios u ON u.nombre = u.username 
       WHERE pr.fecha BETWEEN '${fechaInicio}' AND '${fechaFin}'
     `;
     
@@ -51,33 +51,7 @@ const getUsuariosParticipantesFechasCampanasSel = async (req, res) => {
       type: sequelize.QueryTypes.SELECT
     });
     
-    // Construcción de la consulta SQL para información personalizada
-    let queryInfoCustom = `
-      SELECT 
-        tur.mname,
-        CONCAT(tur.fname, ' ', tur.lname) AS nombreUsuario,
-        tur.userno AS telefono,
-        tur.userid
-      FROM
-        genesis.participante_campana pc
-      INNER JOIN
-        pronet.tbl_customer tc ON tc.customer_id = pc.idUsuarioParticipante
-      INNER JOIN
-        genesis.referidos_ingresos rin ON rin.idreferidos_ingresos = pc.idTransaccion
-      INNER JOIN
-        pronet.tbl_customer tcr ON tcr.customer_id = rin.usuario
-      INNER JOIN
-        pronet.tblUserInformation tur ON tur.userid = tcr.fk_userid
-      WHERE
-        pc.fechaParticipacion BETWEEN '${fechaInicio}' AND '${fechaFin}'
-    `;
-
-    // Ejecutar consulta para información personalizada
-    const infoCustom = await genesis.query(queryInfoCustom, {
-      type: genesis.QueryTypes.SELECT
-    });
-
-    res.json({ participantesCamp, infoCustom });
+    res.json({ participantesCamp});
   } catch (error) {
     console.error("Error al obtener los participantes por año y mes:", error);
     res.status(500).json({ error: "Error al obtener los participantes por año y mes" });

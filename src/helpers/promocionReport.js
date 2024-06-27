@@ -1,79 +1,66 @@
 const { CangePromocion } = require("../models/cangePromocion");
 const { DetallePromocion } = require("../models/detallePromocion");
-const { Op, sequelize, } = require("sequelize");
+const { Op, sequelize } = require("sequelize");
 const { Premio } = require("../models/premio");
 const { PremioPromocion } = require("../models/premioPromocion");
-const { TransaccionPremio } = require("../models/transaccionPremio");
+const { Configuraciones } = require("../models/configuraciones");
 const { Transaccion } = require("../models/transaccion");
 const { Participacion } = require("../models/Participacion");
 const { Premiacion } = require("../models/premiacion");
-const { asignarCategoria } = require("../models/asignarCategoria");
+const { Promocion } = require("../models/promocion");
 const { Campania } = require("../models/campanias");
 const { PremioCampania } = require("../models/premioCampania");
 const { Etapa } = require("../models/etapa");
 
 
-const postDatosCupon = async (promocion,fecha1,fecha2) => {
-  try {
-    // const { promocion, fechaInicial, fechaFinal } = req.body;
-
-    // const fechafin = new Date(fechaFinal);
-    // const fechaIni = new Date(fechaInicial);
 
 
-    const fechaInicioFormatted = fecha1.toISOString().split('T')[0];
-    const fechaFinFormatted = fecha2.toISOString().split('T')[0];
-    
-
-    console.log("estoy buscando inicial", fechaInicioFormatted);
-    console.log("fecha final", fechaFinFormatted)
-    
-    const trxAll = await CangePromocion.findAll({
-      include: {
-        model: DetallePromocion,
+const postDatosCupon = async (idpromocions, fechaInicio, fechaFinal ) => {
+    try {
+  
+      console.log("Fecha Inicio:", fechaInicio);
+      console.log("Fecha Final:", fechaFinal);
+      
+      const trxAll = await CangePromocion.findAll({
         include: {
-          model: PremioPromocion,
+          model: DetallePromocion,
           include: {
-            model: Premio,
-             include: {
-               model: PremioCampania,
+            model: Promocion,
+            include: {
+              model: PremioPromocion,
               include: {
-                model: Etapa,
+                model: Premio,
                 include: {
-                  model: Campania,
-                  // include: {
-                  //   model: Participacion,
-                  //   // include: {
-                  //   //   model: Transaccion
-                  //   // }
-                  // }
-                }
+                  model: PremioCampania,
+                  include: {
+                    model: Etapa,
+                    include: {
+                      model: Campania,
+                    }
+                  }
+                },
               },
-             },
+            },
+          },
+          where: {
+            idPromocion: idpromocions,
           },
         },
         where: {
-          idPromocion: promocion,
-        },
-      },
-      where: {
-        fecha: {
-          [Op.gte]: fechaInicioFormatted,
-        },
-        fecha: {
-          [Op.lte]: fechaFinFormatted,
-        },
-      },
-    });
-    // res.json(trxAll)
-    return trxAll;
-
+          fecha: {
+            [Op.gte]: fechaInicio,
+            [Op.lte]: fechaFinal,
+          },
+        }
+      });
+      return trxAll;
+    
+    } catch (error) {
+      console.log(error);
+      throw new Error('Hubo un problema al cargar la data.');
+    }
+  };
   
-  } catch (error) {
-    console.error('Error al obtener participaciones en la base de datos "genesis":', error);
-    throw new Error('Error al obtener participaciones');
-}
-};
+  module.exports = { postDatosCupon };
 
 
-module.exports = { postDatosCupon };

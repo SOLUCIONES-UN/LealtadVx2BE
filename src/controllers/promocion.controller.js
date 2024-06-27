@@ -265,11 +265,7 @@ const TestearCodigo = async(req, res) => {
         }
     });
 
-    //code 03  cupon no existe
-    //code 04  promocion vencida o eliminada
-    //code 05  Cupon ya Cangeado
-    //code 01 cupon valido
-    //code 02 cupon no valido
+  
 
     if (cantidadCupones === 0) {
         res.json({

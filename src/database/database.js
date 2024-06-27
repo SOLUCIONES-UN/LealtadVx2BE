@@ -1,4 +1,3 @@
-
 const { Sequelize } = require("sequelize");
 
 // const sequelize = new Sequelize("lealtadv229", "root", "B@rilhas2003", {
@@ -8,16 +7,13 @@ const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize(
     "dbepco7agwmwba",
-    "uhxm0qdfefvou",
-    "DesaSolUn",
+    "devusr",
+    "efHBxdcV",
     {
-        host: "34.174.109.166",
-        host: "34.174.109.166",
+        host: "172.16.50.27",
         dialect: "mysql",
     }
 );
-
-
 const pronet = new Sequelize("pronet", "devusr", "efHBxdcV", {
     host: "172.16.50.27",
     port: "3306",
