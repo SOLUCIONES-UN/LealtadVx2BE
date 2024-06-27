@@ -16,13 +16,12 @@
        descripcion: {
            type: DataTypes.STRING(200),
            allowNull: true,
-           unique: true
+         
        },
 
        ruta: {
            type: DataTypes.STRING(200),
            allowNull: true,
-           unique: true
        },
 
        estado: {

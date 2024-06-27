@@ -17,11 +17,12 @@ const Premio = sequelize.define('premios', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: true,
-       
+     
     },
     usuario: {
         type: DataTypes.STRING(150),
         allowNull: true,
+   
     },
     tipo: {
         type: DataTypes.INTEGER,
@@ -34,7 +35,6 @@ const Premio = sequelize.define('premios', {
     claveSecreta: {
         type: DataTypes.STRING(200),
         allowNull: true,
-        unique: true
     },
     estado: {
         type: DataTypes.INTEGER,
@@ -100,10 +100,17 @@ Premiacion.belongsTo(Premio, {
 //           console.log('se creo con exito la tabla  Premio ');
 //       });
 
-//  (async () => {
+
+// (async () => {
+//     try{ 
 //     await Premio.sync({ alter: true });
-//     // Code here
-//  })();
+//     console.log("Se cargo correctamente");
+    
+
+//     } catch (error){
+//         console.error("hay problema al cargar el modelo",error);
+//     }
+// })();
 
 
 
