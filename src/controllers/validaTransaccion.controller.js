@@ -22,46 +22,46 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 
 
-
 const getransaccion = async (req, res) => {
     try {
-      
-      const customerInfo = [
-        {
-          id: 1,
-          fk_customer_id: 130,
-        //   fecha: '2024-09-06',
-          fecha: '2024-09-06T00:31:00.000Z',
-          descripcionTrx: 'Recarga de Saldo',
-          idPremio: 24,
-          idCampania: 33,
-          idTransaccion: 1
-        },
-       
-      ];
-  
-      console.log('Data obtenida de pronet:', customerInfo);
-  
-      const { transaccionesValidadas, transaccionesSospechosas } = await validarTransaccion(customerInfo);
-  
-      console.log('Transacciones validadas:', transaccionesValidadas);
-      console.log('Transacciones sospechosas:', transaccionesSospechosas);
-  
-      res.status(200).json({ transaccionesValidadas, transaccionesSospechosas });
+        const customerInfo = [
+            {
+                idParticipacion: 19,
+                fk_customer_id: 130,
+                fecha: '2024-09-06T00:32:00.000Z',
+                descripcionTrx: 'Recarga de Saldo',
+                idPremio: 24,
+                idCampania: 33,
+                idTransaccion: 1
+            },
+            
+        ];
+
+        console.log('Data obtenida de pronet:', customerInfo);
+
+        const { transaccionesValidadas, transaccionesSospechosas } = await validarTransaccion(customerInfo);
+        // const { transaccionesValidadas2, transaccionesSospechosas2 } = await validarDuplicados(customerInfo);
+
+        console.log('Transacciones validadas (primera validación):', transaccionesValidadas);
+        console.log('Transacciones sospechosas (primera validación):', transaccionesSospechosas);
+        // console.log('Transacciones validadas (segunda validación):', transaccionesValidadas2);
+        // console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
+
+        res.status(200).json({
+            transaccionesValidadas: transaccionesValidadas,
+            transaccionesSospechosasPrimeraValidacion: transaccionesSospechosas,
+            // transaccionesValidadasSegundaValidacion: transaccionesValidadas2,
+            // transaccionesSospechosasSegundaValidacion: transaccionesSospechosas2
+        });
     } catch (error) {
-      console.error('Error al obtener participaciones en la base de datos "genesis":', error);
-      res.status(500).json({ message: 'Error al obtener participaciones' });
+        console.error('Error al obtener participaciones en la base de datos "genesis":', error);
+        res.status(500).json({ message: 'Error al obtener participaciones' });
     }
-  };
+};
 
 
 
-
-
-
-
-
-  const validarTransaccion = async (customerInfo) => {
+const validarTransaccion = async (customerInfo) => {
     const transaccionesValidadas = [];
     const transaccionesSospechosas = [];
 
@@ -75,69 +75,42 @@ const getransaccion = async (req, res) => {
             }
 
             for (const info of customerInfo) {
-                const { fk_customer_id, fecha, idCampania } = info;
+                const { fk_customer_id, fecha, idCampania, idParticipacion, idPremio, idTransaccion } = info;
 
                 if (fk_customer_id === customerId) {
-                    const fechaInicio = new Date(new Date(fecha).getTime() - 2 * 60 * 1000);
-                    const fechaFin = new Date(new Date(fecha).getTime() + 2 * 60 * 1000);
-
-                    const participacionExistente = await Participacion.findOne({
-                        where: {
-                            customerId: fk_customer_id,
-                            fecha: {
-                                [Op.between]: [fechaInicio, fechaFin]
-                            },
-                            idCampania
-                        }
-                    });
-
-                    if (!participacionExistente) {
-                        console.log(`No se encontró participación para el customerId ${customerId}, fecha ${fecha}, idCampania ${idCampania}`);
-                        continue;
-                    }
-
                     const participaciones = await Participacion.findAll({
                         where: {
                             customerId: fk_customer_id,
                             fecha: {
-                                [Op.between]: [fechaInicio, fechaFin]
+                                [Op.between]: [
+                                    sequelize.literal(`DATE_SUB('${fecha}', INTERVAL 2 MINUTE)`),
+                                    sequelize.literal(`DATE_ADD('${fecha}', INTERVAL 2 MINUTE)`)
+                                ]
                             },
-                            idCampania
+                            idCampania,
+                            id: {
+                                [Op.ne]: idParticipacion
+                            },
+                            idPremio,
+                            idTransaccion
                         },
                         order: [['fecha', 'ASC']]
                     });
 
-                    for (let i = 0; i < participaciones.length; i++) {
-                        const participacionActual = participaciones[i];
+                    if (participaciones.length > 0) {
+                        transaccionesSospechosas.push(info); 
 
-                        if (i < participaciones.length - 1) {
-                            const participacionSiguiente = participaciones[i + 1];
-                            const tiempoEntreParticipaciones = Math.abs((new Date(participacionSiguiente.fecha) - new Date(participacionActual.fecha)) / (1000 * 60));
-
-                            if (tiempoEntreParticipaciones < 2 &&
-                                participacionActual.idPremio === participacionSiguiente.idPremio &&
-                                participacionActual.idCampania === participacionSiguiente.idCampania &&
-                                participacionActual.idTransaccion === participacionSiguiente.idTransaccion) {
-
-                                transaccionesSospechosas.push(participacionSiguiente);
-
-                                await sequelize.transaction(async (t) => {
-                                    await FailTransaccion.create({
-                                        idCampania: participacionSiguiente.idCampania,
-                                        idTransaccion: participacionSiguiente.idTransaccion,
-                                        idParticipacion: participacionSiguiente.id,
-                                        failmessage: 'Transacción sospechosa: duplicado dentro de 2 minutos según fecha y idCampania.',
-                                        estado: 1
-                                    }, { transaction: t });
-                                });
-
-                                i++;
-                            }
-                        }
-
-                        if (!transaccionesSospechosas.includes(participacionActual)) {
-                            transaccionesValidadas.push(participacionActual);
-                        }
+                        await sequelize.transaction(async (t) => {
+                            await FailTransaccion.create({
+                                idCampania: info.idCampania,
+                                idTransaccion: info.idTransaccion,
+                                idParticipacion: info.idParticipacion,
+                                failmessage: 'Transacción sospechosa: duplicado dentro de 2 minutos',
+                                estado: 1
+                            }, { transaction: t });
+                        });
+                    } else {
+                        transaccionesValidadas.push(info);  
                     }
                 }
             }
@@ -152,5 +125,51 @@ const getransaccion = async (req, res) => {
     };
 };
 
+
+
+const validarDuplicados = async (customerInfo) => {
+    const transaccionesValidadas2 = [];
+    const transaccionesSospechosas2 = [];
+
+    try {
+        for (const info of customerInfo) {
+            const { fk_customer_id, idCampania, idPremio, idParticipacion, idTransaccion } = info;
+
+            const participacionesDuplicadas = await Participacion.findAll({
+                where: {
+                    customerId: fk_customer_id,
+                    idCampania: idCampania,
+                    idPremio: idPremio,
+                    id: {
+                        [Op.ne]: idParticipacion
+                    }
+                }
+            });
+
+            if (participacionesDuplicadas.length > 0) {
+                transaccionesSospechosas2.push(info);
+
+                await sequelize.transaction(async (t) => {
+                    await FailTransaccion.create({
+                        idCampania: idCampania,
+                        idTransaccion: idTransaccion,
+                        idParticipacion: idParticipacion,
+                        failmessage: 'Transacción sospechosa: el premio ya fue canjeado con anterioridad',
+                        estado: 1
+                    }, { transaction: t });
+                });
+            } else {
+                transaccionesValidadas2.push(info);
+            }
+        }
+    } catch (error) {
+        console.error(`Error al validar duplicados: ${error.message}`);
+    }
+
+    return {
+        transaccionesValidadas2,
+        transaccionesSospechosas2
+    };
+};
 
 module.exports = { getransaccion };
