@@ -1,4 +1,3 @@
-//VAIDACION FUNCIONAL 
 
 
 
@@ -7,7 +6,6 @@ const { genesis, pronet, sequelize } = require("../database/database");
 const { Campania } = require('../models/campanias');
 const { participacionReferidos } = require('../models/participacionReferidos');
 const { codigoReferido } = require('../models/codigoReferidos');
-// const { referidosIngresos } = require('../models/ReferidosIngresos'); // Aquí se agregó la importación faltante
 const { ConfigReferido } = require('../models/configReferidos');
 const { Usuario } = require('../models/usuario');
 const { Op } = require('sequelize');
@@ -24,6 +22,7 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 const getransaccion = async (req, res) => {
     try {
+       
         const customerInfo = [
             {
                 idParticipacion: 19,
@@ -37,18 +36,37 @@ const getransaccion = async (req, res) => {
             
         ];
 
+       
+        const validacion = 'segunda'; 
+
         console.log('Data obtenida de pronet:', customerInfo);
+        console.log('Validación solicitada:', validacion);
 
-        const { transaccionesValidadas, transaccionesSospechosas } = await validarTransaccion(customerInfo);
-        const { transaccionesValidadas2, transaccionesSospechosas2 } = await validarDuplicados(customerInfo);
+        let transaccionesValidadas = [];
+        let transaccionesSospechosas = [];
+        let transaccionesValidadas2 = [];
+        let transaccionesSospechosas2 = [];
 
-        console.log('Transacciones validadas (primera validación):', transaccionesValidadas);
-        console.log('Transacciones sospechosas (primera validación):', transaccionesSospechosas);
-        console.log('Transacciones validadas (segunda validación):', transaccionesValidadas2);
-        console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
+        if (validacion === 'primera' || validacion === 'ambas') {
+            const resultadoPrimeraValidacion = await validarTransaccion(customerInfo);
+            transaccionesValidadas = resultadoPrimeraValidacion.transaccionesValidadas;
+            transaccionesSospechosas = resultadoPrimeraValidacion.transaccionesSospechosas;
+
+            console.log('Transacciones validadas (primera validación):', transaccionesValidadas);
+            console.log('Transacciones sospechosas (primera validación):', transaccionesSospechosas);
+        }
+
+        if ((validacion === 'segunda' || validacion === 'ambas') && transaccionesSospechosas.length === 0) {
+            const resultadoSegundaValidacion = await validarDuplicados(customerInfo);
+            transaccionesValidadas2 = resultadoSegundaValidacion.transaccionesValidadas2;
+            transaccionesSospechosas2 = resultadoSegundaValidacion.transaccionesSospechosas2;
+
+            console.log('Transacciones validadas (segunda validación):', transaccionesValidadas2);
+            console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
+        }
 
         res.status(200).json({
-            transaccionesValidadas: transaccionesValidadas,
+            transaccionesValidadas,
             transaccionesSospechosasPrimeraValidacion: transaccionesSospechosas,
             transaccionesValidadasSegundaValidacion: transaccionesValidadas2,
             transaccionesSospechosasSegundaValidacion: transaccionesSospechosas2
@@ -58,6 +76,7 @@ const getransaccion = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener participaciones' });
     }
 };
+
 
 
 
@@ -126,15 +145,13 @@ const validarTransaccion = async (customerInfo) => {
     };
 };
 
-
-
 const validarDuplicados = async (customerInfo) => {
     const transaccionesValidadas2 = [];
     const transaccionesSospechosas2 = [];
 
     try {
         for (const info of customerInfo) {
-            const { fk_customer_id, idCampania, idPremio, idParticipacion, idTransaccion,fecha } = info;
+            const { fk_customer_id, idCampania, idPremio, idParticipacion, idTransaccion, fecha } = info;
 
             const participacionesDuplicadas = await Participacion.findAll({
                 where: {
@@ -173,5 +190,4 @@ const validarDuplicados = async (customerInfo) => {
         transaccionesSospechosas2
     };
 };
-
 module.exports = { getransaccion };
