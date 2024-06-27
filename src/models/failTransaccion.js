@@ -12,7 +12,10 @@ const FailTransaccion = sequelize.define('failTransaccion', {
         type: DataTypes.STRING(1000),
         allowNull: false
     },
-
+    fecha: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
     estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1

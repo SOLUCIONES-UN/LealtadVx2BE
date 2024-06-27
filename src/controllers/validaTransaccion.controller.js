@@ -40,18 +40,18 @@ const getransaccion = async (req, res) => {
         console.log('Data obtenida de pronet:', customerInfo);
 
         const { transaccionesValidadas, transaccionesSospechosas } = await validarTransaccion(customerInfo);
-        // const { transaccionesValidadas2, transaccionesSospechosas2 } = await validarDuplicados(customerInfo);
+        const { transaccionesValidadas2, transaccionesSospechosas2 } = await validarDuplicados(customerInfo);
 
         console.log('Transacciones validadas (primera validación):', transaccionesValidadas);
         console.log('Transacciones sospechosas (primera validación):', transaccionesSospechosas);
-        // console.log('Transacciones validadas (segunda validación):', transaccionesValidadas2);
-        // console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
+        console.log('Transacciones validadas (segunda validación):', transaccionesValidadas2);
+        console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
 
         res.status(200).json({
             transaccionesValidadas: transaccionesValidadas,
             transaccionesSospechosasPrimeraValidacion: transaccionesSospechosas,
-            // transaccionesValidadasSegundaValidacion: transaccionesValidadas2,
-            // transaccionesSospechosasSegundaValidacion: transaccionesSospechosas2
+            transaccionesValidadasSegundaValidacion: transaccionesValidadas2,
+            transaccionesSospechosasSegundaValidacion: transaccionesSospechosas2
         });
     } catch (error) {
         console.error('Error al obtener participaciones en la base de datos "genesis":', error);
@@ -105,6 +105,7 @@ const validarTransaccion = async (customerInfo) => {
                                 idCampania: info.idCampania,
                                 idTransaccion: info.idTransaccion,
                                 idParticipacion: info.idParticipacion,
+                                fecha,
                                 failmessage: 'Transacción sospechosa: duplicado dentro de 2 minutos',
                                 estado: 1
                             }, { transaction: t });
@@ -133,7 +134,7 @@ const validarDuplicados = async (customerInfo) => {
 
     try {
         for (const info of customerInfo) {
-            const { fk_customer_id, idCampania, idPremio, idParticipacion, idTransaccion } = info;
+            const { fk_customer_id, idCampania, idPremio, idParticipacion, idTransaccion,fecha } = info;
 
             const participacionesDuplicadas = await Participacion.findAll({
                 where: {
@@ -154,6 +155,7 @@ const validarDuplicados = async (customerInfo) => {
                         idCampania: idCampania,
                         idTransaccion: idTransaccion,
                         idParticipacion: idParticipacion,
+                        fecha,
                         failmessage: 'Transacción sospechosa: el premio ya fue canjeado con anterioridad',
                         estado: 1
                     }, { transaction: t });
