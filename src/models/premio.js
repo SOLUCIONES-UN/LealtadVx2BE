@@ -41,11 +41,7 @@ const Premio = sequelize.define('premios', {
         defaultValue: 1,
         allowNull: false
     },
-    idTransaccion: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    }
-
+ 
 }, { timestamps: false });
 
 
@@ -100,6 +96,11 @@ Premiacion.belongsTo(Premio, {
 
 
 
+//  Premio.sync({ alter: true }).then(() => {
+//           console.log('se creo con exito la tabla  Premio ');
+//       });
+
+
 // (async () => {
 //     try{ 
 //     await Premio.sync({ alter: true });
@@ -110,5 +111,12 @@ Premiacion.belongsTo(Premio, {
 //         console.error("hay problema al cargar el modelo",error);
 //     }
 // })();
+
+
+
+
+    //   Participacion.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Participacion ');
+    //   });
 
 module.exports = { Premio, sequelize }

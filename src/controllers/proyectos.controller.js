@@ -3,7 +3,7 @@ const { Departamento_Proyectos } = require('../models/departamento_proyectos');
 const { Departamento } = require('../models/departamento');
 const { Municipio } = require('../models/municipio');
 
-const GetProjects = async (req, res) => {
+const GetProjects = async(req, res) => {
     try {
         const proyectos = await Proyectos.findAll({
             where: {
@@ -17,21 +17,24 @@ const GetProjects = async (req, res) => {
     }
 };
 
-const AddProject = async (req, res) => {
+
+const AddProject = async(req, res) => {
     try {
         console.log('Data recibida en AddProject:', req.body);
         const { descripcion, ruta, localidades } = req.body;
-        
-        // Crear el proyecto
+
+        const proyectoExistente = await Proyectos.findOne({ where: { descripcion } });
+        if (proyectoExistente) {
+            return res.status(400).json({ code: 'error', message: 'El proyecto ya existe con esta descripcion' });
+        }
+
         const proyecto = await Proyectos.create({
             descripcion,
             ruta
         });
 
-        // Obtener el ID del proyecto recién creado
         const proyectoId = proyecto.id;
 
-        // Crear nuevas entradas en la tabla departamento_proyectos para los departamentos asociados al proyecto
         for (const localidad of localidades) {
             await Departamento_Proyectos.create({
                 idDepartamento: localidad.departamentoId,
@@ -44,11 +47,13 @@ const AddProject = async (req, res) => {
         console.log('Proyecto creado con éxito:', proyecto);
     } catch (error) {
         console.log(error);
-        res.status(403).send({ errors: 'Ha sucedido un error al intentar agregar un nuevo proyecto.' });
+        res.status(500).send({ errors: 'Ha sucedido un error al intentar agregar un nuevo proyecto.' });
     }
 };
 
-const UpdateProject = async (req, res) => {
+
+
+const UpdateProject = async(req, res) => {
     try {
         const { descripcion, ruta, localidades } = req.body;
         const { id } = req.params;
@@ -83,7 +88,7 @@ const UpdateProject = async (req, res) => {
 
 
 
-const DeleteProject = async (req, res) => {
+const DeleteProject = async(req, res) => {
     try {
         const { id } = req.params;
         console.log("ID del proyecto a eliminar:", id);
@@ -102,14 +107,13 @@ const DeleteProject = async (req, res) => {
     }
 };
 
-const GetProjectByID = async (req, res) => {
+const GetProjectByID = async(req, res) => {
     try {
         const { id } = req.params;
         const project = await Proyectos.findByPk(id, {
             include: {
                 model: Departamento_Proyectos,
-                include: [
-                    {
+                include: [{
                         model: Departamento
                     },
                     {
@@ -127,7 +131,7 @@ const GetProjectByID = async (req, res) => {
 
 
 
-const Getproyectoscount = async (req, res) => {
+const Getproyectoscount = async(req, res) => {
     try {
         const proyectoscoun = await Proyectos.count({
             where: {
@@ -143,4 +147,4 @@ const Getproyectoscount = async (req, res) => {
 
 
 
-module.exports = { GetProjects, AddProject, UpdateProject, DeleteProject, GetProjectByID,Getproyectoscount };
+module.exports = { GetProjects, AddProject, UpdateProject, DeleteProject, GetProjectByID, Getproyectoscount };

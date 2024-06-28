@@ -23,54 +23,52 @@ const GetTransaccions = async(req, res) => {
 
 
 //controllador para agregar nuevas transacciones
-const AddTransaccion = async(req, res) => {
-
+const AddTransaccion = async (req, res) => {
     try {
-        const { descripcion, columna, puntos } = req.body;
+        const { descripcion, columna, proyecto, tabla } = req.body;
+
+        const transaccionExistente = await Transaccion.findOne({ where: { descripcion, idColumna: columna, idTablas: tabla, idProyecto: proyecto } });
+        if (transaccionExistente) {
+            return res.status(400).json({ code: 'error', message: 'La transacción ya existe con esta descripcion' });
+        }
+
         await Transaccion.create({
             descripcion,
             idColumna: columna,
-            puntos
-        })
-        res.json({ code: 'ok', message: 'Transaccion creada con exito' });
+            idTablas: tabla,
+            idProyecto: proyecto,
+        });
 
+        res.json({ code: 'ok', message: 'Transacción creada con éxito' });
     } catch (error) {
-        console.log(
-            "error", error
-        )
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar realizar la Transaccion.' });
+        console.error("error", error);
+        res.status(500).send({ errors: 'Ha sucedido un error al intentar realizar la transacción.' });
     }
+};
 
-}
 
 
-//controllador para actualizar transacciones
 const UpdateTransaccion = async(req, res) => {
-
     try {
-        const { nombre, descripcion, botton, columna, puntos } = req.body;
+        const { descripcion,columna,tabla,proyecto } = req.body;
         const { id } = req.params
         await Transaccion.update({
-            nombre,
             descripcion,
-            idBotton: botton,
             idColumna: columna,
-            puntos
+            idTabla: tabla, 
+            idProyecto: proyecto,
+
         }, {
             where: {
                 id: id
             }
         });
-
-
-        res.json({ code: 'ok', message: 'Transaccion actualizada con exito' });
+        res.json({ code: 'ok', message: 'Menu actualizado con exito' });
 
     } catch (error) {
         res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar realizar la Transaccion.' });
+        res.send({ errors: 'Ha sucedido un  error al intentar actualizar el menu.' });
     }
-
 }
 
 

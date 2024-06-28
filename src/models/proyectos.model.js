@@ -2,6 +2,7 @@
    const { sequelize } = require('../database/database');
    const { TablaDB } = require('./tabladb');
    const { Columna } = require('./columna');
+   const { Transaccion } = require('./transaccion');
    const { Campania } = require('./campanias');
    const { Departamento_Proyectos } = require('./departamento_proyectos');
 
@@ -58,14 +59,14 @@
        sourceKey: 'id',
    });
 
-Columna.belongsTo(Proyectos,{
-    foreignKey: 'idProyectos',
-    targetId: 'id',
-});
-Proyectos.hasMany(Departamento_Proyectos,{
-    foreignKey: 'idProyecto',
-    sourceKey: 'id'
-});
+   Columna.belongsTo(Proyectos, {
+       foreignKey: 'idProyectos',
+       targetId: 'id',
+   });
+   Proyectos.hasMany(Departamento_Proyectos, {
+       foreignKey: 'idProyecto',
+       sourceKey: 'id'
+   });
 
    Departamento_Proyectos.belongsTo(Proyectos, {
        foreignKey: 'idProyecto',
@@ -73,16 +74,42 @@ Proyectos.hasMany(Departamento_Proyectos,{
    });
 
 
+   Proyectos.hasMany(Transaccion, {
+    foreignKey: 'idProyecto',
+    sourceKey: 'id'
+});
 
-// (async () => {
-//     try{ 
-//     await Proyectos.sync({ alter: true });
-//     console.log("Se cargo correctamente");
-    
+Transaccion.belongsTo(Proyectos, {
+    foreignKey: 'idProyecto',
+    targetKey: 'id',
+});
 
-//     } catch (error){
-//         console.error("hay problema al cargar el modelo",error);
-//     }
-// })();
 
-module.exports = { Proyectos }
+
+   // (async () => {
+   //     try{ 
+   //     await Proyectos.sync({ alter: true });
+   //     console.log("Se cargo correctamente");
+
+
+   //     } catch (error){
+   //         console.error("hay problema al cargar el modelo",error);
+   //     }
+   // })();
+
+
+
+   //    TablaDB.sync({ alter: true }).then(() => {
+   //        console.log('tabla TablaDB creada');
+   //    });
+   //    Columna.sync({ alter: true }).then(() => {
+   //        console.log('tabla TablaDB Columna');
+   //    });
+
+    //   Transaccion.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Transaccion ');
+    //   });
+
+   
+
+   module.exports = { Proyectos }

@@ -15,10 +15,7 @@ const Menu = sequelize.define('menus', {
         unique: true
 
         
-    }, icono: {
-        type: DataTypes.STRING(150),
-        allowNull: false
-    },
+    }, 
     estado : {
         type: DataTypes.INTEGER,
         defaultValue: 1
@@ -54,5 +51,8 @@ Pagina.belongsTo(Menu, {
 //     console.log('Tabla Pagina creada o actualizada correctamente');
 // });
 
+// Menu.sync({ alter: true }).then(() => {
+//     console.log('Tabla Pagina creada o actualizada correctamente');
+// });
 
 module.exports = {Menu}
