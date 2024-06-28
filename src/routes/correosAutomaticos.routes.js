@@ -12,7 +12,6 @@ const path = 'correoAutomatico';
 
 router.get(`/${path}/correo`, async (req, res) => {
     try {
-        // Llamada manual a la función para verificar y enviar correos
         await tareaVerificarCampanias();
         res.status(200).send('Proceso de verificación de campañas iniciado.');
     } catch (error) {
