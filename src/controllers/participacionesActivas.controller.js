@@ -28,7 +28,7 @@ const getParticipacionesActivas = async(req, res) => {
             },
             include: [{
                 model: Participacion,
-                as: 'participaciones',
+                as: 'participacions',
                 attributes: ['fecha', 'descripcionTrx', 'urlPremio', 'valor', 'idPremio', 'idTransaccion', 'customerId'],
             }]
         });
@@ -36,19 +36,18 @@ const getParticipacionesActivas = async(req, res) => {
 
         console.log(envio)
 
-        // Formateamos los datos para el envío
         const newArray = [];
         for (const c of envio) {
-            const participaciones = [];
-            for (const p of c.participaciones) {
+            const participacions = [];
+            for (const p of c.participacions) {
                 const customerInfo = await getCustomerInfoById(p.customerId);
-                participaciones.push({
+                participacions.push({
                     ...p.toJSON(),
                     campanium: {
                         "nombre": c.nombre,
                        
                     },
-                    premioDescripcion: p.premio ? p.premio.descripcion : "Sin premio", // Obtén la descripción del premio
+                    premioDescripcion: p.premio ? p.premio.descripcion : "Sin premio", 
                     customerInfo
                 });
             }
@@ -72,7 +71,7 @@ const getParticipacionesActivas = async(req, res) => {
                 "imgAkisi": c.imgAkisi,
                 "estado": c.estado,
                 "maximoParticipaciones": c.maximoParticipaciones,
-                "participaciones": participaciones
+                "participacions": participacions
             });
         }
 
@@ -103,7 +102,7 @@ const getCustomerInfoById = async(customerId) => {
             type: pronet.QueryTypes.SELECT
         });
 
-        return customerInfo[0]; // Devuelve el primer registro encontrado
+        return customerInfo[0];
     } catch (error) {
         console.error('Error al obtener la información del cliente:', error);
         throw new Error('Error al obtener la información del cliente');

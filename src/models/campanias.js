@@ -107,11 +107,7 @@ const Campania = sequelize.define('campania', {
     emails: {
         type: DataTypes.STRING(1000),
         allowNull: true,
-    },
-    // ultimoCorreoEnviado: {
-    //     type: DataTypes.DATEONLY,
-    //     allowNull: true,
-    // }
+    }
 
 }, { timestamps: false });
 
