@@ -20,9 +20,10 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 
 
+const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
+
 const getransaccion = async (req, res) => {
     try {
-       
         const customerInfo = [
             {
                 idParticipacion: 19,
@@ -33,47 +34,38 @@ const getransaccion = async (req, res) => {
                 idCampania: 33,
                 idTransaccion: 1
             },
-            
         ];
 
-       
-        const validacion = 'tercera'; 
+        const validacionesSeleccionadas = ['primera']; 
 
         console.log('Data obtenida de pronet:', customerInfo);
-        console.log('Validación solicitada:', validacion);
+        console.log('Validaciones solicitadas:', validacionesSeleccionadas);
 
         let transaccionesValidadas = [];
         let transaccionesSospechosas = [];
         let transaccionesValidadas2 = [];
         let transaccionesSospechosas2 = [];
-        let transaccionesValidadas3 = []; 
-        let transaccionesSospechosas3 = []; 
+        let transaccionesValidadas3 = [];
+        let transaccionesSospechosas3 = [];
 
-        if (validacion === 'primera' || validacion === 'ambas') {
-            const resultadoPrimeraValidacion = await validarTransaccion(customerInfo);
-            transaccionesValidadas = resultadoPrimeraValidacion.transaccionesValidadas;
-            transaccionesSospechosas = resultadoPrimeraValidacion.transaccionesSospechosas;
+        for (const validacion of validacionesSeleccionadas) {
+            if (validacion === 'primera' || validacion === 'ambas') {
+                const resultadoPrimeraValidacion = await validarTransaccion(customerInfo);
+                transaccionesValidadas.push(...resultadoPrimeraValidacion.transaccionesValidadas);
+                transaccionesSospechosas.push(...resultadoPrimeraValidacion.transaccionesSospechosas);
+            }
 
-            console.log('Transacciones validadas (primera validación):', transaccionesValidadas);
-            console.log('Transacciones sospechosas (primera validación):', transaccionesSospechosas);
-        }
+            if ((validacion === 'segunda' || validacion === 'ambas') && transaccionesSospechosas.length === 0) {
+                const resultadoSegundaValidacion = await validarDuplicados(customerInfo);
+                transaccionesValidadas2.push(...resultadoSegundaValidacion.transaccionesValidadas2);
+                transaccionesSospechosas2.push(...resultadoSegundaValidacion.transaccionesSospechosas2);
+            }
 
-        if ((validacion === 'segunda' || validacion === 'ambas') && transaccionesSospechosas.length === 0) {
-            const resultadoSegundaValidacion = await validarDuplicados(customerInfo);
-            transaccionesValidadas2 = resultadoSegundaValidacion.transaccionesValidadas2;
-            transaccionesSospechosas2 = resultadoSegundaValidacion.transaccionesSospechosas2;
-
-            console.log('Transacciones validadas (segunda validación):', transaccionesValidadas2);
-            console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
-        }
-
-        if ((validacion === 'tercera' || validacion === 'ambas') && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
-            const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
-            transaccionesValidadas3 = resultadoTerceraValidacion.transaccionesValidadas3;
-            transaccionesSospechosas3 = resultadoTerceraValidacion.transaccionesSospechosas3;
-
-            console.log('Transacciones validadas (tercera validación):', transaccionesValidadas3);
-            console.log('Transacciones sospechosas (tercera validación):', transaccionesSospechosas3);
+            if ((validacion === 'tercera' || validacion === 'ambas') && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
+                const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
+                transaccionesValidadas3.push(...resultadoTerceraValidacion.transaccionesValidadas3);
+                transaccionesSospechosas3.push(...resultadoTerceraValidacion.transaccionesSospechosas3);
+            }
         }
 
         res.status(200).json({
@@ -81,8 +73,8 @@ const getransaccion = async (req, res) => {
             transaccionesSospechosasPrimeraValidacion: transaccionesSospechosas,
             transaccionesValidadasSegundaValidacion: transaccionesValidadas2,
             transaccionesSospechosasSegundaValidacion: transaccionesSospechosas2,
-            PuedeSeguirJugando: transaccionesValidadas3, 
-            transaccionesSospechosasTerceraValidacion: transaccionesSospechosas3 
+            transaccionesValidadasTerceraValidacion: transaccionesValidadas3,
+            transaccionesSospechosasTerceraValidacion: transaccionesSospechosas3
         });
     } catch (error) {
         console.error('Error al obtener participaciones en la base de datos "genesis":', error);
@@ -138,7 +130,8 @@ const validarTransaccion = async (customerInfo) => {
                                 idTransaccion: info.idTransaccion,
                                 idParticipacion: info.idParticipacion,
                                 fecha,
-                                failmessage: 'Transacción sospechosa: duplicado dentro de 2 minutos',
+                                failmessage: 'Transacción sospechosa: mas de una transaccion en un rango de 2 minutos',
+                                codigoError: 1,
                                 estado: 1
                             }, { transaction: t });
                         });
@@ -195,6 +188,7 @@ const validarDuplicados = async (customerInfo) => {
                         idParticipacion: idParticipacion,
                         fecha,
                         failmessage: 'Transacción sospechosa: el premio ya fue canjeado con anterioridad',
+                        codigoError: 2,
                         estado: 1
                     }, { transaction: t });
                 });
@@ -258,7 +252,8 @@ const validarValorTotalPorDia = async (customerInfo) => {
                         idTransaccion: idTransaccion,
                         idParticipacion: idParticipacion,
                         fecha,
-                        failmessage: 'Transacción sospechosa: el total de valor de participaciones para este cliente y campaña en el día excede 1000',
+                        failmessage: 'Transacción sospechosa: el total de valor de participaciones para este cliente y campaña en el día excede el valor de 1000',
+                        codigoError: 3,
                         estado: 1
                     }, { transaction: t });
                 });

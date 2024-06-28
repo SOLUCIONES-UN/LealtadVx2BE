@@ -16,6 +16,10 @@ const FailTransaccion = sequelize.define('failTransaccion', {
         type: DataTypes.DATE,
         allowNull: false
     },
+    codigoError: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
     estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1
