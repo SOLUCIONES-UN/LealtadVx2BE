@@ -46,8 +46,7 @@ const AddCampania = async(req, res) =>{
         } = req.body;
 
         
-        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
-        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
+       
 
         const newCampains = await Campania.create({
             nombre,
@@ -62,8 +61,8 @@ const AddCampania = async(req, res) =>{
             tipoUsuario,
             tituloNotificacion,
             descripcionNotificacion,
-            imgPush: imgPushBase64,
-            imgAkisi: imgAkisiBase64,
+            imgPush,
+            imgAkisi,
             estado,
             maximoParticipaciones,
             campaniaTerceros,
@@ -121,6 +120,28 @@ const AddCampania = async(req, res) =>{
         res.status(500).json({ error: 'Ha sucedido un error al intentar crear la campaña', details: error.message });
     }
 }
+
+
+
+const CheckNombreCampaña = async (req, res) => {
+    try {
+        const { nombre } = req.body; 
+        const existingCampaña = await Campania.findOne({
+            where: { nombre }
+        });
+        if (existingCampaña) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
+    } catch (error) {
+        console.error('Error al verificar el nombre de la campaña:', error);
+        res.status(500).json({ error: 'Ha sucedido un error al intentar verificar el nombre de la campaña' });
+    }
+};
+
+
+
 
 const GetCampania = async (req, res) => {
     try {
@@ -181,8 +202,7 @@ const UpdateCampania = async (req, res) => {
             emails,
             ultimoCorreoEnviado
         } = req.body;
-        const imgPushBase64 = imgPush ? Buffer.from(imgPush).toString('base64') : null;
-        const imgAkisiBase64 = imgAkisi ? Buffer.from(imgAkisi).toString('base64') : null;
+        
 
 
         const campania = await Campania.findByPk(id, { transaction });
@@ -203,8 +223,8 @@ const UpdateCampania = async (req, res) => {
             tipoUsuario,
             tituloNotificacion,
             descripcionNotificacion,
-            imgPush:imgPushBase64,
-            imgAkisi :imgAkisiBase64,
+            imgPush,
+            imgAkisi ,
             estado,
             maximoParticipaciones,
             campaniaTerceros,
@@ -322,13 +342,6 @@ const GetcampanasActivasById = async (req, res) => {
             ]
         });
 
-        if (etapa) {
-            etapa.imgPush = decodeURIComponent(etapa.imgPush); 
-            etapa.imgAkisi = decodeURIComponent(etapa.imgAkisi);
-
-            etapa.imgPush = removeFakePath(etapa.imgPush);
-            etapa.imgAkisi = removeFakePath(etapa.imgAkisi);
-        }
 
         res.json(etapa);
 
@@ -338,13 +351,6 @@ const GetcampanasActivasById = async (req, res) => {
     }
 }
 
-function removeFakePath(path) {
-    const fakePathIndex = path.indexOf("C:/fakepath/");
-    if (fakePathIndex !== -1) {
-        path = path.substring(fakePathIndex + "C:/fakepath/".length);
-    }
-    return path;
-}
 
 const PausarCampaña = async (req, res) => {
 
@@ -1022,7 +1028,8 @@ module.exports = {
     ActivarCampaña,
     DeleteCampania,GetCampaniasSEm,
     Getcampanascount,
-    getnewCampanias
+    getnewCampanias,
+    CheckNombreCampaña
 }
 
 

@@ -3,10 +3,10 @@ const { Usuario } = require('../models/usuario')
 const bcrypt = require("bcryptjs");
 const env = require("../bin/env");
 
-const GetUsuarios = async (req, res) => {
+const GetUsuarios = async(req, res) => {
 
     try {
-        
+
         let usr = await Usuario.findAll({
             include: { model: Rol },
             where: {
@@ -26,11 +26,16 @@ const GetUsuarios = async (req, res) => {
 
 }
 
-const AddUsuario = async (req, res) => {
+const AddUsuario = async(req, res) => {
     try {
         let { username, nombre, password, telefono, emailNotificacion, idRol, tipoUsuario } = req.body;
-        tipoUsuario = tipoUsuario || 1; 
+        tipoUsuario = tipoUsuario || 1;
         password = await bcrypt.hash(password, env.bcrypt.sr);
+
+        const usuarioExistente = await Usuario.findOne({ where: { username } });
+        if (usuarioExistente) {
+            return res.status(400).json({ code: 'error', message: 'El usuario ya existe con este nombre de usuario' });
+        }
 
         await Usuario.create({
             username,
@@ -39,24 +44,25 @@ const AddUsuario = async (req, res) => {
             telefono,
             emailNotificacion,
             idRol,
-            tipoUsuario 
+            tipoUsuario
         });
 
-        res.json({ code: 'ok', message: 'Usuario creado con exito' });
+        res.json({ code: 'ok', message: 'Usuario creado con éxito' });
 
     } catch (error) {
-        console.log("Error al agregar usuario:", error); 
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un error al intentar agrear un usuario.'  + error});
-
+        console.error("Error al agregar usuario:", error);
+        res.status(500).send({ errors: 'Ha sucedido un error al intentar agregar un usuario.' });
     }
 }
-const UpdateUsuario = async (req, res) => {
+
+
+
+const UpdateUsuario = async(req, res) => {
     try {
         const { nombre, password, telefono, emailNotificacion, idRol } = req.body;
         const { username } = req.params;
 
-     
+
         let hashedPassword = password;
         if (password) {
             hashedPassword = await bcrypt.hash(password, env.bcrypt.sr);
@@ -64,7 +70,7 @@ const UpdateUsuario = async (req, res) => {
 
         await Usuario.update({
             nombre,
-            password: hashedPassword, 
+            password: hashedPassword,
             telefono,
             emailNotificacion,
             idRol
@@ -77,14 +83,14 @@ const UpdateUsuario = async (req, res) => {
         res.json({ code: 'ok', message: 'Usuario actualizado con éxito' });
 
     } catch (error) {
-        console.log("Error al actualizar usuario:", error); 
+        console.log("Error al actualizar usuario:", error);
         res.status(403)
         res.send({ errors: 'Ha sucedido un error al intentar actualizar un usuario.' });
     }
 }
 
 //controllador para eliminar los usuarios
-const DeleteUsuario = async (req, res) => {
+const DeleteUsuario = async(req, res) => {
 
     try {
 
@@ -113,8 +119,8 @@ const DeleteUsuario = async (req, res) => {
 }
 
 
-const GetUsuarioById = async (req, res) => {
-    
+const GetUsuarioById = async(req, res) => {
+
     try {
 
         const { username } = req.params;

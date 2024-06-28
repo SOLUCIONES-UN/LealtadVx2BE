@@ -2,6 +2,7 @@
    const { sequelize } = require('../database/database');
    const { TablaDB } = require('./tabladb');
    const { Columna } = require('./columna');
+   const { Transaccion } = require('./transaccion');
    const { Campania } = require('./campanias');
    const { Departamento_Proyectos } = require('./departamento_proyectos');
 
@@ -15,13 +16,12 @@
        descripcion: {
            type: DataTypes.STRING(200),
            allowNull: true,
-           unique: true
+         
        },
 
        ruta: {
            type: DataTypes.STRING(200),
            allowNull: true,
-           unique: true
        },
 
        estado: {
@@ -29,7 +29,6 @@
            defaultValue: 1,
            allowNull: true
        },
-
 
    }, { timestamps: false });
 
@@ -59,29 +58,57 @@
        sourceKey: 'id',
    });
 
-Columna.belongsTo(Proyectos,{
-    foreignKey: 'idProyectos',
-    targetId: 'id',
-});
-Proyectos.hasMany(Departamento_Proyectos,{
-    foreignKey: 'idProyecto',
-    sourceKey: 'id'
-});
+   Columna.belongsTo(Proyectos, {
+       foreignKey: 'idProyectos',
+       targetId: 'id',
+   });
+   Proyectos.hasMany(Departamento_Proyectos, {
+       foreignKey: 'idProyecto',
+       sourceKey: 'id'
+   });
 
    Departamento_Proyectos.belongsTo(Proyectos, {
        foreignKey: 'idProyecto',
        targetKey: 'id',
    });
- 
 
-// (async () => {
-//     try{ 
-//     await Proyectos.sync({ alter: true });
-//     console.log("Se cargo correctamente");
 
-//     } catch (error){
-//         console.error("hay problema al cargar el modelo",error);
-//     }
-// })();
+   Proyectos.hasMany(Transaccion, {
+    foreignKey: 'idProyecto',
+    sourceKey: 'id'
+});
 
-module.exports = { Proyectos }
+Transaccion.belongsTo(Proyectos, {
+    foreignKey: 'idProyecto',
+    targetKey: 'id',
+});
+
+
+
+   // (async () => {
+   //     try{ 
+   //     await Proyectos.sync({ alter: true });
+   //     console.log("Se cargo correctamente");
+
+
+   //     } catch (error){
+   //         console.error("hay problema al cargar el modelo",error);
+   //     }
+   // })();
+
+
+
+   //    TablaDB.sync({ alter: true }).then(() => {
+   //        console.log('tabla TablaDB creada');
+   //    });
+   //    Columna.sync({ alter: true }).then(() => {
+   //        console.log('tabla TablaDB Columna');
+   //    });
+
+    //   Transaccion.sync({ alter: true }).then(() => {
+    //       console.log('se creo con exito la tabla  Transaccion ');
+    //   });
+
+   
+
+   module.exports = { Proyectos }

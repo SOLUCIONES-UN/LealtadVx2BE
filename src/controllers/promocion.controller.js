@@ -10,7 +10,7 @@ const GetPromocion = async (req, res) => {
     try {
         const trx = await Promocion.findAll({
             where: {
-                estado: [1, 2, 3]
+                estado: [1, 2, 0]
             }
         })
         res.json(trx)
