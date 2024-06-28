@@ -46,8 +46,8 @@ const getransaccion = async (req, res) => {
         let transaccionesSospechosas = [];
         let transaccionesValidadas2 = [];
         let transaccionesSospechosas2 = [];
-        let transaccionesValidadas3 = []; // Nuevo array para resultados de la tercera validación
-        let transaccionesSospechosas3 = []; // Nuevo array para transacciones sospechosas de la tercera validación
+        let transaccionesValidadas3 = []; 
+        let transaccionesSospechosas3 = []; 
 
         if (validacion === 'primera' || validacion === 'ambas') {
             const resultadoPrimeraValidacion = await validarTransaccion(customerInfo);
@@ -67,7 +67,6 @@ const getransaccion = async (req, res) => {
             console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
         }
 
-        // Añadimos la tercera validación si es solicitada
         if ((validacion === 'tercera' || validacion === 'ambas') && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
             const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
             transaccionesValidadas3 = resultadoTerceraValidacion.transaccionesValidadas3;
@@ -224,7 +223,7 @@ const validarValorTotalPorDia = async (customerInfo) => {
 
     try {
         for (const info of customerInfo) {
-            const { fk_customer_id, idCampania, fecha, idParticipacion, idTransaccion } = info;
+            const { fk_customer_id, idCampania, fecha, idParticipacion, idTransaccion, valor } = info;
 
             const fechaInicio = new Date(fecha);
             fechaInicio.setHours(0, 0, 0, 0);
@@ -246,11 +245,11 @@ const validarValorTotalPorDia = async (customerInfo) => {
                 raw: true
             });
 
-            const totalValor = participacionesDia[0].totalValor || 0;
+            const totalValor = parseFloat(participacionesDia[0].totalValor) || 0;
 
             console.log(`Total valor para la campaña ${idCampania} en el día ${fecha}: ${totalValor}`);
 
-            if (totalValor + parseFloat(info.valor) >= 1000) {
+            if (totalValor  >= 1000) {
                 transaccionesSospechosas3.push(info);
 
                 await sequelize.transaction(async (t) => {
