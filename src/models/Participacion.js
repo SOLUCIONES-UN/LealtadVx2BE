@@ -2,6 +2,8 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
 const { TransaccionPremio } = require('./transaccionPremio');
 const { codigoReferido } = require('./codigoReferidos');
+const { FailTransaccion } = require('./failTransaccion');
+
 
 const { sumaTotal } = require('sequelize');
 
@@ -22,7 +24,7 @@ const Participacion = sequelize.define('participacions', {
     },
 
     fecha: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.DATE,
         allowNull: false
     },
     customerId: {
@@ -96,6 +98,20 @@ codigoReferido.belongsTo(Participacion, {
     as: 'codigoReferidoAssociation'
 }); 
 
+Participacion.hasMany(FailTransaccion, {
+    foreignKey: 'idParticipacion',
+    sourceKey: 'id',
+    allowNull: false
+
+});
+
+FailTransaccion.belongsTo(Participacion, {
+    foreignKey: 'idParticipacion',
+    targetId: 'id',
+    allowNull: false
+
+
+});
 // (async () => {
 //     try{ 
 //     await Participacion.sync({ alter: true });
@@ -106,5 +122,10 @@ codigoReferido.belongsTo(Participacion, {
 //         console.error("hay problema al cargar el modelo",error);
 //     }
 // })();
+
+
+// FailTransaccion.sync({ alter: true }).then(() => {
+//     console.log('tabla failTransaccion creada');
+// });
 
 module.exports = { Participacion }

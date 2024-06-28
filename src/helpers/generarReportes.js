@@ -1,6 +1,5 @@
 const { QueryTypes } = require('sequelize');
 const XLSX = require('xlsx');
-// const XLSXStyle = require('xlsx-style');
 const { reporteClientesParticipando } = require('../controllers/reports.controller.js')
 const { Campania } = require('../models/campanias');
 const { Configuraciones } = require('../models/configuraciones');
@@ -9,6 +8,77 @@ const { getUsuariosNotificacionesOfferCraftSel } = require('../helpers/OferCraft
 const { getParticipaciones } = require('../helpers/referidos.js')
 const { getParticipacionesFechasGeneral } = require('../helpers/GeneralReport.js')
 const { postDatosCupon } = require('../helpers/promocionReport.js')
+const { reporteClientesContraCampanas } = require('../helpers/CampaniasAcumuladasreport.js')
+
+
+
+
+const reporteClientesContraCampanasAcumulativas = async() => {
+
+
+
+    console.log('Entrando en generarReportePromociones');
+    const datas = await reporteClientesContraCampanas();
+
+    console.log('esto biene aqui', datas)
+
+    const wb = XLSX.utils.book_new();
+
+    let row1 = [
+        { v: '', t: 's', s: { font: { name: 'Courier', sz: 24 } } },
+        { v: 'REPORTE DE CAMPAÑAS ACUMULATIVAS', t: 's', s: { font: { sz: 16 }, alignment: { horizontal: 'center' } } },
+    ];
+
+    let row2 = [
+        { v: '', t: 's', s: { font: { name: 'Courier', sz: 24 } } },
+        { v: 'Reporte de clientes en una campaña', t: 's', s: { font: { sz: 16 }, alignment: { horizontal: 'center' } } },
+    ];
+
+    let row3 = [''];
+
+    let row4 = [
+        '',
+        { v: '#', t: 's', s: { font: { bold: true, color: { rgb: 'ffffff' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '595959' } } } },
+        { v: 'TELÉFONO', t: 's', s: { font: { bold: true, color: { rgb: 'ffffff' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '595959' } } } },
+        { v: 'CLIENTE', t: 's', s: { font: { bold: true, color: { rgb: 'ffffff' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '595959' } } } },
+        { v: 'CAMPAÑA', t: 's', s: { font: { bold: true, color: { rgb: 'ffffff' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '595959' } } } },
+    ];
+
+    let infoFinal = [row1, row2, row3, row4];
+    let contador = 1;
+
+    datas.forEach(data => {
+        let rowInfo = [
+            '',
+            { v: contador, t: 's' },
+            { v: data.telefono, t: 's' },
+            { v: data.nombre, t: 's' },
+            { v: data.campania, t: 's' },
+        ];
+
+        infoFinal.push(rowInfo);
+        contador += 1;
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(infoFinal);
+
+    ws['!cols'] = [
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 25 },
+        { wch: 25 },
+        { wch: 25 },
+    ];
+
+    if (!ws['!merges']) ws['!merges'] = [];
+    ws['!merges'].push({ s: { r: 0, c: 1 }, e: { r: 0, c: 4 } }, { s: { r: 1, c: 1 }, e: { r: 1, c: 4 } });
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuario notificados');
+
+    const file = XLSX.write(wb, { bookType: "xlsx", bookSST: false, type: "buffer" });
+
+    return file;
+}
 
 
 
@@ -57,7 +127,7 @@ const generarReportereGeneralReferidos = async(fecha1, fecha2) => {
                 { v: data["userno"], t: 's' },
                 { v: data["nombreReferido"], t: 's' },
                 { v: data["noReferido"], t: 's' },
-                { v: data["fecha"], t: 's' }, // Asegúrate de que la propiedad "fecha" tenga el formato adecuado
+                { v: data["fecha"], t: 's' },
             ];
             infoFinal.push(rowInfo);
             contador += 1;
@@ -73,7 +143,7 @@ const generarReportereGeneralReferidos = async(fecha1, fecha2) => {
         { wch: 15 },
         { wch: 12 },
         { wch: 25 },
-        { wch: 25 }, // Ajuste de ancho para 'Campaña' y 'Fecha Participacion'
+        { wch: 25 }, 
         { wch: 20 },
         { wch: 20 },
     ];
@@ -88,15 +158,6 @@ const generarReportereGeneralReferidos = async(fecha1, fecha2) => {
 
     return file;
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -164,7 +225,6 @@ const generarReporteClientesParticipando = async() => {
     });
 
     const ws = XLSX.utils.aoa_to_sheet(infoFinal);
-    // ws['!cols'] = [{ width: 30 }, { width: 20 }, { width: 20 }]
     ws['!cols'] = [
         { width: 15 },
         { width: longitud1 + 2 },
@@ -188,7 +248,7 @@ const generarReporteClientesParticipando = async() => {
 }
 
 
-const generarReportereReferidos = async (campanas, fecha1, fecha2) => {
+const generarReportereReferidos = async(campanas, fecha1, fecha2) => {
     const datas = await getParticipaciones(campanas, fecha1, fecha2);
     console.log('esto viene en referidos', datas);
 
@@ -243,7 +303,7 @@ const generarReportereReferidos = async (campanas, fecha1, fecha2) => {
             { v: data["idTransaccion"], t: 's' },
             { v: data["valor"], t: 's' },
             { v: noreferido, t: 's' },
-            { v: nombreReferido, t: 's' }, 
+            { v: nombreReferido, t: 's' },
         ];
         infoFinal.push(rowInfo);
         contador += 1;
@@ -283,7 +343,6 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
 
     const wb = XLSX.utils.book_new();
 
-    // Definir las filas con estilos
     let row1 = [
         { v: '', t: 's', s: { font: { name: 'Courier', sz: 18 } } },
         { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
@@ -346,7 +405,7 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
         { wch: 15 },
         { wch: 12 },
         { wch: 25 },
-        { wch: 25 }, // Ajuste de ancho para 'Campaña' y 'Fecha Participacion'
+        { wch: 25 }, 
         { wch: 20 },
         { wch: 20 },
         { wch: 12 },
@@ -366,21 +425,8 @@ const generarReporteOferCraft = async(idCampanas, fecha1, fecha2) => {
 
 
 
-
-
-
-
-
-
-const generarReportePromociones = async(promocion, fecha1, fecha2) => {
-
-
-    const datas = await postDatosCupon(promocion, fecha1, fecha2);
-
-
-    console.log('esto biene en datas datas', datas)
-
-
+const generarReportePromociones = async (idpromocions, fechaInicio, fechaFinal) => {
+    const datas = await postDatosCupon(idpromocions, fechaInicio, fechaFinal);
 
     const wb = XLSX.utils.book_new();
 
@@ -389,7 +435,7 @@ const generarReportePromociones = async(promocion, fecha1, fecha2) => {
         { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
         { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
         { v: '', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
-        { v: ' REPORTE DE PROMOCIONES', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
+        { v: 'REPORTE DE PROMOCIONES', t: 's', s: { font: { sz: 18 }, alignment: { horizontal: 'center' } } },
     ];
 
     let row2 = [
@@ -399,70 +445,61 @@ const generarReportePromociones = async(promocion, fecha1, fecha2) => {
 
     let row3 = [''];
 
-    let row4 = [
-        '',
-        { v: 'NOMBRE', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'TELEFONO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'CAMPAÑA', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'PREMIO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'MONTO PREMIO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'TRANSACCIÓN', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'CÓDIGO', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'MONTO TRANSACCIONES', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'FECHA ACREDITACIÓN', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
-        { v: 'FECHA PARTICIPACIÓN', t: 's', s: { font: { bold: true, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: '808080' } } } },
+    const headers = [
+        'NOMBRE',
+        'TELEFONO',
+        'CAMPAÑA',
+        'PREMIO',
+        'MONTO PREMIO',
+        'TRANSACCIÓN',
+        'CÓDIGO',
+        'MONTO TRANSACCIONES',
+        'FECHA ACREDITACIÓN',
+        'FECHA PARTICIPACIÓN'
     ];
 
-    let infoFinal = [row1, row2, row3, row4];
-    let contador = 1;
+    const ws = XLSX.utils.aoa_to_sheet([[],[],[],headers]);
+
+    XLSX.utils.sheet_add_aoa(ws, [row1], { origin: 'A1' });
+    XLSX.utils.sheet_add_aoa(ws, [row2], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(ws, [row3], { origin: 'A3' });
 
     datas.forEach(data => {
-        let rowInfo = [
-            '',
-            { v: data["NOMBRE"], t: 's' },
-            { v: data["Telefono"], t: 's' },
-            { v: data["CAMPAÑA"], t: 's' },
-            { v: data["PREMIO"], t: 's' },
-            { v: data["MONTO PREMIO"], t: 's' },
-            { v: data["TRANSACCIÓN"], t: 'n' },
-            { v: data["CÓDIGO"], t: 's' },
-            { v: data["MONTO TRANSACCIONES"], t: 's' },
-            { v: data["FECHA ACREDITACIÓN"], t: 'n' },
-            { v: data["FECHA PARTICIPACIÓN"], t: 's' },
-        ];
+        const nombre = data.detallepromocion?.promocion?.nombre || '';
+        let telefono = data.numeroTelefono || '';
+        if (telefono.length === 8) {
+            telefono = '(502) ' + telefono;
+        }
+        const campania = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[0].etapa?.campanium?.nombre || '';
+        const premio = data.detallepromocion?.promocion?.premiopromocions?.[0].premio.descripcion || '';
+        const monto = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.premiocampania?.[0].valor || '';
+        const transaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].premio?.idTransaccion || '';
+        const codigo = data.detallepromocion?.cupon || '';
+        const montotransaccion = data.detallepromocion?.promocion?.premiopromocions?.[0].valor || '';
+        const fechacreditacion = data.detallepromocion?.promocion?.fechaInicio || '';
+        const fechaParticipacion = data.fecha || '';
 
-        infoFinal.push(rowInfo);
-        contador += 1;
+        const row = [
+            nombre,
+            telefono,
+            campania,
+            premio,
+            monto,
+            transaccion,
+            codigo,
+            montotransaccion,
+            fechacreditacion,
+            fechaParticipacion
+        ];
+        XLSX.utils.sheet_add_aoa(ws, [row], { origin: -1 });
     });
 
-    const ws = XLSX.utils.aoa_to_sheet(infoFinal);
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuarios Notificados');
 
-    ws['!cols'] = [
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 12 },
-        { wch: 25 },
-        { wch: 25 }, // Ajuste de ancho para 'Campaña' y 'Fecha Participacion'
-        { wch: 20 },
-        { wch: 20 },
-        { wch: 12 },
-        { wch: 20 },
-        { wch: 12 },
-    ];
-
-    if (!ws['!merges']) ws['!merges'] = [];
-    ws['!merges'].push({ s: { r: 0, c: 4 }, e: { r: 0, c: 6 } });
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Usuario notificados');
-
-    const file = await XLSX.write(wb, { bookType: "xlsx", bookSST: false, type: "buffer" });
+    const file = await XLSX.write(wb, { bookType: 'xlsx', bookSST: false, type: 'buffer' });
 
     return file;
 };
-
-
-
-
 
 
 module.exports = {
@@ -470,5 +507,6 @@ module.exports = {
     generarReportereGeneralReferidos,
     generarReporteClientesParticipando,
     generarReporteOferCraft,
-    generarReportePromociones
+    generarReportePromociones,
+    reporteClientesContraCampanasAcumulativas
 };

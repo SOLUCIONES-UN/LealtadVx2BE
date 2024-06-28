@@ -19,82 +19,73 @@ const GetPremios = async(req, res) => {
 
 
 //controllador para agregar nuevos Premios
-const AddPremio = async(req, res) => {
-
+const AddPremio = async (req, res) => {
     console.log("si llega el metodo crear ");
-    console.log("si llega el metodo crear ");
-    console.log("si llega el metodo crear ");
-    console.log("si llega el metodo crear ");
-    console.log("si llega el metodo crear ");
-    console.log("si llega el metodo crear ");
-    console.log("si llega el metodo crear ");
-
-
     console.log(req.body);
     try {
+        const { descripcion, link, claveSecreta, tipoTransaccion, idTransaccion } = req.body;
 
-
-        //const { descripcion, nombre,link, claveSecreta, tipoTransaccion, idTransaccion } = req.body;
-
-        const { tipoTransaccion, usuario } = req.body;
-
-        if (tipoTransaccion === "1") {
-            const { tipoTransaccion, idTransaccion } = req.body;
-            await Premio.create({
-                tipo: tipoTransaccion,
-                idTransaccion,
-                usuario
-
-            })
-
-            res.json({ code: 'ok', message: 'Premio creado con exito' });
-
-        } else if (tipoTransaccion === "2") {
-            const { descripcion, link, claveSecreta } = req.body;
-
-            await Premio.create({
-                tipo: tipoTransaccion,
-                descripcion,
-                link,
-                claveSecreta,
-                usuario
-            })
-
-            res.json({ code: 'ok', message: 'Premio creado con exito' });
+        if (!descripcion && tipoTransaccion === "2") {
+            return res.status(400).json({ code: 'error', message: 'La descripción del premio es requerida' });
         }
 
+        if (!claveSecreta && tipoTransaccion === "2") {
+            return res.status(400).json({ code: 'error', message: 'La clave secreta del premio es requerida' });
+        }
 
+        if (tipoTransaccion === "2") {
+            const premioExistenteDescripcion = await Premio.findOne({ where: { descripcion } });
+            if (premioExistenteDescripcion) {
+                return res.status(400).json({ code: 'error', message: 'El premio ya existe con esta descripción' });
+            }
+            const premioExistenteClaveSecreta = await Premio.findOne({ where: { claveSecreta } });
+            if (premioExistenteClaveSecreta) {
+                return res.status(400).json({ code: 'error', message: 'El premio ya existe con esta clave secreta' });
+            }
+        }
 
-
+        if (tipoTransaccion === "1") {
+            await Premio.create({
+                tipo: tipoTransaccion,
+                idTransaccion: idTransaccion,
+            })
+            res.json({ code: 'ok', message: 'Premio creado con éxito' });
+        } else if (tipoTransaccion === "2") {
+            await Premio.create({
+                tipo: tipoTransaccion,
+                descripcion: descripcion,
+                link: link,
+                claveSecreta: claveSecreta,
+            })
+            res.json({ code: 'ok', message: 'Premio creado con éxito' });
+        }
     } catch (error) {
         console.log(error)
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar agregar el premio.' });
-
-        console.log("ERROR GENERADO ES " + error)
-        console.log("ERROR GENERADO ES " + error)
-        console.log("ERROR GENERADO ES " + error)
-        console.log("ERROR GENERADO ES " + error)
-        console.log("ERROR GENERADO ES " + error)
+        res.status(403).send({ errors: 'Ha sucedido un error al intentar agregar el premio.' });
         console.log("ERROR GENERADO ES " + error)
     }
-
 }
+
 
 
 //controllador para actualizar los premios
 const UpdatePremio = async(req, res) => {
+    const { descripcion,link, claveSecreta, tipoTransaccion, idTransaccion } = req.body;
+
 
     try {
-        const { tipoTransaccion, usuario } = req.body;
+        
         const { id } = req.params
 
         if (tipoTransaccion === "1") {
             const { idTransaccion } = req.body;
             await Premio.update({
                 tipo: tipoTransaccion,
-                idTransaccion,
-                usuario
+                idTransaccion:idTransaccion ,
+                tipo: null,
+                descripcion:null,
+                link:null ,
+                claveSecreta:null,
             }, {
                 where: {
                     id: id
@@ -105,12 +96,14 @@ const UpdatePremio = async(req, res) => {
 
         } else if (tipoTransaccion === "2") {
 
-            const { descripcion, link, claveSecreta } = req.body;
+            
             await Premio.update({
-                descripcion,
-                link,
-                claveSecreta,
-                usuario
+                tipo: tipoTransaccion,
+                idTransaccion:null ,
+                tipo: tipoTransaccion,
+                descripcion:descripcion,
+                link:link ,
+                claveSecreta:claveSecreta,
             }, {
                 where: {
                     id: id

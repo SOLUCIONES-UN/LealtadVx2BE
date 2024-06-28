@@ -5,6 +5,8 @@ const { Etapa } = require('./etapa');
 const { Participacion } = require('./Participacion');
 const { Participantes } = require('./participantes');
 const { Parametro } = require('./parametro');
+const { FailTransaccion } = require('./failTransaccion');
+
 // const {Usuario} = require('./usuario');
 const { Configuraciones } = require('./configuraciones');
 
@@ -17,7 +19,7 @@ const Campania = sequelize.define('campania', {
     nombre: {
         type: DataTypes.STRING(150),
         allowNull: false
-    
+
     },
     descripcion: {
         type: DataTypes.STRING(1000),
@@ -27,7 +29,7 @@ const Campania = sequelize.define('campania', {
         type: DataTypes.DATEONLY,
         allowNull: false
     },
-    fechaRegistro:{
+    fechaRegistro: {
         type: DataTypes.DATEONLY,
         allowNull: true
     },
@@ -40,64 +42,64 @@ const Campania = sequelize.define('campania', {
         allowNull: false
     },
     edadInicial: {
-        type:  DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     edadFinal: {
-        type:  DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     sexo: {
-        type:  DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     tipoUsuario: {
-        type:  DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     tituloNotificacion: {
-        type:  DataTypes.STRING(1000),
+        type: DataTypes.STRING(1000),
         allowNull: false
     },
     descripcionNotificacion: {
-        type:  DataTypes.STRING(1000),
+        type: DataTypes.STRING(1000),
         allowNull: false
     },
     imgPush: {
-        type:  DataTypes.TEXT('long'),
+        type: DataTypes.TEXT('long'),
         allowNull: false
     },
     imgAkisi: {
-        type:  DataTypes.TEXT('long'),
+        type: DataTypes.TEXT('long'),
         allowNull: false
     },
-    estado : {
+    estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1
     },
     maximoParticipaciones: {
-        type:  DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
-    campaniaTerceros:{
+    campaniaTerceros: {
         type: DataTypes.INTEGER,
         allowNull: true,
         defaultValue: 0
     },
-    terminosCondiciones:{
+    terminosCondiciones: {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    observaciones:{
+    observaciones: {
         type: DataTypes.STRING(1000),
         allowNull: true
     },
-    esArchivada:{
+    esArchivada: {
         type: DataTypes.INTEGER,
         allowNull: true,
         defaultValue: 0
     },
-    restriccionUser:{
+    restriccionUser: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
@@ -111,10 +113,10 @@ const Campania = sequelize.define('campania', {
     //     allowNull: true,
     // }
 
-},{timestamps: false});
+}, { timestamps: false });
 
 
-Campania.hasMany(Etapa,{
+Campania.hasMany(Etapa, {
     foreignKey: 'idCampania',
     sourceKey: 'id'
 });
@@ -124,7 +126,7 @@ Etapa.belongsTo(Campania, {
     targetId: 'id',
 });
 
-Campania.hasMany(Participantes,{
+Campania.hasMany(Participantes, {
     foreignKey: 'idCampania',
     sourceKey: 'id'
 });
@@ -134,7 +136,7 @@ Participantes.belongsTo(Campania, {
     targetId: 'id',
 });
 
-Campania.hasMany(Bloqueados,{
+Campania.hasMany(Bloqueados, {
     foreignKey: 'idCampania',
     sourceKey: 'id'
 });
@@ -143,24 +145,20 @@ Bloqueados.belongsTo(Campania, {
     foreignKey: 'idCampania',
     targetId: 'id',
 });
-
 Campania.hasMany(Participacion, {
-    as: 'participaciones',
-    foreignKey: {
-        name: 'idCampania',
-        allowNull: false,
-    },
-    sourceKey: 'id',
-    allowNull: false
+    foreignKey: 'idCampania',
+    sourceKey: 'id'
 });
 
-Participacion.belongsTo(Campania,{
+
+
+Participacion.belongsTo(Campania, {
     foreignKey: 'idCampania',
     targetId: 'id',
     allowNull: false
 });
 
-Parametro.belongsTo(Campania,{
+Parametro.belongsTo(Campania, {
     foreignKey: 'idCampania',
     targetId: 'id',
     allowNull: false
@@ -169,12 +167,32 @@ Parametro.belongsTo(Campania,{
 
 Campania.hasMany(Configuraciones, {
     foreignKey: 'idCampania',
-    sourceKey: 'id'
+    sourceKey: 'id',
+    allowNull: false
+
 });
 
 Configuraciones.belongsTo(Campania, {
     foreignKey: 'idCampania',
     targetId: 'id',
+    allowNull: false
+
+
+});
+
+Campania.hasMany(FailTransaccion, {
+    foreignKey: 'idCampania',
+    sourceKey: 'id',
+    allowNull: false
+
+});
+
+FailTransaccion.belongsTo(Campania, {
+    foreignKey: 'idCampania',
+    targetId: 'id',
+    allowNull: false
+
+
 });
 
 
@@ -208,4 +226,14 @@ Configuraciones.belongsTo(Campania, {
 // });
 
 
-module.exports={Campania}
+// Participacion.sync({ alter: true }).then(() => {
+//     console.log('tabla Participacion creada');
+// });
+
+
+// FailTransaccion.sync({ alter: true }).then(() => {
+//     console.log('tabla failTransaccion creada');
+// });
+
+
+module.exports = { Campania }

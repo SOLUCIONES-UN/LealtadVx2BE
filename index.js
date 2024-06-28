@@ -63,6 +63,7 @@ app.use(require('./src/routes/authomaticReport.routes.js'));
 app.use(require('./src/routes/reporteClientesContraCampanias.routes.js'));
 app.use(require('./src/routes/correosAutomaticos.routes.js'));
 app.use(require('./src/routes/participantes.routes.js'));
+app.use(require('./src/routes/validaTransaccion.routes.js'));
 
 
 

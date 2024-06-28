@@ -12,16 +12,16 @@ const { AddCampania,
         GetCampaniasSEm,
         Getcampanascount,
         getnewCampanias,
+        CheckNombreCampaña
         } = require('../controllers/campania.controller');
-//const {validateCreate} = require('../validators/categoria')
 const authUser = require('../middlewares/auth.js');
 
-//declarampos nuestra constante para almacenar el path`
 const path = 'Campania';
 
 
 //rutas del proyecto
 router.get(`/${path}/new`,authUser, getnewCampanias);
+router.get(`/${path}/nombre`,authUser, CheckNombreCampaña);
 router.get(`/${path}/count`,authUser, Getcampanascount);
 router.get(`/${path}`,authUser, GetcampanasActivas);
 router.get(`/${path}/all`,authUser, GetCampania);
