@@ -37,7 +37,7 @@ const getransaccion = async (req, res) => {
         ];
 
        
-        const validacion = 'segunda'; 
+        const validacion = 'tercera'; 
 
         console.log('Data obtenida de pronet:', customerInfo);
         console.log('Validación solicitada:', validacion);
@@ -46,6 +46,8 @@ const getransaccion = async (req, res) => {
         let transaccionesSospechosas = [];
         let transaccionesValidadas2 = [];
         let transaccionesSospechosas2 = [];
+        let transaccionesValidadas3 = []; // Nuevo array para resultados de la tercera validación
+        let transaccionesSospechosas3 = []; // Nuevo array para transacciones sospechosas de la tercera validación
 
         if (validacion === 'primera' || validacion === 'ambas') {
             const resultadoPrimeraValidacion = await validarTransaccion(customerInfo);
@@ -65,11 +67,23 @@ const getransaccion = async (req, res) => {
             console.log('Transacciones sospechosas (segunda validación):', transaccionesSospechosas2);
         }
 
+        // Añadimos la tercera validación si es solicitada
+        if ((validacion === 'tercera' || validacion === 'ambas') && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
+            const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
+            transaccionesValidadas3 = resultadoTerceraValidacion.transaccionesValidadas3;
+            transaccionesSospechosas3 = resultadoTerceraValidacion.transaccionesSospechosas3;
+
+            console.log('Transacciones validadas (tercera validación):', transaccionesValidadas3);
+            console.log('Transacciones sospechosas (tercera validación):', transaccionesSospechosas3);
+        }
+
         res.status(200).json({
             transaccionesValidadas,
             transaccionesSospechosasPrimeraValidacion: transaccionesSospechosas,
             transaccionesValidadasSegundaValidacion: transaccionesValidadas2,
-            transaccionesSospechosasSegundaValidacion: transaccionesSospechosas2
+            transaccionesSospechosasSegundaValidacion: transaccionesSospechosas2,
+            PuedeSeguirJugando: transaccionesValidadas3, 
+            transaccionesSospechosasTerceraValidacion: transaccionesSospechosas3 
         });
     } catch (error) {
         console.error('Error al obtener participaciones en la base de datos "genesis":', error);
@@ -145,6 +159,14 @@ const validarTransaccion = async (customerInfo) => {
     };
 };
 
+
+
+
+
+
+
+
+
 const validarDuplicados = async (customerInfo) => {
     const transaccionesValidadas2 = [];
     const transaccionesSospechosas2 = [];
@@ -190,4 +212,70 @@ const validarDuplicados = async (customerInfo) => {
         transaccionesSospechosas2
     };
 };
+
+
+
+
+
+
+const validarValorTotalPorDia = async (customerInfo) => {
+    const transaccionesValidadas3 = [];
+    const transaccionesSospechosas3 = [];
+
+    try {
+        for (const info of customerInfo) {
+            const { fk_customer_id, idCampania, fecha, idParticipacion, idTransaccion } = info;
+
+            const fechaInicio = new Date(fecha);
+            fechaInicio.setHours(0, 0, 0, 0);
+
+            const fechaFin = new Date(fechaInicio);
+            fechaFin.setHours(23, 59, 59, 999);
+
+            const participacionesDia = await Participacion.findAll({
+                where: {
+                    customerId: fk_customer_id,
+                    idCampania: idCampania,
+                    fecha: {
+                        [Op.between]: [fechaInicio, fechaFin]
+                    },
+                },
+                attributes: [
+                    [sequelize.fn('SUM', sequelize.col('valor')), 'totalValor']
+                ],
+                raw: true
+            });
+
+            const totalValor = participacionesDia[0].totalValor || 0;
+
+            console.log(`Total valor para la campaña ${idCampania} en el día ${fecha}: ${totalValor}`);
+
+            if (totalValor + parseFloat(info.valor) >= 1000) {
+                transaccionesSospechosas3.push(info);
+
+                await sequelize.transaction(async (t) => {
+                    await FailTransaccion.create({
+                        idCampania: idCampania,
+                        idTransaccion: idTransaccion,
+                        idParticipacion: idParticipacion,
+                        fecha,
+                        failmessage: 'Transacción sospechosa: el total de valor de participaciones para este cliente y campaña en el día excede 1000',
+                        estado: 1
+                    }, { transaction: t });
+                });
+            } else {
+                transaccionesValidadas3.push(info);
+            }
+        }
+    } catch (error) {
+        console.error(`Error al validar valor total por día: ${error.message}`);
+    }
+
+    return {
+        transaccionesValidadas3,
+        transaccionesSospechosas3
+    };
+};
+
+
 module.exports = { getransaccion };
