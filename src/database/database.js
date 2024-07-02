@@ -1,18 +1,6 @@
 
 const { Sequelize } = require("sequelize");
 
-// const sequelize = new Sequelize("lealtadv217", "root", "B@rilhas2003", {
-//   host: "localhost",
-//   dialect: "mysql",
-// });
-
-
-// const sequelize = new Sequelize("lealtadv2", "root", "test", {
-//   host: "localhost",
-//   port: "3307",
-//   dialect: "mysql",
-// });
-
 const sequelize = new Sequelize("dbepco7agwmwba", "devusr","efHBxdcV",
     {
         // host: "34.174.109.166",

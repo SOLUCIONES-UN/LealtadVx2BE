@@ -55,6 +55,7 @@ const getParticipacionesActivas = async(req, res) => {
                 "id": c.id,
                 "nombre": c.nombre,
                 "descripcion": c.descripcion,
+                "fechaCreacion": c.fechaCreacion,
                 "fechaRegistro": c.fechaRegistro,
                 "fechaInicio": c.fechaInicio,
                 "fechaFin": c.fechaFin,

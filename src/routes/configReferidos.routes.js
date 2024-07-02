@@ -7,11 +7,11 @@ const authUser = require('../middlewares/auth.js');
 const path = 'ConfigReferidos';
 
 //rutas del proyecto
-router.get(`/${path}`,authUser, GetConfigReferidos);
-router.post(`/${path}`,authUser, AddConfigReferidos);
-router.put(`/${path}/:id`,authUser, UpdateConfigReferidos);
-router.delete(`/${path}/:id`,authUser, DeleteConfigReferidos);
-router.get(`/${path}/:id`,authUser, GetConfigReferidosById);
+router.get(`/${path}`, GetConfigReferidos);
+router.post(`/${path}`, AddConfigReferidos);
+router.put(`/${path}/:id`, UpdateConfigReferidos);
+router.delete(`/${path}/:id`, DeleteConfigReferidos);
+router.get(`/${path}/:id`, GetConfigReferidosById);
 
 //exportacion de rutas
 module.exports = router;
