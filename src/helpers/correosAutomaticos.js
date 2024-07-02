@@ -12,37 +12,43 @@ function validateEmails(emails) {
     const emailArray = emails.split(',');
     const invalidEmails = emailArray.filter(email => !emailPattern.test(email.trim().toLowerCase()));
     if (invalidEmails.length > 0) {
+        console.log("Correos inválidos detectados:", invalidEmails.join(", "));
         return false;
     }
     return true;
 }
 
-const tareaVerificarCampanias = cron.schedule('0 0 * * *', async() => {
-
+const tareaVerificarCampanias = cron.schedule('00 00 * * *', async () => {
     const hoy = new Date();
-
-    const inicioVentana = new Date(hoy.getTime());
-    const finVentana = new Date(hoy.getTime() + 5 * 24 * 60 * 60 * 1000);
+    hoy.setHours(0, 0, 0, 0);
+    console.log('Inicio de la tarea programada para verificar campañas.');
 
     const campanias = await Campania.findAll({
         where: {
-            fechaFin: {
-                [Op.between]: [inicioVentana, finVentana]
-            },
+            fechaFin: { [Op.between]: [new Date(hoy.getTime()), new Date(hoy.getTime() + 5 * 24 * 60 * 60 * 1000)] },
             estado: [1, 2, 3]
         },
         attributes: ['id', 'nombre', 'fechaFin', 'emails']
     });
 
+    console.log(`Encontradas ${campanias.length} campañas a vencer en los próximos 5 días.`);
     for (let campania of campanias) {
-        const fechaFin = new Date(campania.fechaFin);
-        const diasRestantes = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
-
+        console.log(`Procesando campaña: ${campania.nombre}`);
         if (validateEmails(campania.emails)) {
             try {
-               
-            } catch (error) {}
-        } else {}
+                const info = await sendEmails(
+                    campania.emails,
+                    `Aviso de finalización de campaña: ${campania.nombre}`,
+                    `<p>La Campaña <strong>${campania.nombre}</strong> vencerá en ${Math.ceil((new Date(campania.fechaFin) - hoy) / (1000 * 60 * 60 * 24))} días.</p>`,
+                    []
+                );
+                console.log(`Correo enviado: ${info.messageId}`);
+            } catch (error) {
+                console.error('Error al enviar correo:', error);
+            }
+        } else {
+            console.log('Formato de correos inválido o no proporcionado.');
+        }
     }
 });
 module.exports = { tareaVerificarCampanias };

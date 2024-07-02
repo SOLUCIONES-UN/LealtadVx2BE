@@ -30,7 +30,6 @@
            allowNull: true
        },
 
-
    }, { timestamps: false });
 
    Proyectos.hasMany(Campania, {
