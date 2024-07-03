@@ -13,7 +13,7 @@ const Municipio = sequelize.define('municipio', {
     nombre: {
         type: DataTypes.STRING(150),
         allowNull: false,
-        unique: true
+        unique: false
     },
   
     estado : {
@@ -22,10 +22,7 @@ const Municipio = sequelize.define('municipio', {
         allowNull:false
     },
     
-    IdLocal: {
-        type: DataTypes.INTEGER,
-        autoIncrement: false,
-    },
+   
     idDepartamento: {
         type: DataTypes.INTEGER,
         defaultValue:0,
@@ -34,16 +31,6 @@ const Municipio = sequelize.define('municipio', {
 
 },{timestamps: false});
 
-
-Municipio.hasMany(Departamento_Proyectos,{
-    foreignKey: 'idMunicipio',
-    sourceKey: 'id'
-});
-
-Departamento_Proyectos.belongsTo(Municipio, {
-    foreignKey: 'idMunicipio',
-    targetKey: 'id',
-});
 
 
 //  (async () => {
@@ -58,4 +45,8 @@ Departamento_Proyectos.belongsTo(Municipio, {
 //     console.log('tabla TransaccionPremio creada');
 // });
 
+
+// Municipio.sync({ alter: true }).then(() => {
+//     console.log('tabla Municipio creada');
+// });
 module.exports = {Municipio}
