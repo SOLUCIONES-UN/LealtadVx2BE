@@ -252,14 +252,18 @@ const UpdatePromocion = async (req, res) => {
             return res.status(404).send({ errors: 'Promoción no encontrada.' });
         }
 
+        const newImgSuccess = imgSuccess ? imgSuccess : promoExistente.imgSuccess;
+        const newImgFail = imgFail ? imgFail : promoExistente.imgFail;
+
+
         await promoExistente.update({
             nemonico,
             nombre,
             descripcion,
             mesajeExito,
             mesajeFail,
-            imgSuccess,
-            imgFail,
+            imgSucces: newImgSuccess,
+            imgFail: newImgFail,
             fechaInicio,
             fechaFin,
             estado,
@@ -267,6 +271,14 @@ const UpdatePromocion = async (req, res) => {
         });
 
         await PremioPromocion.destroy({ where: { idPromocion: id } });
+
+        if (codigos && codigos.length > 0) {
+            await DetallePromocion.destroy({ where: { idPromocion: id } });
+            await DetallePromocion.bulkCreate(codigos.map(codigos => ({
+                ...codigos,
+                idPromocion: id
+            })));
+        }
 
         const nuevoArrarPremios = premios.map(item => ({
             ...item,

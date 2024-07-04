@@ -85,18 +85,6 @@ const addParticipacion = async (descripcion, numero, id, promocion) => {
       throw new Error("No se pudo actualizar el estado del cupon.");
     }
 
-    // await DetallePromocion.update(
-    //   {
-    //     estado: 2,
-    //   },
-    //   {
-    //     where: {
-    //       id: id,
-    //     },
-    //   }
-    // );
-
-
     return true;
   } catch (error) {
     console.error(error);
