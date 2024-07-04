@@ -99,7 +99,7 @@ Configuraciones.belongsTo(Promocion, {
 // (async () => {
 //     await Promocion.sync({ alter: true });
 //     // Code here
-// // })();
+// })();
 
 
 

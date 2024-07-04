@@ -51,7 +51,7 @@ const AddPromocion = async (req, res) => {
             return res.status(400).send({ errors: 'El nemonico ya existe en una de las promociones.' });
         }
 
-        const existingPromoName = await Promocion.findOne({where: {nombre}});
+        const existingPromoName = await Promocion.findOne({ where: { nombre } });
         if (existingPromoName) {
             return res.status(400).send({ errors: 'El nombre ya existe en una de las promociones.' });
         }
@@ -131,14 +131,11 @@ const AddPromocion = async (req, res) => {
             nuevoArray.push(newData);
         }
 
-        console.log('Detalles de la promoción a insertar:', nuevoArray);
-
         await DetallePromocion.bulkCreate(nuevoArray);
 
         return res.status(200).json({ code: 'ok', message: 'Promocion creada ' + estadotext + ' con exito' });
 
     } catch (error) {
-        console.error('Error al crear la promoción:', error);
         return res.status(403).send({ errors: 'Ha sucedido un error al intentar Crear la Promocion.', detail: error.message });
     }
 };
@@ -156,7 +153,6 @@ const checkNemonico = async (req, res) => {
             return res.json({ exists: false });
         }
     } catch (error) {
-        console.error('Error al verificar nemonico:', error);
         res.status(500).send({ errors: 'Error al verificar nemonico.' });
     }
 };
@@ -164,19 +160,18 @@ const checkNemonico = async (req, res) => {
 
 const checkNombre = async (req, res) => {
     try {
-      const { nombre } = req.body;
-      const promocion = await Promocion.findOne({ where: { nombre: nombre.trim() } });
-  
-      if (promocion) {
-        return res.json({ exists: true });
-      } else {
-        return res.json({ exists: false });
-      }
+        const { nombre } = req.body;
+        const promocion = await Promocion.findOne({ where: { nombre: nombre.trim() } });
+
+        if (promocion) {
+            return res.json({ exists: true });
+        } else {
+            return res.json({ exists: false });
+        }
     } catch (error) {
-      console.error('Error al verificar nombre Promocion:', error);
-      res.status(500).send({ errors: 'Error al verificar nombre promocion.' });
+        res.status(500).send({ errors: 'Error al verificar nombre promocion.' });
     }
-  };
+};
 
 const PausarPromocion = async (req, res) => {
 
@@ -229,7 +224,6 @@ const ActivarPromocion = async (req, res) => {
 const UpdatePromocion = async (req, res) => {
     const { id } = req.params;
     try {
-        console.log('Datos recibidos para actualización:', req.body);
 
         const {
             nemonico,
@@ -341,7 +335,18 @@ const GetPromocionById = async (req, res) => {
 
             ]
         });
-        console.log(project)
+
+        const fechaActual = new Date();
+        const fechaFin = new Date(project.fechaFin);
+
+        if (fechaActual > fechaFin) {
+            await DetallePromocion.update(
+                { estado: 3 },
+                { where: { idPromocion: id, estado: {[Op.ne]: 2 } } }
+            );
+            await project.reload();
+        }
+
         res.json(project)
     } catch (error) {
         res.status(403)
@@ -373,7 +378,6 @@ const DeletePromocion = async (req, res) => {
     try {
 
         const { id } = req.params;
-        console.log(id);
 
         await Promocion.update({
             estado: 0
@@ -423,8 +427,6 @@ const TestearCodigo = async (req, res) => {
                 }
             }
         });
-
-        console.log('cuponDentroActivo', cuponDentroActivo)
 
         if (cuponDentroActivo === 0) {
             res.json(

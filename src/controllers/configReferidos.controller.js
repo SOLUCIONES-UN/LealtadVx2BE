@@ -5,7 +5,6 @@ const GetConfigReferidos = async (req, res) => {
         const trx = await ConfigReferido.findAll();
         res.json(trx)
     } catch (error) {
-        console.log("este es:".error)
         res.status(403)
         res.send({ errors: 'Ha sucedido un  error al intentar obtener la lista de referidos.' });
     }
@@ -56,7 +55,6 @@ const DeleteConfigReferidos = async (req, res) => {
     try {
         const { id } = req.params
         const {estado} = req.body;
-        console.log("actuaizando estado:"+estado)
         await ConfigReferido.update({
             estado: estado
         }, {
@@ -66,7 +64,6 @@ const DeleteConfigReferidos = async (req, res) => {
         });
     res.json({ code: 'ok', message: `Referido ${estado == 1 ? "habilitado" : "deshabilitado"} con exito` });
     } catch (error) {
-        console.log(error)
         res.status(403)
         res.send({ errors: 'Ha sucedido un  error al intentar deshabilitar al Referido.' });
     }

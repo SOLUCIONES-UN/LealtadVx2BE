@@ -12,9 +12,7 @@ const getParticipacionesActivas = async(req, res) => {
     try {
         const { fecha1, fecha2, } = req.body;
 
-        
 
-        // Realizamos la consulta a la base de datos
         const envio = await Campania.findAll({
             where: {
                 [Op.or]: [{ estado: [1, 2, 3] }],
@@ -28,7 +26,7 @@ const getParticipacionesActivas = async(req, res) => {
             },
             include: [{
                 model: Participacion,
-                as: 'participaciones',
+                as: 'participacions',
                 attributes: ['fecha', 'descripcionTrx', 'urlPremio', 'valor', 'idPremio', 'idTransaccion', 'customerId'],
             }]
         });
@@ -36,19 +34,18 @@ const getParticipacionesActivas = async(req, res) => {
 
         console.log(envio)
 
-        // Formateamos los datos para el envío
         const newArray = [];
         for (const c of envio) {
-            const participaciones = [];
-            for (const p of c.participaciones) {
+            const participacions = [];
+            for (const p of c.participacions) {
                 const customerInfo = await getCustomerInfoById(p.customerId);
-                participaciones.push({
+                participacions.push({
                     ...p.toJSON(),
                     campanium: {
                         "nombre": c.nombre,
                        
                     },
-                    premioDescripcion: p.premio ? p.premio.descripcion : "Sin premio", // Obtén la descripción del premio
+                    premioDescripcion: p.premio ? p.premio.descripcion : "Sin premio", 
                     customerInfo
                 });
             }
@@ -56,6 +53,7 @@ const getParticipacionesActivas = async(req, res) => {
                 "id": c.id,
                 "nombre": c.nombre,
                 "descripcion": c.descripcion,
+                "fechaCreacion": c.fechaCreacion,
                 "fechaRegistro": c.fechaRegistro,
                 "fechaInicio": c.fechaInicio,
                 "fechaFin": c.fechaFin,
@@ -72,13 +70,12 @@ const getParticipacionesActivas = async(req, res) => {
                 "imgAkisi": c.imgAkisi,
                 "estado": c.estado,
                 "maximoParticipaciones": c.maximoParticipaciones,
-                "participaciones": participaciones
+                "participacions": participacions
             });
         }
 
         res.json(newArray);
     } catch (error) {
-        console.error('Error al obtener las campañas:', error);
         res.status(403).send({ errors: 'Ha ocurrido un error al obtener las campañas.' });
     }
 };
@@ -103,9 +100,8 @@ const getCustomerInfoById = async(customerId) => {
             type: pronet.QueryTypes.SELECT
         });
 
-        return customerInfo[0]; // Devuelve el primer registro encontrado
+        return customerInfo[0];
     } catch (error) {
-        console.error('Error al obtener la información del cliente:', error);
         throw new Error('Error al obtener la información del cliente');
     }
 };
@@ -126,7 +122,6 @@ const getclientes = async (req, res) => {
   
       res.status(200).json(customerInfo[0]);
     } catch (error) {
-      console.error('Error al obtener clientes creados en los últimos 7 días:', error);
       res.status(500).json({ error: 'Error al obtener clientes' });
     }
   };

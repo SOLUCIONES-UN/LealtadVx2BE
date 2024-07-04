@@ -42,6 +42,7 @@ const AddCampania = async(req, res) =>{
             bloqueados,
             participacion,
             emails,
+            ultimoCorreoEnviado
         } = req.body;
 
         
@@ -70,7 +71,8 @@ const AddCampania = async(req, res) =>{
             esArchivada,
             restriccionUser,
             idProyecto,
-            emails
+            emails,
+            ultimoCorreoEnviado
         }, { transaction });
 
         const { id } = newCampains.dataValues;
@@ -197,7 +199,8 @@ const UpdateCampania = async (req, res) => {
             etapas,
             bloqueados,
             participacion,
-            emails
+            emails,
+            ultimoCorreoEnviado
         } = req.body;
         
 
@@ -230,7 +233,8 @@ const UpdateCampania = async (req, res) => {
             esArchivada,
             restriccionUser,
             idProyecto,
-            emails
+            emails,
+            ultimoCorreoEnviado
         }, { transaction });
 
         if (Array.isArray(etapas)) {
