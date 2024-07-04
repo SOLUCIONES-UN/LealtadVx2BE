@@ -262,7 +262,7 @@ const UpdatePromocion = async (req, res) => {
             descripcion,
             mesajeExito,
             mesajeFail,
-            imgSucces: newImgSuccess,
+            imgSuccess: newImgSuccess,
             imgFail: newImgFail,
             fechaInicio,
             fechaFin,
