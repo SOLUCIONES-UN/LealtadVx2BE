@@ -87,16 +87,7 @@ const GetProjectByID = async(req, res) => {
     try {
         const { id } = req.params;
         const project = await Proyectos.findByPk(id, {
-            include: {
-                model: Departamento_Proyectos,
-                include: [{
-                        model: Departamento
-                    },
-                    {
-                        model: Municipio
-                    }
-                ]
-            }
+          
         });
         res.json(project);
     } catch (error) {
