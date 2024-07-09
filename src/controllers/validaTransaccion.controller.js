@@ -16,7 +16,17 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 async function getFailTransaccions(req, res) {
     try {
-        const transacciones = await FailTransaccion.findAll();
+        // Realiza la consulta incluyendo el nombre de la campaña
+        const transacciones = await FailTransaccion.findAll({
+            include: {
+                model: Campania,
+                attributes: ['nombre'], // Selecciona solo el atributo 'nombre' de Campania
+                required: true // Esto asegura que solo se traigan las transacciones con una campaña asociada
+            }
+        });
+
+
+
         res.json(transacciones);
     } catch (error) {
         console.error('Error al obtener las transacciones fallidas:', error);
