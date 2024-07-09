@@ -1,7 +1,7 @@
-const {Router} = require('express');
+const { Router } = require('express');
 const router = Router();
-const {getransaccion, } = require('../controllers/validaTransaccion.controller.js')
-const {validateCreate} = require('../validators/usuario')
+const { getransaccion, getFailTransaccions } = require('../controllers/validaTransaccion.controller.js')
+const { validateCreate } = require('../validators/usuario')
 const env = require('../bin/env');
 const authUser = require('../middlewares/auth.js');
 
@@ -11,7 +11,9 @@ const path = 'Validate';
 
 
 //rutas del proyecto
-router.get(`/${path}`,  getransaccion);
+router.get(`/${path}`, getransaccion);
+router.get(`/${path}/fail`, getFailTransaccions);
+
 
 
 

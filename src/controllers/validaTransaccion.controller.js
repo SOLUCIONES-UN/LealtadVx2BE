@@ -1,6 +1,3 @@
-
-
-
 const { Sequelize } = require("sequelize");
 const { genesis, pronet, sequelize } = require("../database/database");
 const { Campania } = require('../models/campanias');
@@ -17,26 +14,31 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 
 
-
-
+async function getFailTransaccions(req, res) {
+    try {
+        const transacciones = await FailTransaccion.findAll();
+        res.json(transacciones);
+    } catch (error) {
+        console.error('Error al obtener las transacciones fallidas:', error);
+        res.status(500).json({ error: 'Error al obtener las transacciones fallidas' });
+    }
+}
 
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
-const getransaccion = async (req, res) => {
+const getransaccion = async(req, res) => {
     try {
-        const customerInfo = [
-            {
-                idParticipacion: 19,
-                fk_customer_id: 130,
-                fecha: '2024-09-06T00:32:00.000Z',
-                descripcionTrx: 'Recarga de Saldo',
-                idPremio: 24,
-                idCampania: 33,
-                idTransaccion: 1
-            },
-        ];
+        const customerInfo = [{
+            idParticipacion: 19,
+            fk_customer_id: 130,
+            fecha: '2024-09-06T00:32:00.000Z',
+            descripcionTrx: 'Recarga de Saldo',
+            idPremio: 24,
+            idCampania: 33,
+            idTransaccion: 1
+        }, ];
 
-        const validacionesSeleccionadas = ['primera']; 
+        const validacionesSeleccionadas = ['primera'];
 
         console.log('Data obtenida de pronet:', customerInfo);
         console.log('Validaciones solicitadas:', validacionesSeleccionadas);
@@ -85,7 +87,7 @@ const getransaccion = async (req, res) => {
 
 
 
-const validarTransaccion = async (customerInfo) => {
+const validarTransaccion = async(customerInfo) => {
     const transaccionesValidadas = [];
     const transaccionesSospechosas = [];
 
@@ -118,13 +120,15 @@ const validarTransaccion = async (customerInfo) => {
                             idPremio,
                             idTransaccion
                         },
-                        order: [['fecha', 'ASC']]
+                        order: [
+                            ['fecha', 'ASC']
+                        ]
                     });
 
                     if (participaciones.length > 0) {
-                        transaccionesSospechosas.push(info); 
+                        transaccionesSospechosas.push(info);
 
-                        await sequelize.transaction(async (t) => {
+                        await sequelize.transaction(async(t) => {
                             await FailTransaccion.create({
                                 idCampania: info.idCampania,
                                 idTransaccion: info.idTransaccion,
@@ -136,7 +140,7 @@ const validarTransaccion = async (customerInfo) => {
                             }, { transaction: t });
                         });
                     } else {
-                        transaccionesValidadas.push(info);  
+                        transaccionesValidadas.push(info);
                     }
                 }
             }
@@ -159,7 +163,7 @@ const validarTransaccion = async (customerInfo) => {
 
 
 
-const validarDuplicados = async (customerInfo) => {
+const validarDuplicados = async(customerInfo) => {
     const transaccionesValidadas2 = [];
     const transaccionesSospechosas2 = [];
 
@@ -181,7 +185,7 @@ const validarDuplicados = async (customerInfo) => {
             if (participacionesDuplicadas.length > 0) {
                 transaccionesSospechosas2.push(info);
 
-                await sequelize.transaction(async (t) => {
+                await sequelize.transaction(async(t) => {
                     await FailTransaccion.create({
                         idCampania: idCampania,
                         idTransaccion: idTransaccion,
@@ -211,7 +215,7 @@ const validarDuplicados = async (customerInfo) => {
 
 
 
-const validarValorTotalPorDia = async (customerInfo) => {
+const validarValorTotalPorDia = async(customerInfo) => {
     const transaccionesValidadas3 = [];
     const transaccionesSospechosas3 = [];
 
@@ -243,10 +247,10 @@ const validarValorTotalPorDia = async (customerInfo) => {
 
             console.log(`Total valor para la campaña ${idCampania} en el día ${fecha}: ${totalValor}`);
 
-            if (totalValor  >= 1000) {
+            if (totalValor >= 1000) {
                 transaccionesSospechosas3.push(info);
 
-                await sequelize.transaction(async (t) => {
+                await sequelize.transaction(async(t) => {
                     await FailTransaccion.create({
                         idCampania: idCampania,
                         idTransaccion: idTransaccion,
@@ -272,4 +276,4 @@ const validarValorTotalPorDia = async (customerInfo) => {
 };
 
 
-module.exports = { getransaccion };
+module.exports = { getransaccion, getFailTransaccions };
