@@ -14,18 +14,25 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 
 
+
+
+
 async function getFailTransaccions(req, res) {
     try {
-
         const transacciones = await FailTransaccion.findAll({
-            include: {
-                model: Campania,
-                attributes: ['nombre'],
-                required: true
-            }
+            include: [
+                {
+                    model: Campania,
+                    attributes: ['nombre'],
+                    required: true
+                },
+                {
+                    model: Participacion,
+                    attributes: ['customerId'], 
+                    required: true
+                }
+            ]
         });
-
-
 
         res.json(transacciones);
     } catch (error) {
@@ -33,6 +40,10 @@ async function getFailTransaccions(req, res) {
         res.status(500).json({ error: 'Error al obtener las transacciones fallidas' });
     }
 }
+
+
+
+
 
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
