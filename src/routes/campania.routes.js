@@ -12,7 +12,8 @@ const { AddCampania,
         GetCampaniasSEm,
         Getcampanascount,
         getnewCampanias,
-        CheckNombreCampaña
+        CheckNombreCampaña,
+        inabilitarEtapa
         } = require('../controllers/campania.controller');
 const authUser = require('../middlewares/auth.js');
 
@@ -33,6 +34,10 @@ router.put(`/${path}/pausar/:id`,authUser, PausarCampaña);
 router.put(`/${path}/activar/:id`,authUser, ActivarCampaña);
 router.delete(`/${path}/:id`,authUser,DeleteCampania);
 router.get(`/${path}/:id`,authUser,GetcampanasActivasById);
+
+
+router.put(`/${path}/inabilitar/:id`,authUser, inabilitarEtapa);
+
 
 
 
