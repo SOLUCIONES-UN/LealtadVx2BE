@@ -13,8 +13,6 @@ const { FailTransaccion } = require('../models/failTransaccion');
 
 async function getCustomerInfoFromPronet(customerId) {
     try {
-        console.log(`Obteniendo información para customerId: ${customerId}`);
-
         const query = `
             SELECT telno 
             FROM pronet.tbl_customer 
@@ -25,18 +23,13 @@ async function getCustomerInfoFromPronet(customerId) {
             type: Sequelize.QueryTypes.SELECT
         });
 
-        console.log(`Resultados de la consulta para customerId ${customerId}: ${JSON.stringify(results)}`);
-
         if (results.length > 0) {
             const telno = results[0].telno;
-            console.log(`Teléfono encontrado para customerId ${customerId}: ${telno}`);
             return telno;
         } else {
-            console.log(`CustomerId ${customerId} no encontrado.`);
             return null;
         }
     } catch (error) {
-        console.error(`Error al obtener datos de Pronet para customerId ${customerId}:`, error);
         return null;
     }
 }
@@ -66,15 +59,11 @@ async function getFailTransaccionsByCampania(req, res) {
             ]
         });
 
-        console.log('Transacciones obtenidas:', JSON.stringify(transacciones, null, 2));
-
         for (const transaccion of transacciones) {
             const customerId = transaccion.participacion ? transaccion.participacion.customerId : null;
-            console.log(`customerId obtenido: ${customerId}`);
 
             if (customerId) {
                 const telno = await getCustomerInfoFromPronet(customerId);
-                console.log(`Telno para customerId ${customerId}: ${telno}`);
                 
                 if (telno) {
                     transaccion.dataValues.telno = telno;
@@ -84,14 +73,11 @@ async function getFailTransaccionsByCampania(req, res) {
             } else {
                 transaccion.dataValues.telno = 'Teléfono cliente no disponible';
             }
-
-            console.log(`Transacción después de asignar telno: ${JSON.stringify(transaccion, null, 2)}`);
         }
 
         res.json(transacciones);
         
     } catch (error) {
-        console.error('Error al obtener las transacciones fallidas:', error);
         res.status(500).json({ error: 'Error al obtener las transacciones fallidas' });
     }
 }
@@ -118,16 +104,11 @@ async function getFailTransaccions(req, res) {
             ]
         });
 
-        console.log('Transacciones obtenidas:', JSON.stringify(transacciones, null, 2));
-
-        // Crear un array de promesas para obtener los números de teléfono
         const promesasTelno = transacciones.map(async (transaccion) => {
             const customerId = transaccion.participacion ? transaccion.participacion.customerId : null;
-            console.log(`customerId obtenido: ${customerId}`);
 
             if (customerId) {
                 const telno = await getCustomerInfoFromPronet(customerId);
-                console.log(`Telno para customerId ${customerId}: ${telno}`);
 
                 if (telno) {
                     transaccion.dataValues.telno = telno;
@@ -137,16 +118,12 @@ async function getFailTransaccions(req, res) {
             } else {
                 transaccion.dataValues.telno = 'Teléfono no disponible';
             }
-
-            console.log(`Transacción después de asignar telno: ${JSON.stringify(transaccion, null, 2)}`);
         });
 
-        // Esperar a que todas las promesas se resuelvan
         await Promise.all(promesasTelno);
 
         res.json(transacciones);
     } catch (error) {
-        console.error('Error al obtener las transaccciones fallidas:', error);
         res.status(500).json({ error: 'Error al obtener las transaccciones fallidas' });
     }
 }
