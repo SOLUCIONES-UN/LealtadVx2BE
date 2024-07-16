@@ -21,7 +21,7 @@ const GetProjects = async(req, res) => {
 const AddProject = async(req, res) => {
     try {
         console.log('Data recibida en AddProject:', req.body);
-        const { descripcion, ruta, localidades } = req.body;
+        const { descripcion, ruta } = req.body;
 
         const proyectoExistente = await Proyectos.findOne({ where: { descripcion } });
         if (proyectoExistente) {
@@ -32,17 +32,6 @@ const AddProject = async(req, res) => {
             descripcion,
             ruta
         });
-
-        const proyectoId = proyecto.id;
-
-        for (const localidad of localidades) {
-            await Departamento_Proyectos.create({
-                idDepartamento: localidad.departamentoId,
-                idProyecto: proyectoId,
-                idMunicipio: localidad.municipioId
-            });
-        }
-
         res.json({ code: 'ok', message: 'Proyecto creado con éxito.' });
         console.log('Proyecto creado con éxito:', proyecto);
     } catch (error) {
@@ -55,23 +44,10 @@ const AddProject = async(req, res) => {
 
 const UpdateProject = async(req, res) => {
     try {
-        const { descripcion, ruta, localidades } = req.body;
+        const { descripcion, ruta } = req.body;
         const { id } = req.params;
 
-        // Actualizar proyecto
         await Proyectos.update({ descripcion, ruta }, { where: { id } });
-
-        // Eliminar asociaciones de localidades existentes
-        await Departamento_Proyectos.destroy({ where: { idProyecto: id } });
-
-        // Crear nuevas asociaciones de localidades
-        for (const localidad of localidades) {
-            await Departamento_Proyectos.create({
-                idDepartamento: localidad.departamentoId,
-                idProyecto: id,
-                idMunicipio: localidad.municipioId
-            });
-        }
 
         res.json({ code: 'ok', message: 'Proyecto actualizado con éxito' });
     } catch (error) {
@@ -111,16 +87,7 @@ const GetProjectByID = async(req, res) => {
     try {
         const { id } = req.params;
         const project = await Proyectos.findByPk(id, {
-            include: {
-                model: Departamento_Proyectos,
-                include: [{
-                        model: Departamento
-                    },
-                    {
-                        model: Municipio
-                    }
-                ]
-            }
+          
         });
         res.json(project);
     } catch (error) {
