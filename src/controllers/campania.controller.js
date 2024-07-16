@@ -1486,23 +1486,29 @@ const Addnumbers = async(req, res) => {
 
 }
 
+
+
 const Getbloqueados = async(req, res) => {
     try {
-        const { id } = req.body;
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).send({ errors: 'El id de la campaña es requerido.' });
+        }
+        console.log('Request Body:', req.body);
+
         const numbers = await Bloqueados.findAll({
             where: {
                 idCampania: id,
-                estado: 2
+                estado: 2,
             },
-            attributes: ['numero']
         });
-        res.json(numbers)
-    } catch (error) {
-        res.status(403)
-        console.log(error)
-        res.send({ errors: 'Ha sucedido un  error al intentar agregar el municipio.' });
-    }
 
+        res.json(numbers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ errors: 'Ha sucedido un error al verificar el número.' });
+    }
 }
 
 
