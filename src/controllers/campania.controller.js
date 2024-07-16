@@ -598,7 +598,7 @@ const GetCampania = async(req, res) => {
 
 
 
-const UpdateCampania = async (req, res) => {
+const UpdateCampania = async(req, res) => {
     const transaction = await sequelize.transaction();
     try {
         const { id } = req.params;
@@ -629,6 +629,7 @@ const UpdateCampania = async (req, res) => {
             bloqueados,
             participacion,
             emails,
+            emailspar,
             ultimoCorreoEnviado
         } = req.body;
 
@@ -661,6 +662,7 @@ const UpdateCampania = async (req, res) => {
             restriccionUser,
             idProyecto,
             emails,
+            emailspar,
             ultimoCorreoEnviado
         }, { transaction });
 
@@ -685,25 +687,25 @@ const UpdateCampania = async (req, res) => {
                     etapa.valorAcumulado = etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null;
                     const nuevaEtapa = await Etapa.create(etapa, { transaction });
 
-                    const parametrosData = etapa.parametros.map(parametro => ({ ...parametro, idEtapa: nuevaEtapa.id }));
+                    const parametrosData = etapa.parametros.map(parametro => ({...parametro, idEtapa: nuevaEtapa.id }));
                     await Parametro.bulkCreate(parametrosData, { transaction });
 
-                    const presupuestoData = etapa.presupuesto.map(presupuesto => ({ ...presupuesto, idEtapa: nuevaEtapa.id }));
+                    const presupuestoData = etapa.presupuesto.map(presupuesto => ({...presupuesto, idEtapa: nuevaEtapa.id }));
                     await Presupuesto.bulkCreate(presupuestoData, { transaction });
 
-                    const premioData = etapa.premio.map(premio => ({ ...premio, idEtapa: nuevaEtapa.id }));
+                    const premioData = etapa.premio.map(premio => ({...premio, idEtapa: nuevaEtapa.id }));
                     await PremioCampania.bulkCreate(premioData, { transaction });
                 }
             }
         }
 
         if (bloqueados) {
-            const bloqueoData = bloqueados.map(bloqueo => ({ ...bloqueo, idCampania: id }));
+            const bloqueoData = bloqueados.map(bloqueo => ({...bloqueo, idCampania: id }));
             await Bloqueados.bulkCreate(bloqueoData, { transaction });
         }
 
         if (participacion) {
-            const participacionData = participacion.map(participacion => ({ ...participacion, idCampania: id }));
+            const participacionData = participacion.map(participacion => ({...participacion, idCampania: id }));
             await Participantes.bulkCreate(participacionData, { transaction });
         }
 
@@ -747,12 +749,11 @@ const UpdateCampania = async (req, res) => {
 //     }
 // }
 
-const GetcampanasActivasById = async (req, res) => {
+const GetcampanasActivasById = async(req, res) => {
     try {
         const { id } = req.params;
         const etapa = await Campania.findByPk(id, {
-            include: [
-                {
+            include: [{
                     model: Etapa,
                     where: { estado: 1 },
                     include: [
@@ -1466,6 +1467,47 @@ const getnewCampanias = async(req, res) => {
 
 
 
+const Addnumbers = async(req, res) => {
+
+    try {
+        console.log(req.body);
+        const { numero, estado, campaignId } = req.body;
+        await Bloqueados.create({
+            numero: numero,
+            estado: estado,
+            idCampania: campaignId,
+        })
+        res.json({ code: 'ok', message: 'numero creado con exito' });
+
+    } catch (error) {
+        res.status(403)
+        res.send({ errors: 'Ha sucedido un  error al intentar agregar el numero' });
+    }
+
+}
+
+const Getbloqueados = async(req, res) => {
+    try {
+        const { id } = req.body;
+        const numbers = await Bloqueados.findAll({
+            where: {
+                idCampania: id,
+                estado: 2
+            },
+            attributes: ['numero']
+        });
+        res.json(numbers)
+    } catch (error) {
+        res.status(403)
+        console.log(error)
+        res.send({ errors: 'Ha sucedido un  error al intentar agregar el municipio.' });
+    }
+
+}
+
+
+
+
 module.exports = {
     AddCampania,
     GetCampania,
@@ -1480,5 +1522,7 @@ module.exports = {
     Getcampanascount,
     getnewCampanias,
     CheckNombreCampaña,
-    inabilitarEtapa
+    inabilitarEtapa,
+    Addnumbers,
+    Getbloqueados
 }
