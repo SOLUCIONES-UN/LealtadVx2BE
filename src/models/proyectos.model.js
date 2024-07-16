@@ -109,6 +109,9 @@ Transaccion.belongsTo(Proyectos, {
     //       console.log('se creo con exito la tabla  Transaccion ');
     //   });
 
-   
+//    Campania.sync({ alter: true }).then(() => {
+//     console.log('tabla campania creada');
+// });
+
 
    module.exports = { Proyectos }

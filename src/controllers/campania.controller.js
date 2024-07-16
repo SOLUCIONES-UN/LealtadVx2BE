@@ -42,6 +42,7 @@ const AddCampania = async(req, res) => {
             bloqueados,
             participacion,
             emails,
+            emailspar,
             ultimoCorreoEnviado
         } = req.body;
 
@@ -72,6 +73,7 @@ const AddCampania = async(req, res) => {
             restriccionUser,
             idProyecto,
             emails,
+            emailspar,
             ultimoCorreoEnviado
         }, { transaction });
 
