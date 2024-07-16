@@ -93,7 +93,7 @@ Participacion.hasMany(codigoReferido,{
 });
 
 codigoReferido.belongsTo(Participacion, {
-    foreignKey: 'customerId', // Columna en este modelo
+    foreignKey: 'customerId',
     targetKey: 'customerId',
     as: 'codigoReferidoAssociation'
 }); 

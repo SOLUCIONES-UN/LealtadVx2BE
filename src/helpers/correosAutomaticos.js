@@ -6,7 +6,6 @@ const { sendEmails,sendEmailspart } = require('./sendEmail');
 
 function validateEmails(emails) {
     if (!emails) {
-        console.log("No hay correos proporcionados.");
         return false;
     }
     const emailPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -14,7 +13,6 @@ function validateEmails(emails) {
     const invalidEmails = emailArray.filter(email => !emailPattern.test(email));
 
     if (invalidEmails.length > 0) {
-        console.log("Correos inválidos detectados:", invalidEmails.join(", "));
         return false;
     }
     return true;
@@ -23,7 +21,6 @@ function validateEmails(emails) {
 const tareaVerificarCampanias = cron.schedule('00 00 * * *', async () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    console.log('Inicio de la tarea programada para verificar campañas.');
 
     const campanias = await Campania.findAll({
         where: {
@@ -35,7 +32,6 @@ const tareaVerificarCampanias = cron.schedule('00 00 * * *', async () => {
 
     console.log(`Encontradas ${campanias.length} campañas a vencer en los próximos 5 días.`);
     for (let campania of campanias) {
-        console.log(`Procesando campaña: ${campania.nombre}`);
         if (validateEmails(campania.emails)) {
             try {
                 const info = await sendEmails(

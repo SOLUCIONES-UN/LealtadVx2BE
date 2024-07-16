@@ -1,8 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
-// const { participacionReferidos } = require('./participacionReferidos');
 
-//Creacion de tabla y declaracion de sus atributos correspondientes
 const ConfigReferido = sequelize.define('configreferidos', {
     id: {
         type: DataTypes.INTEGER,

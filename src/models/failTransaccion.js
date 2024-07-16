@@ -23,7 +23,12 @@ const FailTransaccion = sequelize.define('failTransaccion', {
     estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1
-    }
+    },
+    motivo: {
+        type: DataTypes.STRING(1000),
+        allowNull: false
+    },
+
 }, { timestamps: false });
 
 // Categoria.hasMany(asignarCategoria, {

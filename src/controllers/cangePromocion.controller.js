@@ -4,7 +4,7 @@ const { DetallePromocion } = require("../models/detallePromocion");
 const { PremioPromocion } = require("../models/premioPromocion");
 const { Promocion } = require("../models/promocion");
 
-//metodo para validar
+
 const Participar = async (req, res) => {
   try {
     const { cupon, numero } = req.body;
@@ -40,7 +40,6 @@ const Participar = async (req, res) => {
   }
 };
 
-//Metodo para testear los codigos
 const Testear = async (req, res) => {
   try {
     const { cupon } = req.body;
@@ -64,10 +63,6 @@ const addParticipacion = async (descripcion, numero, id, promocion) => {
       },
     });
 
-
-
-
-
     await CangePromocion.create({
       descripcion,
       fecha: new Date(),
@@ -75,7 +70,7 @@ const addParticipacion = async (descripcion, numero, id, promocion) => {
       idDetallePromocion: id,
     });
 
-    await DetallePromocion.update(
+    const updated = await DetallePromocion.update(
       {
         estado: 2,
       },
@@ -86,7 +81,9 @@ const addParticipacion = async (descripcion, numero, id, promocion) => {
       }
     );
 
-    //update DetalleParticipacion set estado = 2 where id= 1
+    if (updated[0] === 0) {
+      throw new Error("No se pudo actualizar el estado del cupon.");
+    }
 
     return true;
   } catch (error) {
@@ -121,7 +118,31 @@ const validarParticipacion = async (cupon) => {
   const datosCupon = await getDatosCupon(cupon);
   const { promocion } = datosCupon;
 
-  console.log(promocion.estado);
+  const fechaActual = new Date();
+  const fechaFin = new Date(promocion.fechaFin);
+
+  if (fechaActual > fechaFin && datosCupon.estado !== 2) {
+    await DetallePromocion.update(
+      { estado: 3 },
+      { where: { cupon: cupon }}
+    );
+    datosCupon.estado = 3;
+  }
+
+  if (datosCupon.estado === 3 ) {
+    result = false;
+    data.code = "08";
+    data.message = "Este cupon ya esta vencido";
+    return { result, data };
+  }
+
+  if (!await ValidarFechaCupon(cupon)) {
+    result = false;
+    data.code = "04";
+    data.message = "Esta promocion ya se encuentra expirada";
+    return { result, data };
+  }
+
   if (datosCupon.estado === 2) {
     result = false;
     data.code = "05";
@@ -136,7 +157,6 @@ const validarParticipacion = async (cupon) => {
     return { result, data };
   }
 
-  //cosas que devolvera si o si
   data.id = datosCupon.id;
   data.PremioXcampania = promocion.PremioXcampania;
   data.nemonico = promocion.nemonico;
@@ -155,17 +175,10 @@ const validarParticipacion = async (cupon) => {
   data.message = promocion.mesajeExito;
   data.img = promocion.imgSuccess;
 
-  //code 03  cupon no existe
-  //code 04  promocion vencida o eliminada
-  //code 05  Cupon ya Cangeado
-  //code 06  Cupon eliminado
-  //code 01 cupon valido
-  //code 02 cupon no valido
 
   return { result, data };
 };
 
-//obtener numero de cupones
 const getCantidadNumeroCupones = async (cupon) => {
   const cantidadCupones = await DetallePromocion.count({
     where: {
@@ -176,7 +189,6 @@ const getCantidadNumeroCupones = async (cupon) => {
   return cantidadCupones;
 };
 
-// Funcion para validar que el cupon esté entre el rango de la fecha
 const ValidarFechaCupon = async (cupon) => {
   const cuponDentroActivo = await Promocion.count({
     include: {
@@ -199,7 +211,6 @@ const ValidarFechaCupon = async (cupon) => {
   return cuponDentroActivo > 0;
 };
 
-// Devolver los datos del cupon ganador
 const getDatosCupon = async (cupon) => {
   const datosCupon = await DetallePromocion.findOne({
     include: {
