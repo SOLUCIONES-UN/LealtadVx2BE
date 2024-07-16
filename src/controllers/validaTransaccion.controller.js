@@ -11,21 +11,78 @@ const { Transaccion } = require('../models/transaccion');
 const { Participacion } = require('../models/Participacion');
 const { FailTransaccion } = require('../models/failTransaccion');
 
-
-
-
-async function getFailTransaccions(req, res) {
+async function getCustomerInfoFromPronet(customerId) {
     try {
+        console.log(`Obteniendo información para customerId: ${customerId}`);
 
-        const transacciones = await FailTransaccion.findAll({
-            include: {
-                model: Campania,
-                attributes: ['nombre'],
-                required: true
-            }
+        const query = `
+            SELECT telno 
+            FROM pronet.tbl_customer 
+            WHERE customer_id = :customerId;
+        `;
+        const results = await pronet.query(query, {
+            replacements: { customerId },
+            type: Sequelize.QueryTypes.SELECT
         });
 
+        console.log(`Resultados de la consulta: ${JSON.stringify(results)}`);
 
+        if (results.length > 0) {
+            const telno = results[0].telno;
+            console.log(`Teléfono encontrado: ${telno}`);
+            return telno;
+        } else {
+            console.log(`CustomerId ${customerId} no encontrado.`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Error al obtener datos de Pronet para customerId ${customerId}:`, error);
+        throw new Error('Error al obtener datos del cliente');
+    }
+}
+
+
+async function getFailTransaccionsByCampania(req, res) {
+    try {
+        const { campaniaId  } = req.params;
+
+        const transacciones = await FailTransaccion.findAll({
+            where: {
+                idCampania: campaniaId,
+                estado: {
+                    [Op.in]: [1, 2] 
+                }
+            },
+            include: [
+                {
+                    model: Campania,
+                    attributes: ['nombre'],
+                    required: true
+                },
+                {
+                    model: Participacion,
+                    attributes: ['customerId'], 
+                    required: true
+                }
+            ]
+        });
+
+        console.log('Transacciones obtenidas:', JSON.stringify(transacciones, null, 2));
+
+        for (const transaccion of transacciones) {
+            const customerId = transaccion.Participacion ? transaccion.Participacion.customerId : null;
+            if (customerId) {
+                const telno = await getCustomerInfoFromPronet(customerId);
+                console.log(`Telno para customerId ${customerId}: ${telno}`);
+                if (telno) {
+                    transaccion.dataValues.telno = telno;
+                } else {
+                    transaccion.dataValues.telno = 'Teléfono no encontrado';
+                }
+            } else {
+                transaccion.dataValues.telno = 'Teléfono cliente no disponible';
+            }
+        }
 
         res.json(transacciones);
     } catch (error) {
@@ -33,6 +90,55 @@ async function getFailTransaccions(req, res) {
         res.status(500).json({ error: 'Error al obtener las transacciones fallidas' });
     }
 }
+
+async function getFailTransaccions(req, res) {
+    try {
+        const transacciones = await FailTransaccion.findAll({
+            where: {
+                estado: {
+                    [Op.in]: [1, 2]
+                }
+            },
+            include: [
+                {
+                    model: Campania,
+                    attributes: ['nombre'],
+                    required: true
+                },
+                {
+                    model: Participacion,
+                    attributes: ['customerId'],
+                    required: true
+                }
+            ]
+        });
+
+        console.log('Transacciones obtenidas:', JSON.stringify(transacciones, null, 2));
+
+        for (const transaccion of transacciones) {
+            const customerId = transaccion.Participacion ? transaccion.Participacion.customerId : null;
+            if (customerId) {
+                const telno = await getCustomerInfoFromPronet(customerId);
+                console.log(`Telno para customerId ${customerId}: ${telno}`);
+                if (telno) {
+                    transaccion.dataValues.telno = telno;
+                } else {
+                    transaccion.dataValues.telno = 'Teléfono no encontrado';
+                }
+            } else {
+                transaccion.dataValues.telno = 'Teléfono no disponible';
+            }
+        }
+
+        res.json(transacciones);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener las transaccciones fallidas'});
+    }
+}
+
+
+
+
 
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
@@ -93,9 +199,6 @@ const getransaccion = async(req, res) => {
         res.status(500).json({ message: 'Error al obtener participaciones' });
     }
 };
-
-
-
 
 const validarTransaccion = async(customerInfo) => {
     const transaccionesValidadas = [];
@@ -168,11 +271,6 @@ const validarTransaccion = async(customerInfo) => {
 
 
 
-
-
-
-
-
 const validarDuplicados = async(customerInfo) => {
     const transaccionesValidadas2 = [];
     const transaccionesSospechosas2 = [];
@@ -201,7 +299,7 @@ const validarDuplicados = async(customerInfo) => {
                         idTransaccion: idTransaccion,
                         idParticipacion: idParticipacion,
                         fecha,
-                        failmessage: 'Transacción sospechosa: el premio ya fue canjeado con anterioridad',
+                        failmessage: 'El premio ya fue canjeado con anterioridad',
                         codigoError: 2,
                         estado: 1
                     }, { transaction: t });
@@ -285,5 +383,49 @@ const validarValorTotalPorDia = async(customerInfo) => {
     };
 };
 
+const aceptarTransaccionSospechosa = async (req, res) => {
 
-module.exports = { getransaccion, getFailTransaccions };
+    try {
+        const { id } = req.params;
+        const { motivo } = req.body;
+        await FailTransaccion.update({
+            estado: 2,
+            motivo: motivo
+        }, {
+            where: {
+                id: id
+            }
+        });
+        res.json({ code: 'ok', message: 'Transacción sospechosa aceptada con exito' });
+
+    } catch (error) {
+        res.status(403)
+        res.send({ errors: 'Ha sucedido un  error al intentar pausar la Promocion.' });
+    }
+
+}
+
+const rechazarTransaccion = async (req, res) => {
+
+    try {
+        const { id } = req.params;
+        const { motivo } = req.body;
+        await FailTransaccion.update({
+            estado: 0,
+            motivo: motivo
+        }, {
+            where: {
+                id: id
+            }
+        });
+        res.json({ code: 'ok', message: 'Transacción sospechosa rechazada con exito' });
+
+    } catch (error) {
+        res.status(403)
+        res.send({ errors: 'Ha sucedido un  error al intentar rechazar la transaccion.' });
+    }
+
+}
+
+
+module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, getCustomerInfoFromPronet };
