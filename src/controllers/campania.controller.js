@@ -172,7 +172,6 @@ const GetCampania = async(req, res) => {
 
 
 
-
 const UpdateCampania = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
@@ -210,11 +209,11 @@ const UpdateCampania = async (req, res) => {
 
         const campania = await Campania.findByPk(id, { transaction });
         if (!campania) {
-            throw new Error('La campaña no existe');
+            return res.status(404).json({ error: 'La campaña no existe' });
         }
 
         if (!etapas || etapas.length === 0) {
-            throw new Error('La campaña debe tener al menos una etapa para ser actualizada');
+            return res.status(400).json({ error: 'La campaña debe tener al menos una etapa para ser actualizada' });
         }
 
         await campania.update({
@@ -261,25 +260,25 @@ const UpdateCampania = async (req, res) => {
                     etapa.valorAcumulado = etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null;
                     const nuevaEtapa = await Etapa.create(etapa, { transaction });
 
-                    const parametrosData = etapa.parametros.map(parametro => ({...parametro, idEtapa: nuevaEtapa.id }));
+                    const parametrosData = etapa.parametros.map(parametro => ({ ...parametro, idEtapa: nuevaEtapa.id }));
                     await Parametro.bulkCreate(parametrosData, { transaction });
 
-                    const presupuestoData = etapa.presupuesto.map(presupuesto => ({...presupuesto, idEtapa: nuevaEtapa.id }));
+                    const presupuestoData = etapa.presupuesto.map(presupuesto => ({ ...presupuesto, idEtapa: nuevaEtapa.id }));
                     await Presupuesto.bulkCreate(presupuestoData, { transaction });
 
-                    const premioData = etapa.premio.map(premio => ({...premio, idEtapa: nuevaEtapa.id }));
+                    const premioData = etapa.premio.map(premio => ({ ...premio, idEtapa: nuevaEtapa.id }));
                     await PremioCampania.bulkCreate(premioData, { transaction });
                 }
             }
         }
 
         if (bloqueados) {
-            const bloqueoData = bloqueados.map(bloqueo => ({...bloqueo, idCampania: id }));
+            const bloqueoData = bloqueados.map(bloqueo => ({ ...bloqueo, idCampania: id }));
             await Bloqueados.bulkCreate(bloqueoData, { transaction });
         }
 
         if (participacion) {
-            const participacionData = participacion.map(participacion => ({...participacion, idCampania: id }));
+            const participacionData = participacion.map(participacion => ({ ...participacion, idCampania: id }));
             await Participantes.bulkCreate(participacionData, { transaction });
         }
 
@@ -288,9 +287,18 @@ const UpdateCampania = async (req, res) => {
     } catch (error) {
         await transaction.rollback();
         console.error('Error al actualizar la campaña:', error);
-        res.status(500).json({ error: 'Ha sucedido un error al intentar actualizar la campaña', details: error.message });
+        res.status(500).json({ error: 'Error general al actualizar la campaña', details: error.message });
     }
 };
+
+
+
+
+
+
+
+
+
 
 
 
