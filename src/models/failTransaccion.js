@@ -28,6 +28,14 @@ const FailTransaccion = sequelize.define('failTransaccion', {
         type: DataTypes.STRING(1000),
         allowNull: false
     },
+    cantidadTransacciones: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    rangoTiempo: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
 
 }, { timestamps: false });
 

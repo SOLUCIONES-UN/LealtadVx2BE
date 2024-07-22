@@ -132,14 +132,15 @@ async function getFailTransaccions(req, res) {
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
 const getransaccion = async(req, res) => {
+
     try {
         const customerInfo = [{
-            idParticipacion: 19,
-            fk_customer_id: 130,
-            fecha: '2024-09-06T00:32:00.000Z',
+            idParticipacion: 20,
+            fk_customer_id: 112,
+            fecha: '2024-18-07T00:30:00.000Z',
             descripcionTrx: 'Recarga de Saldo',
-            idPremio: 24,
-            idCampania: 33,
+            idPremio: 25,
+            idCampania: 38,
             idTransaccion: 1
         }, ];
 
@@ -189,6 +190,7 @@ const getransaccion = async(req, res) => {
     }
 };
 
+
 const validarTransaccion = async(customerInfo) => {
     const transaccionesValidadas = [];
     const transaccionesSospechosas = [];
@@ -236,7 +238,7 @@ const validarTransaccion = async(customerInfo) => {
                                 idTransaccion: info.idTransaccion,
                                 idParticipacion: info.idParticipacion,
                                 fecha,
-                                failmessage: 'Transacción sospechosa: mas de una transaccion en un rango de 2 minutos',
+                                failmessage: 'Más de una transacción en un rango de 2 minutos',
                                 codigoError: 1,
                                 estado: 1
                             }, { transaction: t });
@@ -256,8 +258,6 @@ const validarTransaccion = async(customerInfo) => {
         transaccionesSospechosas
     };
 };
-
-
 
 
 const validarDuplicados = async(customerInfo) => {
@@ -306,7 +306,6 @@ const validarDuplicados = async(customerInfo) => {
         transaccionesSospechosas2
     };
 };
-
 
 
 
@@ -395,7 +394,6 @@ const aceptarTransaccionSospechosa = async (req, res) => {
 }
 
 const rechazarTransaccion = async (req, res) => {
-
     try {
         const { id } = req.params;
         const { motivo } = req.body;
