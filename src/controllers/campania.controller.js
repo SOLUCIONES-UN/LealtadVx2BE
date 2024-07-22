@@ -170,435 +170,10 @@ const GetCampania = async(req, res) => {
     }
 };
 
-// const UpdateCampania = async (req, res) => {
-//     const transaction = await sequelize.transaction();
-//     try {
-//         const { id } = req.params;
-//         const {
-//             nombre,
-//             descripcion,
-//             fechaCreacion,
-//             fechaRegistro,
-//             fechaInicio,
-//             fechaFin,
-//             edadInicial,
-//             edadFinal,
-//             sexo,
-//             tipoUsuario,
-//             tituloNotificacion,
-//             descripcionNotificacion,
-//             imgPush,
-//             imgAkisi,
-//             estado,
-//             maximoParticipaciones,
-//             campaniaTerceros,
-//             terminosCondiciones,
-//             observaciones,
-//             esArchivada,
-//             restriccionUser,
-//             idProyecto,
-//             etapas,
-//             bloqueados,
-//             participacion,
-//             emails,
-//             ultimoCorreoEnviado
-//         } = req.body;
 
 
 
-//         const campania = await Campania.findByPk(id, { transaction });
-//         if (!campania) {
-//             throw new Error('La campaña no existe');
-//         }
-
-//         await campania.update({
-//             nombre,
-//             descripcion,
-//             fechaCreacion,
-//             fechaRegistro,
-//             fechaInicio,
-//             fechaFin,
-//             edadInicial,
-//             edadFinal,
-//             sexo,
-//             tipoUsuario,
-//             tituloNotificacion,
-//             descripcionNotificacion,
-//             imgPush,
-//             imgAkisi ,
-//             estado,
-//             maximoParticipaciones,
-//             campaniaTerceros,
-//             terminosCondiciones,
-//             observaciones,
-//             esArchivada,
-//             restriccionUser,
-//             idProyecto,
-//             emails,
-//             ultimoCorreoEnviado
-//         }, { transaction });
-
-//         if (Array.isArray(etapas)) {
-//             for (const etapa of etapas) {
-//                 const [etapaInstancia, etapaCreada] = await Etapa.findOrCreate({
-//                     where: { id: etapa.id },
-//                     defaults: {
-//                         idCampania: id,
-//                         periodo: etapa.periodo ? parseInt(etapa.periodo) : null,
-//                         intervalo: etapa.intervalo ? parseInt(etapa.intervalo) : null,
-//                         intervaloSemanal: etapa.intervaloSemanal ? parseInt(etapa.intervaloSemanal) : null,
-//                         intervaloMensual: etapa.intervaloMensual ? parseInt(etapa.intervaloMensual) : null,
-//                         valorAcumulado: etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null
-//                     },
-//                     transaction
-//                 });
-
-//                 if (!etapaCreada) {
-//                     await etapaInstancia.update({
-//                         idCampania: id,
-//                         periodo: etapa.periodo ? parseInt(etapa.periodo) : null,
-//                         intervalo: etapa.intervalo ? parseInt(etapa.intervalo) : null,
-//                         intervaloSemanal: etapa.intervaloSemanal ? parseInt(etapa.intervaloSemanal) : null,
-//                         intervaloMensual: etapa.intervaloMensual ? parseInt(etapa.intervaloMensual) : null,
-//                         valorAcumulado: etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null
-//                     }, { transaction });
-//                 }
-
-//                 if (Array.isArray(etapa.parametros)) {
-//                     for (const parametro of etapa.parametros) {
-//                         await Parametro.upsert({ ...parametro, idEtapa: etapaInstancia.id }, { transaction });
-//                     }
-//                 }
-
-//                 if (Array.isArray(etapa.presupuestos)) {
-//                     for (const presupuesto of etapa.presupuestos) {
-//                         await Presupuesto.upsert({ ...presupuesto, idEtapa: etapaInstancia.id }, { transaction });
-//                     }
-//                 }
-
-//                 if (Array.isArray(etapa.premiocampania)) {
-//                     for (const premio of etapa.premiocampania) {
-//                         await PremioCampania.upsert({ ...premio, idEtapa: etapaInstancia.id }, { transaction });
-//                     }
-//                 }
-//             }
-//         }
-
-//         if (Array.isArray(bloqueados)) {
-//             for (const bloqueo of bloqueados) {
-//                 await Bloqueados.upsert({ ...bloqueo, idCampania: id }, { transaction });
-//             }
-//         }
-
-//         if (Array.isArray(participacion)) {
-//             for (const participante of participacion) {
-//                 await Participantes.upsert({ ...participante, idCampania: id }, { transaction });
-//             }
-//         }
-
-//         await transaction.commit();
-
-//         const campaniaActualizada = await Campania.findByPk(id, {
-//             include: [
-//                 {
-//                     model: Etapa,
-//                     include: [
-//                         { model: Parametro, attributes: { exclude: ['idCampania'] } },
-//                         { model: Presupuesto },
-//                         { model: PremioCampania }
-//                     ]
-//                 },
-//                 { model: Bloqueados },
-//                 { model: Participantes }
-//             ]
-//         });
-
-//         res.json({ code: 'ok', message: 'Campaña actualizada con éxito', data: campaniaActualizada });
-//     } catch (error) {
-//         if (transaction.finished !== 'commit') {
-//             await transaction.rollback();
-//         }
-//         console.error('Error al actualizar la campaña:', error);
-//         res.status(500).json({ error: 'Ha sucedido un error al intentar actualizar la campaña', details: error.message });
-//     }
-// };
-
-
-
-
-//esta de abajo es prueva 
-
-// const UpdateCampania = async (req, res) => {
-//     const transaction = await sequelize.transaction();
-//     try {
-//         const { id } = req.params;
-//         const {
-//             nombre,
-//             descripcion,
-//             fechaCreacion,
-//             fechaRegistro,
-//             fechaInicio,
-//             fechaFin,
-//             edadInicial,
-//             edadFinal,
-//             sexo,
-//             tipoUsuario,
-//             tituloNotificacion,
-//             descripcionNotificacion,
-//             imgPush,
-//             imgAkisi,
-//             estado,
-//             maximoParticipaciones,
-//             campaniaTerceros,
-//             terminosCondiciones,
-//             observaciones,
-//             esArchivada,
-//             restriccionUser,
-//             idProyecto,
-//             etapas,
-//             bloqueados,
-//             participacion,
-//             emails,
-//             ultimoCorreoEnviado
-//         } = req.body;
-
-//         const campania = await Campania.findByPk(id, { transaction });
-//         if (!campania) {
-//             throw new Error('La campaña no existe');
-//         }
-
-//         await campania.update({
-//             nombre,
-//             descripcion,
-//             fechaCreacion,
-//             fechaRegistro,
-//             fechaInicio,
-//             fechaFin,
-//             edadInicial,
-//             edadFinal,
-//             sexo,
-//             tipoUsuario,
-//             tituloNotificacion,
-//             descripcionNotificacion,
-//             imgPush,
-//             imgAkisi,
-//             estado,
-//             maximoParticipaciones,
-//             campaniaTerceros,
-//             terminosCondiciones,
-//             observaciones,
-//             esArchivada,
-//             restriccionUser,
-//             idProyecto,
-//             emails,
-//             ultimoCorreoEnviado
-//         }, { transaction });
-
-//         const etapaData = etapas.map(etapa => ({
-//             ...etapa,
-//             idCampania: id,
-//             periodo: etapa.periodo ? parseInt(etapa.periodo) : null,
-//             intervalo: etapa.intervalo ? parseInt(etapa.intervalo) : null,
-//             intervaloSemanal: etapa.intervaloSemanal ? parseInt(etapa.intervaloSemanal) : null,
-//             intervaloMensual: etapa.intervaloMensual ? parseInt(etapa.intervaloMensual) : null,
-//             valorAcumulado: etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null
-//         }));
-
-//         const nuevasEtapas = await Etapa.bulkCreate(etapaData, { transaction });
-
-//         for (let nuevaEtapa of nuevasEtapas) {
-//             const parametrosData = nuevaEtapa.parametros.map(parametro => ({ ...parametro, idEtapa: nuevaEtapa.id }));
-//             await Parametro.bulkCreate(parametrosData, { transaction });
-
-//             const presupuestoData = nuevaEtapa.presupuesto.map(presupuesto => ({ ...presupuesto, idEtapa: nuevaEtapa.id }));
-//             await Presupuesto.bulkCreate(presupuestoData, { transaction });
-
-//             const premioData = nuevaEtapa.premio.map(premio => ({ ...premio, idEtapa: nuevaEtapa.id }));
-//             await PremioCampania.bulkCreate(premioData, { transaction });
-//         }
-
-//         if (bloqueados) {
-//             const bloqueoData = bloqueados.map(bloqueo => ({ ...bloqueo, idCampania: id }));
-//             await Bloqueados.bulkCreate(bloqueoData, { transaction });
-//         }
-
-//         if (participacion) {
-//             const participacionData = participacion.map(participacion => ({ ...participacion, idCampania: id }));
-//             await Participantes.bulkCreate(participacionData, { transaction });
-//         }
-
-//         await transaction.commit();
-//         res.json({ code: 'ok', message: 'Campaña creada con éxito' });
-//     } catch (error) {
-//         await transaction.rollback();
-//         console.error('Error al crear la campaña:', error);
-//         res.status(500).json({ error: 'Ha sucedido un error al intentar crear la campaña', details: error.message });
-//     }
-// }
-
-
-
-
-//esta es otra prueva
-
-// const UpdateCampania = async (req, res) => {
-//     const transaction = await sequelize.transaction();
-//     try {
-//         const { id } = req.params;
-//         const {
-//             nombre,
-//             descripcion,
-//             fechaCreacion,
-//             fechaRegistro,
-//             fechaInicio,
-//             fechaFin,
-//             edadInicial,
-//             edadFinal,
-//             sexo,
-//             tipoUsuario,
-//             tituloNotificacion,
-//             descripcionNotificacion,
-//             imgPush,
-//             imgAkisi,
-//             estado,
-//             maximoParticipaciones,
-//             campaniaTerceros,
-//             terminosCondiciones,
-//             observaciones,
-//             esArchivada,
-//             restriccionUser,
-//             idProyecto,
-//             etapas = [],  // Asegúrate de que etapas siempre sea un array
-//             bloqueados,
-//             participacion,
-//             emails,
-//             ultimoCorreoEnviado
-//         } = req.body;
-
-//         // Verifica si la campaña existe
-//         const campania = await Campania.findByPk(id, { transaction });
-//         if (!campania) {
-//             throw new Error('La campaña no existe');
-//         }
-
-//         // Actualiza la campaña
-//         await campania.update({
-//             nombre,
-//             descripcion,
-//             fechaCreacion,
-//             fechaRegistro,
-//             fechaInicio,
-//             fechaFin,
-//             edadInicial,
-//             edadFinal,
-//             sexo,
-//             tipoUsuario,
-//             tituloNotificacion,
-//             descripcionNotificacion,
-//             imgPush,
-//             imgAkisi,
-//             estado,
-//             maximoParticipaciones,
-//             campaniaTerceros,
-//             terminosCondiciones,
-//             observaciones,
-//             esArchivada,
-//             restriccionUser,
-//             idProyecto,
-//             emails,
-//             ultimoCorreoEnviado
-//         }, { transaction });
-
-//         // Procesa las etapas
-//         const idsEtapasExistentes = etapas
-//             .filter(etapa => etapa.id) // Etapas con ID (existentes)
-//             .map(etapa => etapa.id);
-
-//         // Actualiza estado de las etapas existentes
-//         if (idsEtapasExistentes.length > 0) {
-//             await Etapa.update(
-//                 { estado: 0 },
-//                 {
-//                     where: {
-//                         id: idsEtapasExistentes,
-//                         idCampania: id
-//                     },
-//                     transaction
-//                 }
-//             );
-//         }
-
-//         // Crea nuevas etapas
-//         const nuevasEtapas = etapas
-//             .filter(etapa => !etapa.id) // Etapas nuevas
-//             .map(etapa => ({
-//                 ...etapa,
-//                 idCampania: id,
-//                 periodo: etapa.periodo ? parseInt(etapa.periodo) : null,
-//                 intervalo: etapa.intervalo ? parseInt(etapa.intervalo) : null,
-//                 intervaloSemanal: etapa.intervaloSemanal ? parseInt(etapa.intervaloSemanal) : null,
-//                 intervaloMensual: etapa.intervaloMensual ? parseInt(etapa.intervaloMensual) : null,
-//                 valorAcumulado: etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null
-//             }));
-
-//         // Crear etapas y obtener datos de las etapas creadas
-//         const etapasCreadas = await Etapa.bulkCreate(nuevasEtapas, { returning: true, transaction });
-
-//         // Procesar cada etapa creada para agregar parámetros, presupuestos y premios
-//         for (let nuevaEtapa of etapasCreadas) {
-//             // Crear parámetros de la etapa
-//             const parametrosData = nuevaEtapa.parametros ? nuevaEtapa.parametros.map(parametro => ({
-//                 ...parametro,
-//                 idEtapa: nuevaEtapa.id
-//             })) : [];
-//             await Parametro.bulkCreate(parametrosData, { transaction });
-
-//             // Crear presupuestos de la etapa
-//             const presupuestoData = nuevaEtapa.presupuesto ? nuevaEtapa.presupuesto.map(presupuesto => ({
-//                 ...presupuesto,
-//                 idEtapa: nuevaEtapa.id
-//             })) : [];
-//             await Presupuesto.bulkCreate(presupuestoData, { transaction });
-
-//             // Crear premios de la etapa
-//             const premioData = nuevaEtapa.premio ? nuevaEtapa.premio.map(premio => ({
-//                 ...premio,
-//                 idEtapa: nuevaEtapa.id
-//             })) : [];
-//             await PremioCampania.bulkCreate(premioData, { transaction });
-//         }
-
-//         // Manejar bloqueados
-//         if (bloqueados) {
-//             const bloqueoData = bloqueados.map(bloqueo => ({ ...bloqueo, idCampania: id }));
-//             await Bloqueados.bulkCreate(bloqueoData, { transaction });
-//         }
-
-//         // Manejar participaciones
-//         if (participacion) {
-//             const participacionData = participacion.map(participacion => ({ ...participacion, idCampania: id }));
-//             await Participantes.bulkCreate(participacionData, { transaction });
-//         }
-
-//         await transaction.commit();
-//         res.json({ code: 'ok', message: 'Campaña actualizada con éxito' });
-//     } catch (error) {
-//         await transaction.rollback();
-//         console.error('Error al actualizar la campaña:', error);
-//         res.status(500).json({ error: 'Ha sucedido un error al intentar actualizar la campaña', details: error.message });
-//     }
-// }
-
-
-
-
-
-
-
-
-
-
-const UpdateCampania = async(req, res) => {
+const UpdateCampania = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
         const { id } = req.params;
@@ -638,6 +213,10 @@ const UpdateCampania = async(req, res) => {
             throw new Error('La campaña no existe');
         }
 
+        if (!etapas || etapas.length === 0) {
+            throw new Error('La campaña debe tener al menos una etapa para ser actualizada');
+        }
+
         await campania.update({
             nombre,
             descripcion,
@@ -667,18 +246,13 @@ const UpdateCampania = async(req, res) => {
         }, { transaction });
 
         if (etapas.length === 1 && etapas[0].id) {
-            // Si solo viene una etapa y trae id, se guarda tal como viene
             const singleEtapa = etapas[0];
             await Etapa.update(singleEtapa, { where: { id: singleEtapa.id }, transaction });
-
         } else {
-            // Si vienen más de una etapa, actualizar etapas existentes y crear nuevas etapas
             for (let etapa of etapas) {
                 if (etapa.id) {
-                    // Actualizar etapa existente
                     await Etapa.update(etapa, { where: { id: etapa.id, idCampania: id }, transaction });
                 } else {
-                    // Crear nueva etapa
                     etapa.idCampania = id;
                     etapa.periodo = etapa.periodo ? parseInt(etapa.periodo) : null;
                     etapa.intervalo = etapa.intervalo ? parseInt(etapa.intervalo) : null;
@@ -721,33 +295,6 @@ const UpdateCampania = async(req, res) => {
 
 
 
-// const GetcampanasActivasById = async(req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const etapa = await Campania.findByPk(id, {
-//             where: { estado: 1 },
-//             include: [{
-//                     model: Etapa,
-//                     include: [
-//                         { model: Parametro, attributes: { exclude: ['idCampania'] } },
-//                         { model: PremioCampania },
-//                         { model: Presupuesto }
-//                     ]
-//                 },
-//                 { model: Participantes },
-//                 { model: Bloqueados }
-
-//             ]
-//         });
-
-
-//         res.json(etapa);
-
-//     } catch (error) {
-//         res.status(403)
-//         res.send({ errors: 'Ha sucedido un  error al intentar consultar la Campaña.', details: error.message });
-//     }
-// }
 
 const GetcampanasActivasById = async(req, res) => {
     try {
@@ -1467,24 +1014,87 @@ const getnewCampanias = async(req, res) => {
 
 
 
-const Addnumbers = async(req, res) => {
+// const Addnumbers = async (req, res) => {
+//     try {
+//         console.log(req.body);
 
+//         const { numeros, estado, campaignId } = req.body;
+
+//         if (!Array.isArray(numeros)) {
+//             return res.status(400).json({ code: 'error', message: 'El campo "numeros" debe ser un array.' });
+//         }
+
+//         await sequelize.transaction(async (t) => {
+//             for (const numero of numeros) {
+//                 await Bloqueados.create({
+//                     numero: numero,
+//                     estado: estado,
+//                     idCampania: campaignId,
+//                 }, { transaction: t });
+//             }
+//         });
+
+//         res.json({ code: 'ok', message: 'Números creados con éxito.' });
+
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ code: 'error', message: 'Ha sucedido un error al intentar agregar los números.' });
+//     }
+// };
+
+
+
+const Addnumbers = async (req, res) => {
+    let transaction;
+    
     try {
         console.log(req.body);
-        const { numero, estado, campaignId } = req.body;
-        await Bloqueados.create({
-            numero: numero,
-            estado: estado,
-            idCampania: campaignId,
-        })
-        res.json({ code: 'ok', message: 'numero creado con exito' });
 
+        const { numeros, estado, campaignId } = req.body;
+
+        if (!Array.isArray(numeros)) {
+            return res.status(400).json({ code: 'error', message: 'El campo "numeros" debe ser un array.' });
+        }
+
+        transaction = await sequelize.transaction();
+
+        for (const numero of numeros) {
+            const numExistente = await Bloqueados.findOne({
+                where: {
+                    numero: numero,
+                    idCampania: campaignId,
+                },
+                transaction,
+            });
+
+            if (numExistente) {
+                await transaction.rollback();
+                return res.status(400).json({
+                    code: 'error',
+                    message: `El número ${numero} ya existe en la campaña ${campaignId}.`,
+                });
+            }
+
+            await Bloqueados.create({
+                numero: numero,
+                estado: estado,
+                idCampania: campaignId,
+            }, { transaction });
+        }
+
+        await transaction.commit();
+        return res.json({ code: 'ok', message: 'Números creados con éxito.' });
     } catch (error) {
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar agregar el numero' });
+        if (transaction) {
+            await transaction.rollback();
+        }
+        console.error(error);
+        return res.status(500).json({ code: 'error', message: 'Ha sucedido un error al intentar agregar los números.' });
     }
+};
 
-}
+
+
 
 
 
@@ -1514,6 +1124,50 @@ const Getbloqueados = async(req, res) => {
 
 
 
+
+const actualizarNumero = async(req, res) => {
+
+    try {
+
+        const { numero } = req.params;
+
+
+        console.log('Número recibido:', numero);
+
+        await Bloqueados.update({
+            estado: 0
+        }, {
+
+            where: {
+                numero: numero,
+                
+            }
+        });
+
+        res.json({ code: 'ok', message: 'numero  eliminado con exito' })
+
+    } catch (error) {
+
+        res.status(403)
+        res.send({ errors: 'Ha sucedido un  error al intentar eliminar.' });
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
     AddCampania,
     GetCampania,
@@ -1530,5 +1184,9 @@ module.exports = {
     CheckNombreCampaña,
     inabilitarEtapa,
     Addnumbers,
-    Getbloqueados
+    Getbloqueados,
+    actualizarNumero
 }
+
+
+

@@ -16,7 +16,8 @@ const {
     CheckNombreCampaña,
     inabilitarEtapa,
     Addnumbers,
-    Getbloqueados
+    Getbloqueados,
+    actualizarNumero
 } = require('../controllers/campania.controller');
 const authUser = require('../middlewares/auth.js');
 
@@ -39,7 +40,7 @@ router.delete(`/${path}/:id`, authUser, DeleteCampania);
 router.get(`/${path}/:id`, authUser, GetcampanasActivasById);
 router.post(`/${path}/num`, authUser, Addnumbers);
 router.get(`/${path}/number/:id`, Getbloqueados);
-
+router.put(`/${path}/numdelete/:numero`, authUser, actualizarNumero);
 
 
 

@@ -33,17 +33,17 @@ const getCustomerInfoById = async(customerId) => {
     }
 };
 
-// Función para obtener los participantes y la información del cliente
 const getParticipantes = async(req, res) => {
     try {
         const participantes = await Participacion.findAll({
             include: {
                 model: Campania,
                 attributes: ['nombre', 'descripcion', 'fechaInicio', 'fechaFin', 'fechaCreacion']
-            }
+            },
+            order: [['fecha', 'DESC']],  
+            limit: 10  
         });
 
-        // Obtener la información del cliente para cada participante
         for (let participante of participantes) {
             const customerInfo = await getCustomerInfoById(participante.customerId);
             participante.dataValues.customerInfo = customerInfo;
