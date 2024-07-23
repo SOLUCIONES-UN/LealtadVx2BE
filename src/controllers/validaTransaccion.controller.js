@@ -231,19 +231,19 @@ const getransaccion = async(req, res) => {
         let transaccionesSospechosas3 = [];
 
         for (const validacion of validacionesSeleccionadas) {
-            if (validacion === 1 || validacion === 7) {
+            if (validacion === 1 || validacion === 4) {
                 const resultadoPrimeraValidacion = await validarTransaccion(customerInfo, tiempoIntervalo);
                 transaccionesValidadas.push(...resultadoPrimeraValidacion.transaccionesValidadas);
                 transaccionesSospechosas.push(...resultadoPrimeraValidacion.transaccionesSospechosas);
             }
 
-            if ((validacion === 2 || validacion === 7) && transaccionesSospechosas.length === 0) {
+            if ((validacion === 2 || validacion === 4) && transaccionesSospechosas.length === 0) {
                 const resultadoSegundaValidacion = await validarDuplicados(customerInfo);
                 transaccionesValidadas2.push(...resultadoSegundaValidacion.transaccionesValidadas2);
                 transaccionesSospechosas2.push(...resultadoSegundaValidacion.transaccionesSospechosas2);
             }
 
-            if ((validacion === 3 || validacion === 7) && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
+            if ((validacion === 3 || validacion === 4) && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
                 const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
                 transaccionesValidadas3.push(...resultadoTerceraValidacion.transaccionesValidadas3);
                 transaccionesSospechosas3.push(...resultadoTerceraValidacion.transaccionesSospechosas3);
