@@ -10,6 +10,40 @@ const { Transaccion } = require('../models/transaccion');
 
 const { Participacion } = require('../models/Participacion');
 const { FailTransaccion } = require('../models/failTransaccion');
+const { Configurevalidation } = require('../models/configurevalidation');
+
+
+
+
+
+
+
+const AddCofig = async(req, res) => {
+    try {
+        const { idCampania, validacion,time,cantransaccion } = req.body;
+
+
+        await Configurevalidation.create({
+            idCampania,
+            validacion,
+            time,
+            cantransaccion
+        });
+
+        res.json({ code: "ok", message: "configuracion creada con éxito" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            errors: "Ha sucedido un error al intentar crear la configuracion.",
+        });
+    }
+};
+
+
+
+
+
+
 
 async function getCustomerInfoFromPronet(customerId) {
     try {
@@ -127,6 +161,10 @@ async function getFailTransaccions(req, res) {
         res.status(500).json({ error: 'Error al obtener las transaccciones fallidas' });
     }
 }
+
+
+
+
 
 
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
@@ -417,4 +455,4 @@ const rechazarTransaccion = async (req, res) => {
 }
 
 
-module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, getCustomerInfoFromPronet };
+module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, getCustomerInfoFromPronet,AddCofig};

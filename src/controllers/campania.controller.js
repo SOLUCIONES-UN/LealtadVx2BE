@@ -296,14 +296,6 @@ const UpdateCampania = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
 const GetcampanasActivasById = async(req, res) => {
     try {
         const { id } = req.params;
@@ -1019,36 +1011,6 @@ const getnewCampanias = async(req, res) => {
     }
 };
 
-
-
-
-// const Addnumbers = async (req, res) => {
-//     try {
-//         console.log(req.body);
-
-//         const { numeros, estado, campaignId } = req.body;
-
-//         if (!Array.isArray(numeros)) {
-//             return res.status(400).json({ code: 'error', message: 'El campo "numeros" debe ser un array.' });
-//         }
-
-//         await sequelize.transaction(async (t) => {
-//             for (const numero of numeros) {
-//                 await Bloqueados.create({
-//                     numero: numero,
-//                     estado: estado,
-//                     idCampania: campaignId,
-//                 }, { transaction: t });
-//             }
-//         });
-
-//         res.json({ code: 'ok', message: 'Números creados con éxito.' });
-
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ code: 'error', message: 'Ha sucedido un error al intentar agregar los números.' });
-//     }
-// };
 
 
 

@@ -6,6 +6,7 @@ const { Participacion } = require('./Participacion');
 const { Participantes } = require('./participantes');
 const { Parametro } = require('./parametro');
 const { FailTransaccion } = require('./failTransaccion');
+const { Configurevalidation } = require('./configurevalidation');
 
 // const {Usuario} = require('./usuario');
 const { Configuraciones } = require('./configuraciones');
@@ -195,6 +196,23 @@ FailTransaccion.belongsTo(Campania, {
 
 });
 
+Campania.hasMany(Configurevalidation, {
+    foreignKey: 'idCampania',
+    sourceKey: 'id',
+    allowNull: false
+
+});
+
+Configurevalidation.belongsTo(Campania, {
+    foreignKey: 'idCampania',
+    targetId: 'id',
+    allowNull: false
+
+
+});
+
+
+
 
 
 
@@ -233,6 +251,11 @@ FailTransaccion.belongsTo(Campania, {
 
 // FailTransaccion.sync({ alter: true }).then(() => {
 //     console.log('tabla failTransaccion creada');
+// });
+
+
+// Configurevalidation.sync({ alter: true }).then(() => {
+//     console.log('tabla Configurevalidation creada');
 // });
 
 
