@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const { getransaccion, getFailTransaccions, aceptarTransaccionSospechosa, rechazarTransaccion, getFailTransaccionsByCampania, getCustomerInfoFromPronet,AddCofig } = require('../controllers/validaTransaccion.controller.js')
+const { getransaccion, getFailTransaccions, aceptarTransaccionSospechosa, rechazarTransaccion, GetConfig, getFailTransaccionsByCampania, getCustomerInfoFromPronet, AddCofig } = require('../controllers/validaTransaccion.controller.js')
 const { validateCreate } = require('../validators/usuario')
 const env = require('../bin/env');
 const authUser = require('../middlewares/auth.js');
@@ -13,9 +13,10 @@ router.get(`/${path}/campaniafail/:campaniaId`, getFailTransaccionsByCampania);
 router.put(`/${path}/aceptar/:id`, aceptarTransaccionSospechosa);
 router.put(`/${path}/rechazar/:id`, rechazarTransaccion);
 router.post(`/${path}`, AddCofig);
+router.get(`/${path}/config`, GetConfig);
 // router.get(`/${path}/customers/:customerId`, getCustomerInfoFromPronet);
 
-router.get(`/${path}/customers/:customerId`, async (req, res) => {
+router.get(`/${path}/customers/:customerId`, async(req, res) => {
     const { customerId } = req.params;
     try {
         const telno = await getCustomerInfoFromPronet(customerId);

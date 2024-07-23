@@ -14,37 +14,6 @@ const { Configurevalidation } = require('../models/configurevalidation');
 
 
 
-
-
-
-
-const AddCofig = async(req, res) => {
-    try {
-        const { idCampania, validacion,time,cantransaccion } = req.body;
-
-
-        await Configurevalidation.create({
-            idCampania,
-            validacion,
-            time,
-            cantransaccion
-        });
-
-        res.json({ code: "ok", message: "configuracion creada con éxito" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({
-            errors: "Ha sucedido un error al intentar crear la configuracion.",
-        });
-    }
-};
-
-
-
-
-
-
-
 async function getCustomerInfoFromPronet(customerId) {
     try {
         const query = `
@@ -79,8 +48,7 @@ async function getFailTransaccionsByCampania(req, res) {
                     [Op.in]: [1, 2]
                 }
             },
-            include: [
-                {
+            include: [{
                     model: Campania,
                     attributes: ['nombre'],
                     required: true
@@ -98,7 +66,7 @@ async function getFailTransaccionsByCampania(req, res) {
 
             if (customerId) {
                 const telno = await getCustomerInfoFromPronet(customerId);
-                
+
                 if (telno) {
                     transaccion.dataValues.telno = telno;
                 } else {
@@ -110,7 +78,7 @@ async function getFailTransaccionsByCampania(req, res) {
         }
 
         res.json(transacciones);
-        
+
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener las transacciones fallidas' });
     }
@@ -124,8 +92,7 @@ async function getFailTransaccions(req, res) {
                     [Op.in]: [1, 2]
                 }
             },
-            include: [
-                {
+            include: [{
                     model: Campania,
                     attributes: ['nombre'],
                     required: true
@@ -138,7 +105,7 @@ async function getFailTransaccions(req, res) {
             ]
         });
 
-        const promesasTelno = transacciones.map(async (transaccion) => {
+        const promesasTelno = transacciones.map(async(transaccion) => {
             const customerId = transaccion.participacion ? transaccion.participacion.customerId : null;
 
             if (customerId) {
@@ -166,22 +133,92 @@ async function getFailTransaccions(req, res) {
 
 
 
+const AddCofig = async(req, res) => {
+    try {
+        const { idCampania, validacion, time, cantransaccion } = req.body;
+
+
+        await Configurevalidation.create({
+            idCampania,
+            validacion,
+            time,
+            cantransaccion
+        });
+
+        res.json({ code: "ok", message: "configuracion creada con éxito" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            errors: "Ha sucedido un error al intentar crear la configuracion.",
+        });
+    }
+};
+
+
+
+
+const GetConfig = async(req, res) => {
+    try {
+        const config = await Configurevalidation.findAll({
+
+            where: {
+                estado: 1,
+            },
+        });
+        res.json(config);
+    } catch (error) {
+        res.status(403);
+        res.send({
+            errors: "Ha sucedido un  error al intentar realizar la configuracion.",
+        });
+    }
+};
+
+
+
+
+// const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
 const getransaccion = async(req, res) => {
     try {
-        const customerInfo = [{
-            idParticipacion: 19,
-            fk_customer_id: 130,
-            fecha: '2024-09-06T00:32:00.000Z',
-            descripcionTrx: 'Recarga de Saldo',
-            idPremio: 24,
-            idCampania: 33,
-            idTransaccion: 1
-        }, ];
+        const config = await Configurevalidation.findAll({
+            where: {
+                estado: 1,
+            },
+        });
 
-        const validacionesSeleccionadas = ['primera'];
+        if (!config || config.length === 0) {
+            return res.status(400).json({ message: 'No se encontró una configuración válida' });
+        }
+
+        const tiempoIntervalo = config[0].time;
+        const cantTransaccion = config[0].cantTransaccion;
+        const validacionesSeleccionadas = config.map(c => c.validacion);
+
+        let customerInfo = [{
+                idParticipacion: 24,
+                fk_customer_id: 242,
+                fecha: '2024-06-30T16:00:00.000Z',
+                descripcionTrx: 'Recarga de saldo Tigo 3',
+                idPremio: 24,
+                idCampania: 87,
+                idTransaccion: 1
+            },
+            {
+                idParticipacion: 22,
+                fk_customer_id: 110,
+                fecha: '2024-06-30T15:56:00.000Z',
+                descripcionTrx: 'Recarga de saldo Tigo 2',
+                idPremio: 5,
+                idCampania: 35,
+                idTransaccion: 1
+            }
+        ];
+
+        // Limit the number of transactions based on cantTransaccion
+        customerInfo = customerInfo.slice(0, cantTransaccion);
 
         console.log('Data obtenida de pronet:', customerInfo);
         console.log('Validaciones solicitadas:', validacionesSeleccionadas);
@@ -194,19 +231,19 @@ const getransaccion = async(req, res) => {
         let transaccionesSospechosas3 = [];
 
         for (const validacion of validacionesSeleccionadas) {
-            if (validacion === 'primera' || validacion === 'ambas') {
-                const resultadoPrimeraValidacion = await validarTransaccion(customerInfo);
+            if (validacion === 1 || validacion === 7) {
+                const resultadoPrimeraValidacion = await validarTransaccion(customerInfo, tiempoIntervalo);
                 transaccionesValidadas.push(...resultadoPrimeraValidacion.transaccionesValidadas);
                 transaccionesSospechosas.push(...resultadoPrimeraValidacion.transaccionesSospechosas);
             }
 
-            if ((validacion === 'segunda' || validacion === 'ambas') && transaccionesSospechosas.length === 0) {
+            if ((validacion === 2 || validacion === 7) && transaccionesSospechosas.length === 0) {
                 const resultadoSegundaValidacion = await validarDuplicados(customerInfo);
                 transaccionesValidadas2.push(...resultadoSegundaValidacion.transaccionesValidadas2);
                 transaccionesSospechosas2.push(...resultadoSegundaValidacion.transaccionesSospechosas2);
             }
 
-            if ((validacion === 'tercera' || validacion === 'ambas') && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
+            if ((validacion === 3 || validacion === 7) && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
                 const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
                 transaccionesValidadas3.push(...resultadoTerceraValidacion.transaccionesValidadas3);
                 transaccionesSospechosas3.push(...resultadoTerceraValidacion.transaccionesSospechosas3);
@@ -227,7 +264,9 @@ const getransaccion = async(req, res) => {
     }
 };
 
-const validarTransaccion = async(customerInfo) => {
+
+
+const validarTransaccion = async(customerInfo, tiempoIntervalo) => {
     const transaccionesValidadas = [];
     const transaccionesSospechosas = [];
 
@@ -249,8 +288,8 @@ const validarTransaccion = async(customerInfo) => {
                             customerId: fk_customer_id,
                             fecha: {
                                 [Op.between]: [
-                                    sequelize.literal(`DATE_SUB('${fecha}', INTERVAL 2 MINUTE)`),
-                                    sequelize.literal(`DATE_ADD('${fecha}', INTERVAL 2 MINUTE)`)
+                                    sequelize.literal(`DATE_SUB('${fecha}', INTERVAL ${tiempoIntervalo} MINUTE)`),
+                                    sequelize.literal(`DATE_ADD('${fecha}', INTERVAL ${tiempoIntervalo} MINUTE)`)
                                 ]
                             },
                             idCampania,
@@ -274,7 +313,7 @@ const validarTransaccion = async(customerInfo) => {
                                 idTransaccion: info.idTransaccion,
                                 idParticipacion: info.idParticipacion,
                                 fecha,
-                                failmessage: 'Transacción sospechosa: mas de una transaccion en un rango de 2 minutos',
+                                failmessage: `Transacción sospechosa: duplicado dentro de ${tiempoIntervalo} minutos`,
                                 codigoError: 1,
                                 estado: 1
                             }, { transaction: t });
@@ -294,6 +333,8 @@ const validarTransaccion = async(customerInfo) => {
         transaccionesSospechosas
     };
 };
+
+
 
 
 
@@ -410,7 +451,7 @@ const validarValorTotalPorDia = async(customerInfo) => {
     };
 };
 
-const aceptarTransaccionSospechosa = async (req, res) => {
+const aceptarTransaccionSospechosa = async(req, res) => {
 
     try {
         const { id } = req.params;
@@ -432,7 +473,7 @@ const aceptarTransaccionSospechosa = async (req, res) => {
 
 }
 
-const rechazarTransaccion = async (req, res) => {
+const rechazarTransaccion = async(req, res) => {
 
     try {
         const { id } = req.params;
@@ -455,4 +496,4 @@ const rechazarTransaccion = async (req, res) => {
 }
 
 
-module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, getCustomerInfoFromPronet,AddCofig};
+module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, GetConfig, getCustomerInfoFromPronet, AddCofig };

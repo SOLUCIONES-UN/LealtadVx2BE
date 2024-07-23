@@ -112,7 +112,7 @@ const Campania = sequelize.define('campania', {
     emailspar: {
         type: DataTypes.STRING(1000),
         allowNull: true,
-    }    
+    }
 
 }, { timestamps: false });
 

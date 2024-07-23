@@ -15,20 +15,22 @@ const Configurevalidation = sequelize.define('configurevalidation', {
 
     validacion: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: 1,
         allowNull: true
     },
- 
+
 
     time: {
-        type: DataTypes.INTEGER, 
+        type: DataTypes.INTEGER,
+        defaultValue: 2,
         allowNull: true,
-        
+
     },
-    cantransaccion: {
-        type: DataTypes.INTEGER, 
+    cantTransaccion: {
+        type: DataTypes.INTEGER,
+        defaultValue: 2,
         allowNull: true,
-        
+
     },
 
 
@@ -44,7 +46,7 @@ const Configurevalidation = sequelize.define('configurevalidation', {
 
 
 
-//    Configurevalidation.sync({ alter: true }).then(() => {
+// Configurevalidation.sync({ alter: true }).then(() => {
 //     console.log('tabla Configurevalidation creada');
 // });
 
