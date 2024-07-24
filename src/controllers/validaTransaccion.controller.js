@@ -133,73 +133,7 @@ async function getFailTransaccions(req, res) {
 
 
 
-const AddCofig = async(req, res) => {
-    try {
-        const {  validacion, cantTransaccion_time, time_minutes } = req.body;
 
-
-        await Configurevalidation.create({
-            validacion,
-            cantTransaccion_time,
-            time_minutes
-        });
-
-        res.json({ code: "ok", message: "configuracion creada con éxito" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({
-            errors: "Ha sucedido un error al intentar crear la configuracion.",
-        });
-    }
-};
-
-
-
-
-
-const updateConfig = async(req, res) => {
-    try {
-        const { validacion, cantTransaccion_time, time_minutes } = req.body;
-
-        const { id } = req.params;
-        await Configurevalidation.update({
-            validacion,
-            cantTransaccion_time,
-            time_minutes
-        }, {
-            where: {
-                id: id,
-            },
-        });
-
-        res.json({ code: "ok", message: "Configuración actualizada con éxito" });
-    } catch (error) {
-        res.status(403);
-        res.send({
-            errors: "Ha sucedido un error al intentar actualizar la configuración..",
-        });
-    }
-};
-
-
-
-
-const GetConfig = async(req, res) => {
-    try {
-        const config = await Configurevalidation.findAll({
-
-            where: {
-                estado: 1,
-            },
-        });
-        res.json(config);
-    } catch (error) {
-        res.status(403);
-        res.send({
-            errors: "Ha sucedido un  error al intentar realizar la configuracion.",
-        });
-    }
-};
 
 
 
@@ -512,4 +446,4 @@ const rechazarTransaccion = async(req, res) => {
 }
 
 
-module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, GetConfig, getCustomerInfoFromPronet, AddCofig,updateConfig };
+module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, getCustomerInfoFromPronet };

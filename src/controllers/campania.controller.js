@@ -172,6 +172,25 @@ const GetCampania = async(req, res) => {
 
 
 
+
+const GetEtapa = async(req, res) => {
+    try {
+        const etapas = await Etapa.findAll({
+            where: {
+                estado: [0]
+            },
+           
+        });
+
+        res.json(etapas);
+    } catch (error) {
+        res.status(500).json({ error: 'Ha sucedido un error al intentar ver la campaña', details: error.message });
+    }
+};
+
+
+
+
 const UpdateCampania = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
@@ -206,6 +225,21 @@ const UpdateCampania = async (req, res) => {
             emailspar,
             ultimoCorreoEnviado
         } = req.body;
+
+        const existingEtapaIds = etapas.filter(etapa => etapa.id).map(etapa => etapa.id);
+
+        if (existingEtapaIds.length > 0) {
+            const etapasEnEstadoCero = await Etapa.findAll({
+                where: {
+                    id: existingEtapaIds,
+                    estado: 0
+                }
+            });
+
+            if (etapasEnEstadoCero.length === existingEtapaIds.length) {
+                return res.status(400).json({ error: 'La campaña debe tener al menos una etapa para ser actualizada' });
+            }
+        }
 
         const campania = await Campania.findByPk(id, { transaction });
         if (!campania) {
@@ -290,6 +324,126 @@ const UpdateCampania = async (req, res) => {
         res.status(500).json({ error: 'Error general al actualizar la campaña', details: error.message });
     }
 };
+
+
+// const UpdateCampania = async (req, res) => {
+//     const transaction = await sequelize.transaction();
+//     try {
+//         const { id } = req.params;
+//         const {
+//             nombre,
+//             descripcion,
+//             fechaCreacion,
+//             fechaRegistro,
+//             fechaInicio,
+//             fechaFin,
+//             edadInicial,
+//             edadFinal,
+//             sexo,
+//             tipoUsuario,
+//             tituloNotificacion,
+//             descripcionNotificacion,
+//             imgPush,
+//             imgAkisi,
+//             estado,
+//             maximoParticipaciones,
+//             campaniaTerceros,
+//             terminosCondiciones,
+//             observaciones,
+//             esArchivada,
+//             restriccionUser,
+//             idProyecto,
+//             etapas,
+//             bloqueados,
+//             participacion,
+//             emails,
+//             emailspar,
+//             ultimoCorreoEnviado
+//         } = req.body;
+
+//         const campania = await Campania.findByPk(id, { transaction });
+//         if (!campania) {
+//             return res.status(404).json({ error: 'La campaña no existe' });
+//         }
+
+//         if (!etapas || etapas.length === 0) {
+//             return res.status(400).json({ error: 'La campaña debe tener al menos una etapa para ser actualizada' });
+//         }
+
+//         await campania.update({
+//             nombre,
+//             descripcion,
+//             fechaCreacion,
+//             fechaRegistro,
+//             fechaInicio,
+//             fechaFin,
+//             edadInicial,
+//             edadFinal,
+//             sexo,
+//             tipoUsuario,
+//             tituloNotificacion,
+//             descripcionNotificacion,
+//             imgPush,
+//             imgAkisi,
+//             estado,
+//             maximoParticipaciones,
+//             campaniaTerceros,
+//             terminosCondiciones,
+//             observaciones,
+//             esArchivada,
+//             restriccionUser,
+//             idProyecto,
+//             emails,
+//             emailspar,
+//             ultimoCorreoEnviado
+//         }, { transaction });
+
+//         if (etapas.length === 1 && etapas[0].id) {
+//             const singleEtapa = etapas[0];
+//             await Etapa.update(singleEtapa, { where: { id: singleEtapa.id }, transaction });
+//         } else {
+//             for (let etapa of etapas) {
+//                 if (etapa.id) {
+//                     await Etapa.update(etapa, { where: { id: etapa.id, idCampania: id }, transaction });
+//                 } else {
+//                     etapa.idCampania = id;
+//                     etapa.periodo = etapa.periodo ? parseInt(etapa.periodo) : null;
+//                     etapa.intervalo = etapa.intervalo ? parseInt(etapa.intervalo) : null;
+//                     etapa.intervaloSemanal = etapa.intervaloSemanal ? parseInt(etapa.intervaloSemanal) : null;
+//                     etapa.intervaloMensual = etapa.intervaloMensual ? parseInt(etapa.intervaloMensual) : null;
+//                     etapa.valorAcumulado = etapa.valorAcumulado ? parseInt(etapa.valorAcumulado) : null;
+//                     const nuevaEtapa = await Etapa.create(etapa, { transaction });
+
+//                     const parametrosData = etapa.parametros.map(parametro => ({ ...parametro, idEtapa: nuevaEtapa.id }));
+//                     await Parametro.bulkCreate(parametrosData, { transaction });
+
+//                     const presupuestoData = etapa.presupuesto.map(presupuesto => ({ ...presupuesto, idEtapa: nuevaEtapa.id }));
+//                     await Presupuesto.bulkCreate(presupuestoData, { transaction });
+
+//                     const premioData = etapa.premio.map(premio => ({ ...premio, idEtapa: nuevaEtapa.id }));
+//                     await PremioCampania.bulkCreate(premioData, { transaction });
+//                 }
+//             }
+//         }
+
+//         if (bloqueados) {
+//             const bloqueoData = bloqueados.map(bloqueo => ({ ...bloqueo, idCampania: id }));
+//             await Bloqueados.bulkCreate(bloqueoData, { transaction });
+//         }
+
+//         if (participacion) {
+//             const participacionData = participacion.map(participacion => ({ ...participacion, idCampania: id }));
+//             await Participantes.bulkCreate(participacionData, { transaction });
+//         }
+
+//         await transaction.commit();
+//         res.json({ code: 'ok', message: 'Campaña actualizada con éxito' });
+//     } catch (error) {
+//         await transaction.rollback();
+//         console.error('Error al actualizar la campaña:', error);
+//         res.status(500).json({ error: 'Error general al actualizar la campaña', details: error.message });
+//     }
+// };
 
 
 

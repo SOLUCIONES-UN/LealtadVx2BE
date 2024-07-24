@@ -6,7 +6,7 @@ const { Participacion } = require('./Participacion');
 const { Participantes } = require('./participantes');
 const { Parametro } = require('./parametro');
 const { FailTransaccion } = require('./failTransaccion');
-// const { Configurevalidation } = require('./configurevalidation');
+const { CampaniaValidation } = require('./campaniaValidation');
 
 // const {Usuario} = require('./usuario');
 const { Configuraciones } = require('./configuraciones');
@@ -196,20 +196,20 @@ FailTransaccion.belongsTo(Campania, {
 
 });
 
-// Campania.hasMany(Configurevalidation, {
-//     foreignKey: 'idCampania',
-//     sourceKey: 'id',
-//     allowNull: false
+Campania.hasMany(CampaniaValidation, {
+    foreignKey: 'idCampania',
+    sourceKey: 'id',
+    allowNull: false
 
-// });
+});
 
-// Configurevalidation.belongsTo(Campania, {
-//     foreignKey: 'idCampania',
-//     targetId: 'id',
-//     allowNull: false
+CampaniaValidation.belongsTo(Campania, {
+    foreignKey: 'idCampania',
+    targetId: 'id',
+    allowNull: false
 
 
-// });
+});
 
 
 
@@ -254,7 +254,7 @@ FailTransaccion.belongsTo(Campania, {
 // });
 
 
-// Configurevalidation.sync({ alter: true }).then(() => {
+// CampaniaValidation.sync({ alter: true }).then(() => {
 //     console.log('tabla Configurevalidation creada');
 // });
 
