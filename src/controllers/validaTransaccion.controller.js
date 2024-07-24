@@ -135,14 +135,13 @@ async function getFailTransaccions(req, res) {
 
 const AddCofig = async(req, res) => {
     try {
-        const { idCampania, validacion, time, cantransaccion } = req.body;
+        const {  validacion, cantTransaccion_time, time_minutes } = req.body;
 
 
         await Configurevalidation.create({
-            idCampania,
             validacion,
-            time,
-            cantransaccion
+            cantTransaccion_time,
+            time_minutes
         });
 
         res.json({ code: "ok", message: "configuracion creada con éxito" });
@@ -150,6 +149,34 @@ const AddCofig = async(req, res) => {
         console.error(error);
         res.status(500).send({
             errors: "Ha sucedido un error al intentar crear la configuracion.",
+        });
+    }
+};
+
+
+
+
+
+const updateConfig = async(req, res) => {
+    try {
+        const { validacion, cantTransaccion_time, time_minutes } = req.body;
+
+        const { id } = req.params;
+        await Configurevalidation.update({
+            validacion,
+            cantTransaccion_time,
+            time_minutes
+        }, {
+            where: {
+                id: id,
+            },
+        });
+
+        res.json({ code: "ok", message: "Configuración actualizada con éxito" });
+    } catch (error) {
+        res.status(403);
+        res.send({
+            errors: "Ha sucedido un error al intentar actualizar la configuración..",
         });
     }
 };
@@ -177,7 +204,6 @@ const GetConfig = async(req, res) => {
 
 
 
-// const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
@@ -206,18 +232,8 @@ const getransaccion = async(req, res) => {
                 idCampania: 87,
                 idTransaccion: 1
             },
-            {
-                idParticipacion: 22,
-                fk_customer_id: 110,
-                fecha: '2024-06-30T15:56:00.000Z',
-                descripcionTrx: 'Recarga de saldo Tigo 2',
-                idPremio: 5,
-                idCampania: 35,
-                idTransaccion: 1
-            }
         ];
 
-        // Limit the number of transactions based on cantTransaccion
         customerInfo = customerInfo.slice(0, cantTransaccion);
 
         console.log('Data obtenida de pronet:', customerInfo);
@@ -496,4 +512,4 @@ const rechazarTransaccion = async(req, res) => {
 }
 
 
-module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, GetConfig, getCustomerInfoFromPronet, AddCofig };
+module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, GetConfig, getCustomerInfoFromPronet, AddCofig,updateConfig };

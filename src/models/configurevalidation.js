@@ -20,13 +20,13 @@ const Configurevalidation = sequelize.define('configurevalidation', {
     },
 
 
-    time: {
+    time_minutes: {
         type: DataTypes.INTEGER,
         defaultValue: 2,
         allowNull: true,
 
     },
-    cantTransaccion: {
+    cantTransaccion_time: {
         type: DataTypes.INTEGER,
         defaultValue: 2,
         allowNull: true,
