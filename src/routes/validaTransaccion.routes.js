@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const { getransaccion,getFailTransaccions, aceptarTransaccionSospechosa, rechazarTransaccion,  getFailTransaccionsByCampania, getCustomerInfoFromPronet } = require('../controllers/validaTransaccion.controller.js')
-const { updateConfig, GetConfig, AddCofig } = require('../controllers/configValidate.controller.js')
+const { updateConfig, GetConfig, AddCofig,updateCofigValidate } = require('../controllers/configValidate.controller.js')
 const { validateCreate } = require('../validators/usuario')
 const env = require('../bin/env');
 const authUser = require('../middlewares/auth.js');
@@ -16,6 +16,7 @@ router.put(`/${path}/rechazar/:id`, rechazarTransaccion);
 router.post(`/${path}`, AddCofig);
 router.get(`/${path}/config`, GetConfig);
 router.put(`/${path}/config/:id`, updateConfig);
+router.put(`/${path}/configValidate/:id`, updateCofigValidate);
 
 router.get(`/${path}/customers/:customerId`, async(req, res) => {
     const { customerId } = req.params;
