@@ -7,12 +7,9 @@ const { ConfigReferido } = require('../models/configReferidos');
 const { Usuario } = require('../models/usuario');
 const { Op } = require('sequelize');
 const { Transaccion } = require('../models/transaccion');
-
 const { Participacion } = require('../models/Participacion');
 const { FailTransaccion } = require('../models/failTransaccion');
 const { Configurevalidation } = require('../models/configurevalidation');
-
-
 
 async function getCustomerInfoFromPronet(customerId) {
     try {
