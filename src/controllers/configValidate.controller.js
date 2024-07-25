@@ -14,10 +14,6 @@ const AddCofig = async (req, res) => {
             idCampania,
            
         });
-
-       
-
-
         res.json({ code: "ok", message: "Configuración creada con éxito"});
     } catch (error) {
         console.error(error);
@@ -106,7 +102,22 @@ const GetConfig = async(req, res) => {
 
 
 
+const GetCampaniasConfig = async(req, res) => {
+    try {
+        const config = await CampaniaValidation.findAll({
+
+            where: {
+                estado: 1,
+            },
+        });
+        res.json(config);
+    } catch (error) {
+        res.status(403);
+        res.send({
+            errors: "Ha sucedido un  error al intentar realizar la configuracion con campania.",
+        });
+    }
+};
 
 
-
-module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate };
+module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig };
