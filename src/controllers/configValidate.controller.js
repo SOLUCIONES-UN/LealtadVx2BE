@@ -102,23 +102,28 @@ const GetConfig = async(req, res) => {
 
 
 
-
-const GetCampaniasConfig = async(req, res) => {
+const GetCampaniasConfig = async (req, res) => {
     try {
         const config = await CampaniaValidation.findAll({
-
             where: {
                 estado: 1,
             },
+            include: [{
+                model: Campania,
+                attributes: ['nombre'], 
+            }],
         });
+
         res.json(config);
     } catch (error) {
         res.status(403);
         res.send({
-            errors: "Ha sucedido un  error al intentar realizar la configuracion con campania.",
+            errors: "Ha sucedido un error al intentar realizar la configuración con campaña.",
         });
     }
 };
+
+
 
 
 

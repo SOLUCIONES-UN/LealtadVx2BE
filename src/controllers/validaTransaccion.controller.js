@@ -11,6 +11,7 @@ const { Transaccion } = require('../models/transaccion');
 const { Participacion } = require('../models/Participacion');
 const { FailTransaccion } = require('../models/failTransaccion');
 const { Configurevalidation } = require('../models/configurevalidation');
+const { CampaniaValidation } = require('../models/campaniaValidation');
 
 
 
@@ -132,41 +133,45 @@ async function getFailTransaccions(req, res) {
 
 
 
-
-
-
-
-
-
-
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
-const getransaccion = async(req, res) => {
+const getransaccion = async (req, res) => {
     try {
-        const config = await Configurevalidation.findAll({
+       
+        let customerInfo = [{
+            idParticipacion: 24,
+            fk_customer_id: 242,
+            fecha: '2024-06-30T16:00:00.000Z',
+            descripcionTrx: 'Recarga de saldo Tigo 3',
+            idPremio: 24,
+            idCampania: 87,
+            idTransaccion: 1
+        }];
+
+        const idCampania = customerInfo[0].idCampania;
+
+        const campaniaValidation = await CampaniaValidation.findOne({
             where: {
+                idCampania: idCampania,
                 estado: 1,
             },
+            include: {
+                model: Configurevalidation,
+                required: true,
+                where: {
+                    estado: 1
+                }
+            }
         });
 
-        if (!config || config.length === 0) {
-            return res.status(400).json({ message: 'No se encontró una configuración válida' });
+        if (!campaniaValidation) {
+            return res.status(400).json({ message: 'No se encontró una configuración válida para la campaña' });
         }
 
-        const tiempoIntervalo = config[0].time;
-        const cantTransaccion = config[0].cantTransaccion;
-        const validacionesSeleccionadas = config.map(c => c.validacion);
-
-        let customerInfo = [{
-                idParticipacion: 24,
-                fk_customer_id: 242,
-                fecha: '2024-06-30T16:00:00.000Z',
-                descripcionTrx: 'Recarga de saldo Tigo 3',
-                idPremio: 24,
-                idCampania: 87,
-                idTransaccion: 1
-            },
-        ];
+        const config = campaniaValidation.configurevalidation;
+        const tiempoIntervalo = config.time_minutes;
+        const cantTransaccion = config.cantTransaccion_time;
+        const validacionesSeleccionadas = [config.validacion];
 
         customerInfo = customerInfo.slice(0, cantTransaccion);
 
@@ -192,7 +197,6 @@ const getransaccion = async(req, res) => {
                 transaccionesValidadas2.push(...resultadoSegundaValidacion.transaccionesValidadas2);
                 transaccionesSospechosas2.push(...resultadoSegundaValidacion.transaccionesSospechosas2);
             }
-
             if ((validacion === 3 || validacion === 4) && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
                 const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
                 transaccionesValidadas3.push(...resultadoTerceraValidacion.transaccionesValidadas3);
@@ -213,6 +217,10 @@ const getransaccion = async(req, res) => {
         res.status(500).json({ message: 'Error al obtener participaciones' });
     }
 };
+
+
+
+
 
 
 
