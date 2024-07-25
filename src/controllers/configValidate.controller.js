@@ -120,4 +120,26 @@ const GetCampaniasConfig = async(req, res) => {
 };
 
 
-module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig };
+
+const DeleteConfig = async(req, res) => {
+    try {
+        const { id } = req.params;
+        await CampaniaValidation.update({
+            estado: 0,
+        }, {
+            where: {
+                idCampania: id,
+            },
+        });
+
+        res.json({ code: "ok", message: "configuracion inhabilitada con exito" });
+    } catch (error) {
+        res.status(403);
+        res.send({
+            errors: "Ha sucedido un  error al intentar inhabilitar la configuracion.",
+        });
+    }
+};
+
+
+module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig,DeleteConfig };
