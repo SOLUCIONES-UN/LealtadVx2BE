@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Participacion } = require('../models/Participacion');
 const { FailTransaccion } = require('../models/failTransaccion');
 const { Configurevalidation } = require('../models/configurevalidation');
@@ -84,7 +85,7 @@ const updateConfig = async(req, res) => {
 
 const GetConfig = async(req, res) => {
     try {
-        const config = await Configurevalidation.findAll({
+        const config = await Campania.findAll({
 
             where: {
                 estado: 1,
@@ -142,4 +143,39 @@ const DeleteConfig = async(req, res) => {
 };
 
 
-module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig,DeleteConfig };
+
+
+const GetCampaniasValidate = async (req, res) => {
+    try {
+        const campaniasEnValidation = await CampaniaValidation.findAll({
+            attributes: ['idCampania'],
+            where: {
+                estado: 1,
+            },
+        });
+
+        const campaniasEnValidationIds = campaniasEnValidation.map(campania => campania.idCampania);
+
+        const campanias = await Campania.findAll({
+            where: {
+                estado: 1,
+                id: {
+                    [Op.notIn]: campaniasEnValidationIds,
+                },
+            },
+        });
+
+        res.json(campanias);
+    } catch (error) {
+        res.status(403).send({
+            errors: "Ha sucedido un error al intentar realizar la configuración con campaña.",
+        });
+    }
+};
+
+
+
+
+
+
+module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig,DeleteConfig,GetCampaniasValidate };
