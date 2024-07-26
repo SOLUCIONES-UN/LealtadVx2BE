@@ -30,6 +30,10 @@ const Configurevalidation = sequelize.define('configurevalidation', {
         allowNull: true,
 
     },
+    nombre: {
+        type: DataTypes.STRING(150),
+        allowNull: false
+    },
 
 
     estado: {

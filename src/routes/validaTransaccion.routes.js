@@ -21,6 +21,7 @@ router.put(`/${path}/config/:id`, updateConfig);
 router.put(`/${path}/configValidate/:id`, updateCofigValidate);
 router.delete(`/${path}/configValidate/:id`,DeleteConfig);
 
+
 router.get(`/${path}/customers/:customerId`, async(req, res) => {
     const { customerId } = req.params;
     try {
