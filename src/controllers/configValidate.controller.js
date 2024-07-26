@@ -102,26 +102,6 @@ const GetConfig = async(req, res) => {
 
 
 
-const GetCampaniasConfig = async (req, res) => {
-    try {
-        const config = await CampaniaValidation.findAll({
-            where: {
-                estado: 1,
-            },
-            include: [{
-                model: Campania,
-                attributes: ['nombre'], 
-            }],
-        });
-
-        res.json(config);
-    } catch (error) {
-        res.status(403);
-        res.send({
-            errors: "Ha sucedido un error al intentar realizar la configuración con campaña.",
-        });
-    }
-};
 
 
 
@@ -147,6 +127,29 @@ const DeleteConfig = async(req, res) => {
     }
 };
 
+
+
+
+const GetCampaniasConfig = async (req, res) => {
+    try {
+        const config = await CampaniaValidation.findAll({
+            where: {
+                estado: 1,
+            },
+            include: [{
+                model: Campania,
+                attributes: ['nombre'], 
+            }],
+        });
+
+        res.json(config);
+    } catch (error) {
+        res.status(403);
+        res.send({
+            errors: "Ha sucedido un error al intentar realizar la configuración con campaña.",
+        });
+    }
+};
 
 
 
@@ -180,7 +183,67 @@ const GetCampaniasValidate = async (req, res) => {
 
 
 
+const GetCampaniasConfigValidate = async (req, res) => {
+    const { validacion } = req.params; 
+
+    try {
+        
+        const config = await Configurevalidation.findOne({
+            where: {
+                validacion: validacion,
+                estado: 1,
+            },
+            include: [{
+                model: CampaniaValidation,
+                attributes: ['idCampania', 'estado'], 
+                include: [{
+                    model: Campania,
+                    attributes: ['id', 'nombre'], 
+                }]
+            }],
+        });
+
+        if (!config) {
+            return res.status(404).json({ error: "Configuración no encontrada" });
+        }
+
+       
+        const campaniasAsignadas = config.campaniaValidations
+            .filter(cv => cv.estado === 1 && cv.campanium) 
+            .map(cv => cv.campanium);
+
+        
+        const campaniasAsignadasIds = campaniasAsignadas.map(campania => campania.id);
+
+     
+        const campaniasNoAsignadas = await Campania.findAll({
+            where: {
+                estado: 1, 
+                id: {
+                    [Op.notIn]: campaniasAsignadasIds,
+                },
+            },
+            attributes: ['id', 'nombre'], 
+        });
+
+       
+        const response = {
+            configuracion: config,
+            campaniasAsignadas: campaniasAsignadas,
+            campaniasNoAsignadas: campaniasNoAsignadas,
+        };
+
+        res.json(response);
+    } catch (error) {
+        console.error(error);
+        res.status(403).send({
+            errors: "Ha sucedido un error al intentar realizar la configuración con campaña.",
+        });
+    }
+};
 
 
 
-module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig,DeleteConfig,GetCampaniasValidate };
+
+
+module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig,DeleteConfig,GetCampaniasValidate,GetCampaniasConfigValidate };

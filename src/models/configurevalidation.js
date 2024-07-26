@@ -13,20 +13,17 @@ const Configurevalidation = sequelize.define('configurevalidation', {
 
     validacion: {
         type: DataTypes.INTEGER,
-        defaultValue: 1,
         allowNull: true
     },
 
 
     time_minutes: {
         type: DataTypes.INTEGER,
-        defaultValue: 2,
         allowNull: true,
 
     },
     cantTransaccion_time: {
         type: DataTypes.INTEGER,
-        defaultValue: 2,
         allowNull: true,
 
     },
@@ -35,6 +32,10 @@ const Configurevalidation = sequelize.define('configurevalidation', {
         allowNull: false
     },
 
+    nombre: {
+        type: DataTypes.STRING(1000),
+        allowNull: false
+    },
 
     estado: {
         type: DataTypes.INTEGER,
@@ -42,6 +43,8 @@ const Configurevalidation = sequelize.define('configurevalidation', {
         allowNull: true
     },
 
+    
+   
 }, { timestamps: false });
 
 
