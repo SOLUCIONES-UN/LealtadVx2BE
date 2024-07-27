@@ -100,11 +100,16 @@ const GetConfig = async(req, res) => {
     }
 };
 
+// const GetConfigById = async(req, res) => {
 
-
-
-
-
+//     try {
+//         const { id } = req.params;
+//         const config = await Configurevalidation.findByPk(id);
+//         res.json(config);
+//     } catch (error) {
+//         res.status(403).send({ errors: 'Ha sucedido un error al inentar obtener una configuracion'});
+//     }
+// };
 
 
 const DeleteConfig = async(req, res) => {
@@ -128,8 +133,6 @@ const DeleteConfig = async(req, res) => {
 };
 
 
-
-
 const GetCampaniasConfig = async (req, res) => {
     try {
         const config = await CampaniaValidation.findAll({
@@ -150,7 +153,6 @@ const GetCampaniasConfig = async (req, res) => {
         });
     }
 };
-
 
 
 const GetCampaniasValidate = async (req, res) => {
@@ -180,7 +182,6 @@ const GetCampaniasValidate = async (req, res) => {
         });
     }
 };
-
 
 
 const GetCampaniasConfigValidate = async (req, res) => {
