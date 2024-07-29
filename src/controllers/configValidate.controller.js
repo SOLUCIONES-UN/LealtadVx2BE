@@ -53,7 +53,6 @@ const updateCofigValidate = async (req, res) => {
 
 
 
-
 const updateConfig = async(req, res) => {
     try {
         const { validacion, cantTransaccion_time, time_minutes } = req.body;
@@ -128,11 +127,11 @@ const DeleteConfig = async(req, res) => {
             },
         });
 
-        res.json({ code: "ok", message: "configuracion inhabilitada con exito" });
+        res.json({ code: "ok", message: "configuracion eliminada con exito" });
     } catch (error) {
         res.status(403);
         res.send({
-            errors: "Ha sucedido un  error al intentar inhabilitar la configuracion.",
+            errors: "Ha sucedido un  error al intentar eliminada la configuracion.",
         });
     }
 };
