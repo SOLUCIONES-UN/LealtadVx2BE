@@ -8,14 +8,22 @@ const { Campania } = require('../models/campanias');
 
 const AddCofig = async (req, res) => {
     try {
-        const { idConfiguration, idCampania} = req.body;
+        const { idConfiguration, idCampanias } = req.body;
 
-         await CampaniaValidation.create({
-            idConfiguration,
-            idCampania,
-           
-        });
-        res.json({ code: "ok", message: "Configuración creada con éxito"});
+        if (!Array.isArray(idCampanias)) {
+            return res.status(400).send({
+                errors: "El campo idCampanias debe ser un array de IDs de campañas.",
+            });
+        }
+
+        await Promise.all(idCampanias.map(idCampania =>
+            CampaniaValidation.create({
+                idConfiguration,
+                idCampania,
+            })
+        ));
+
+        res.json({ code: "ok", message: "Configuración creada con éxito para todas las campañas." });
     } catch (error) {
         console.error(error);
         res.status(500).send({
