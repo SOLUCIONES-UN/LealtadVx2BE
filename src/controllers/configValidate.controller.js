@@ -108,6 +108,16 @@ const GetConfig = async(req, res) => {
 };
 
 
+const GetConfigById = async(req, res) => {
+
+    try {
+        const { id } = req.params;
+        const config = await Configurevalidation.findByPk(id);
+        res.json(config);
+    } catch (error) {
+        res.status(403).send({ errors: 'Ha sucedido un error al inentar obtener una configuracion'});
+    }
+};
 
 
 
@@ -253,4 +263,4 @@ const GetCampaniasConfigValidate = async (req, res) => {
 
 
 
-module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig,DeleteConfig,GetCampaniasValidate,GetCampaniasConfigValidate };
+module.exports = { GetConfig,AddCofig,updateConfig,updateCofigValidate,GetCampaniasConfig,DeleteConfig,GetCampaniasValidate,GetCampaniasConfigValidate,GetConfigById };
