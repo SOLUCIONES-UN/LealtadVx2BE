@@ -21,7 +21,7 @@ router.get(`/${path}/configCampanias`, GetCampaniasValidate);
 router.get(`/${path}/filterCampanias/:validacion`, GetCampaniasConfigValidate);
 router.put(`/${path}/config/:id`, updateConfig);
 router.put(`/${path}/configValidate/:id`, updateCofigValidate);
-router.delete(`/${path}/configValidate/:id`,DeleteConfig);
+router.delete(`/${path}/configValidate/:idConfiguration`, DeleteConfig);
 
 
 router.get(`/${path}/customers/:customerId`, async(req, res) => {

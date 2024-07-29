@@ -123,26 +123,34 @@ const GetConfigById = async(req, res) => {
 
 
 
-
-const DeleteConfig = async(req, res) => {
+const DeleteConfig = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { idConfiguration } = req.params;
+        const { idCampanias } = req.body; 
+
+        if (!Array.isArray(idCampanias) || idCampanias.length === 0) {
+            return res.status(400).json({ errors: "El campo 'ids' debe ser un array de IDs de campañas." });
+        }
+
+       
         await CampaniaValidation.update({
             estado: 0,
         }, {
             where: {
-                idCampania: id,
+                idConfiguration: idConfiguration,
+                idCampania: idCampanias,
             },
         });
 
-        res.json({ code: "ok", message: "configuracion eliminada con exito" });
+        res.json({ code: "ok", message: "Configuraciones eliminadas con éxito." });
     } catch (error) {
-        res.status(403);
-        res.send({
-            errors: "Ha sucedido un  error al intentar eliminada la configuracion.",
+        console.error("Error al eliminar configuraciones:", error);
+        res.status(403).send({
+            errors: "Ha sucedido un error al intentar eliminar las configuraciones.",
         });
     }
 };
+
 
 
 
