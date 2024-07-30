@@ -43,7 +43,7 @@ async function getFailTransaccionsByCampania(req, res) {
             where: {
                 idCampania: campaniaId,
                 estado: {
-                    [Op.in]: [1, 2]
+                    [Op.in]: [1]
                 }
             },
             include: [{
@@ -87,7 +87,7 @@ async function getFailTransaccions(req, res) {
         const transacciones = await FailTransaccion.findAll({
             where: {
                 estado: {
-                    [Op.in]: [1, 2]
+                    [Op.in]: [1]
                 }
             },
             include: [{
