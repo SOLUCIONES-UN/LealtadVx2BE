@@ -1,10 +1,8 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
-const { TablaDB } = require('./tabladb');
-const { Columna } = require('./columna');
-const { Transaccion } = require('./transaccion');
 const { Campania } = require('./campanias');
-const { Departamento_Proyectos } = require('./departamento_proyectos');
+const { CampaniaValidation } = require('./campaniaValidation');
+
 
 const Configurevalidation = sequelize.define('configurevalidation', {
     id: {
@@ -15,24 +13,29 @@ const Configurevalidation = sequelize.define('configurevalidation', {
 
     validacion: {
         type: DataTypes.INTEGER,
-        defaultValue: 1,
         allowNull: true
     },
 
 
     time_minutes: {
         type: DataTypes.INTEGER,
-        defaultValue: 2,
         allowNull: true,
 
     },
     cantTransaccion_time: {
         type: DataTypes.INTEGER,
-        defaultValue: 2,
         allowNull: true,
 
     },
+    nombre: {
+        type: DataTypes.STRING(150),
+        allowNull: false
+    },
 
+    nombre: {
+        type: DataTypes.STRING(1000),
+        allowNull: false
+    },
 
     estado: {
         type: DataTypes.INTEGER,
@@ -40,13 +43,34 @@ const Configurevalidation = sequelize.define('configurevalidation', {
         allowNull: true
     },
 
+    
+   
 }, { timestamps: false });
 
 
+Configurevalidation.hasMany(CampaniaValidation, {
+    foreignKey: 'idConfiguration',
+    sourceKey: 'id',
+    allowNull: false
+
+});
+
+CampaniaValidation.belongsTo(Configurevalidation, {
+    foreignKey: 'idConfiguration',
+    targetId: 'id',
+    allowNull: false
+
+
+});
 
 
 
 // Configurevalidation.sync({ alter: true }).then(() => {
+//     console.log('tabla Configurevalidation creada');
+// });
+
+
+// CampaniaValidation.sync({ alter: true }).then(() => {
 //     console.log('tabla Configurevalidation creada');
 // });
 

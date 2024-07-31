@@ -24,5 +24,4 @@ router.put(`/${path}/configValidate/:id`, updateCofigValidate);
 router.delete(`/${path}/configValidate/:idConfiguration`, DeleteConfig);
 
 
-
 module.exports = router

@@ -92,7 +92,7 @@ const updateConfig = async(req, res) => {
 
 const GetConfig = async(req, res) => {
     try {
-        const config = await Campania.findAll({
+        const config = await Configurevalidation.findAll({
 
             where: {
                 estado: 1,

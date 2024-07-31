@@ -54,23 +54,7 @@ Configuraciones.belongsTo(ConfigReport, {
 
 
 
-// Configuraciones.sync({ alter: true }).then(() => {
-//     console.log('Tabla Configuraciones creada o actualizada correctamente');
-// });
 
-// Configuraciones.sync({ alter: true }).then(() => {
-//     console.log('Tabla Configuraciones creada o actualizada correctamente');
-// });
-
-
-// Configuraciones.sync({ alter: true }).then(() => {
-//     console.log('tabla Campania creada');
-// });
-
-
-// ConfigReport.sync({ alter: true }).then(() => {
-//     console.log('Tabla ConfigReport creada o actualizada correctamente');
-// });
 
 
 

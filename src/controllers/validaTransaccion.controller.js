@@ -7,11 +7,10 @@ const { ConfigReferido } = require('../models/configReferidos');
 const { Usuario } = require('../models/usuario');
 const { Op } = require('sequelize');
 const { Transaccion } = require('../models/transaccion');
-
 const { Participacion } = require('../models/Participacion');
 const { FailTransaccion } = require('../models/failTransaccion');
-const { Configurevalidation } = require("../models/configurevalidation");
-const { CampaniaValidation } = require("../models/campaniaValidation");
+const { Configurevalidation } = require('../models/configurevalidation');
+const { CampaniaValidation } = require('../models/campaniaValidation');
 
 async function getCustomerInfoFromPronet(customerId) {
     try {
@@ -44,11 +43,10 @@ async function getFailTransaccionsByCampania(req, res) {
             where: {
                 idCampania: campaniaId,
                 estado: {
-                    [Op.in]: [1, 2]
+                    [Op.in]: [1]
                 }
             },
-            include: [
-                {
+            include: [{
                     model: Campania,
                     attributes: ['nombre'],
                     required: true
@@ -66,7 +64,7 @@ async function getFailTransaccionsByCampania(req, res) {
 
             if (customerId) {
                 const telno = await getCustomerInfoFromPronet(customerId);
-                
+
                 if (telno) {
                     transaccion.dataValues.telno = telno;
                 } else {
@@ -78,7 +76,7 @@ async function getFailTransaccionsByCampania(req, res) {
         }
 
         res.json(transacciones);
-        
+
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener las transacciones fallidas' });
     }
@@ -89,11 +87,10 @@ async function getFailTransaccions(req, res) {
         const transacciones = await FailTransaccion.findAll({
             where: {
                 estado: {
-                    [Op.in]: [1, 2]
+                    [Op.in]: [1]
                 }
             },
-            include: [
-                {
+            include: [{
                     model: Campania,
                     attributes: ['nombre'],
                     required: true
@@ -106,7 +103,7 @@ async function getFailTransaccions(req, res) {
             ]
         });
 
-        const promesasTelno = transacciones.map(async (transaccion) => {
+        const promesasTelno = transacciones.map(async(transaccion) => {
             const customerId = transaccion.participacion ? transaccion.participacion.customerId : null;
 
             if (customerId) {
@@ -130,126 +127,44 @@ async function getFailTransaccions(req, res) {
     }
 }
 
-// const AddCofig = async(req, res) => {
-//     try {
-//         const {  validacion, cantTransaccion_time, time_minutes } = req.body;
-
-
-//         await Configurevalidation.create({
-//             validacion,
-//             cantTransaccion_time,
-//             time_minutes
-//         });
-
-//         res.json({ code: "ok", message: "configuracion creada con éxito" });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).send({
-//             errors: "Ha sucedido un error al intentar crear la configuracion.",
-//         });
-//     }
-// };
-
-const updateConfig = async(req, res) => {
-    try {
-        const { validacion, cantTransaccion_time, time_minutes } = req.body;
-
-        const { id } = req.params;
-        await Configurevalidation.update({
-            validacion,
-            cantTransaccion_time,
-            time_minutes
-        }, {
-            where: {
-                id: id,
-            },
-        });
-
-        res.json({ code: "ok", message: "Configuración actualizada con éxito" });
-    } catch (error) {
-        res.status(403);
-        res.send({
-            errors: "Ha sucedido un error al intentar actualizar la configuración..",
-        });
-    }
-};
-
-const GetConfig = async(req, res) => {
-    try {
-        const config = await Configurevalidation.findAll({
-
-            where: {
-                estado: 1,
-            },
-        });
-        res.json(config);
-    } catch (error) {
-        res.status(403);
-        res.send({
-            errors: "Ha sucedido un  error al intentar realizar la configuracion.",
-        });
-    }
-};
-
-const AddCofig = async (req, res) => {
-    try {
-        const { idConfiguration, idCampania} = req.body;
-
-         await CampaniaValidation.create({
-            idConfiguration,
-            idCampania,
-           
-        });
-
-        res.json({ code: "ok", message: "Configuración creada con éxito"});
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({
-            errors: "Ha sucedido un error al intentar crear la configuración.",
-        });
-    }
-};
-
-const updateCofigValidate = async (req, res) => {
-    try {
-        const { idConfiguration, idCampania} = req.body;
-        
-        const { id } = req.params;
-         await CampaniaValidation.update({
-            idConfiguration,
-            idCampania,
-           
-        }, {
-            where: {
-                id: id,
-            },
-        });
-        res.json({ code: "ok", message: "Configuración actualizada con éxito"});
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({
-            errors: "Ha sucedido un error al intentar crear la configuración.",
-        });
-    }
-};
-
-
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
 
-const getransaccion = async(req, res) => {
-
+const getransaccion = async (req, res) => {
     try {
-        const customerInfo = [{
-            idParticipacion: 20,
-            fk_customer_id: 112,
-            fecha: '2024-18-07T00:30:00.000Z',
-            descripcionTrx: 'Recarga de Saldo',
-            idPremio: 25,
-            idCampania: 38,
+        let customerInfo = [{
+            idParticipacion: 24,
+            fk_customer_id: 242,
+            fecha: '2024-07-29T12:12:00.000Z',
+            descripcionTrx: 'Recarga de saldo Tigo 3',
+            idPremio: 24,
+            idCampania: 26,
             idTransaccion: 1
-        }, ];
+        }];
 
-        const validacionesSeleccionadas = ['primera'];
+        const idCampania = customerInfo[0].idCampania;
+
+        const campaniaValidation = await CampaniaValidation.findOne({
+            where: {
+                idCampania: idCampania,
+                estado: 1,
+            },
+            include: {
+                model: Configurevalidation,
+                required: true,
+                where: {
+                    estado: 1
+                }
+            }
+        });
+
+        if (!campaniaValidation) {
+            return res.status(400).json({ message: 'No se encontró una configuración válida para la campaña' });
+        }
+
+        const config = campaniaValidation.configurevalidation;
+        const tiempoIntervalo = config.time_minutes;
+        const cantTransaccion = config.cantTransaccion_time;
+        const validacionesSeleccionadas = [config.validacion];
 
         console.log('Data obtenida de pronet:', customerInfo);
         console.log('Validaciones solicitadas:', validacionesSeleccionadas);
@@ -261,20 +176,26 @@ const getransaccion = async(req, res) => {
         let transaccionesValidadas3 = [];
         let transaccionesSospechosas3 = [];
 
+        const numeroTransacciones = await contarTransacciones(customerInfo[0].fk_customer_id, customerInfo[0].fecha, tiempoIntervalo);
+
+        if (numeroTransacciones >= cantTransaccion) {
+            return res.status(400).json({ message: 'Se está excediendo el límite de transacciones, intente de nuevo más tarde' });
+        }
+
         for (const validacion of validacionesSeleccionadas) {
-            if (validacion === 'primera' || validacion === 'ambas') {
-                const resultadoPrimeraValidacion = await validarTransaccion(customerInfo);
+            if (validacion === 1 || validacion === 4) {
+                const resultadoPrimeraValidacion = await validarTransaccion(customerInfo, tiempoIntervalo);
                 transaccionesValidadas.push(...resultadoPrimeraValidacion.transaccionesValidadas);
                 transaccionesSospechosas.push(...resultadoPrimeraValidacion.transaccionesSospechosas);
             }
 
-            if ((validacion === 'segunda' || validacion === 'ambas') && transaccionesSospechosas.length === 0) {
+            if ((validacion === 2 || validacion === 4) && transaccionesSospechosas.length === 0) {
                 const resultadoSegundaValidacion = await validarDuplicados(customerInfo);
                 transaccionesValidadas2.push(...resultadoSegundaValidacion.transaccionesValidadas2);
                 transaccionesSospechosas2.push(...resultadoSegundaValidacion.transaccionesSospechosas2);
             }
 
-            if ((validacion === 'tercera' || validacion === 'ambas') && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
+            if ((validacion === 3 || validacion === 4) && transaccionesSospechosas.length === 0 && transaccionesSospechosas2.length === 0) {
                 const resultadoTerceraValidacion = await validarValorTotalPorDia(customerInfo);
                 transaccionesValidadas3.push(...resultadoTerceraValidacion.transaccionesValidadas3);
                 transaccionesSospechosas3.push(...resultadoTerceraValidacion.transaccionesSospechosas3);
@@ -295,8 +216,22 @@ const getransaccion = async(req, res) => {
     }
 };
 
+const contarTransacciones = async (customerId, fecha, tiempoIntervalo) => {
+    const participaciones = await Participacion.count({
+        where: {
+            customerId: customerId,
+            fecha: {
+                [Op.between]: [
+                    sequelize.literal(`DATE_SUB('${fecha}', INTERVAL ${tiempoIntervalo} MINUTE)`),
+                    sequelize.literal(`DATE_ADD('${fecha}', INTERVAL ${tiempoIntervalo} MINUTE)`)
+                ]
+            }
+        }
+    });
+    return participaciones;
+};
 
-const validarTransaccion = async(customerInfo) => {
+const validarTransaccion = async (customerInfo, tiempoIntervalo, cantTransaccion) => {
     const transaccionesValidadas = [];
     const transaccionesSospechosas = [];
 
@@ -318,8 +253,8 @@ const validarTransaccion = async(customerInfo) => {
                             customerId: fk_customer_id,
                             fecha: {
                                 [Op.between]: [
-                                    sequelize.literal(`DATE_SUB('${fecha}', INTERVAL 2 MINUTE)`),
-                                    sequelize.literal(`DATE_ADD('${fecha}', INTERVAL 2 MINUTE)`)
+                                    sequelize.literal(`DATE_SUB('${fecha}', INTERVAL ${tiempoIntervalo} MINUTE)`),
+                                    sequelize.literal(`DATE_ADD('${fecha}', INTERVAL ${tiempoIntervalo} MINUTE)`)
                                 ]
                             },
                             idCampania,
@@ -334,20 +269,8 @@ const validarTransaccion = async(customerInfo) => {
                         ]
                     });
 
-                    if (participaciones.length > 0) {
-                        transaccionesSospechosas.push(info);
-
-                        await sequelize.transaction(async(t) => {
-                            await FailTransaccion.create({
-                                idCampania: info.idCampania,
-                                idTransaccion: info.idTransaccion,
-                                idParticipacion: info.idParticipacion,
-                                fecha,
-                                failmessage: 'Más de una transacción en un rango de 2 minutos',
-                                codigoError: 1,
-                                estado: 1
-                            }, { transaction: t });
-                        });
+                    if (participaciones.length >= cantTransaccion) {
+                        return { error: `Se está excediendo el límite de ${cantTransaccion} transacciones en ${tiempoIntervalo} minutos. Intente de nuevo más tarde.` };
                     } else {
                         transaccionesValidadas.push(info);
                     }
@@ -363,6 +286,13 @@ const validarTransaccion = async(customerInfo) => {
         transaccionesSospechosas
     };
 };
+
+
+
+
+
+
+
 
 
 const validarDuplicados = async(customerInfo) => {
@@ -411,6 +341,7 @@ const validarDuplicados = async(customerInfo) => {
         transaccionesSospechosas2
     };
 };
+
 
 
 
@@ -476,7 +407,7 @@ const validarValorTotalPorDia = async(customerInfo) => {
     };
 };
 
-const aceptarTransaccionSospechosa = async (req, res) => {
+const aceptarTransaccionSospechosa = async(req, res) => {
 
     try {
         const { id } = req.params;
@@ -498,7 +429,8 @@ const aceptarTransaccionSospechosa = async (req, res) => {
 
 }
 
-const rechazarTransaccion = async (req, res) => {
+const rechazarTransaccion = async(req, res) => {
+
     try {
         const { id } = req.params;
         const { motivo } = req.body;
@@ -520,4 +452,4 @@ const rechazarTransaccion = async (req, res) => {
 }
 
 
-module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, getCustomerInfoFromPronet, GetConfig, updateConfig, AddCofig};
+module.exports = { getransaccion, getFailTransaccions, rechazarTransaccion, aceptarTransaccionSospechosa, getFailTransaccionsByCampania, getCustomerInfoFromPronet };
