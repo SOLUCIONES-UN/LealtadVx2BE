@@ -69,7 +69,7 @@ const Participacion = sequelize.define('participacions', {
         type: DataTypes.CHAR(1),
         allowNull: false
     },
-    estado : {
+    estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1
     },
@@ -87,16 +87,16 @@ TransaccionPremio.belongsTo(Participacion, {
     targetKey: 'id',
 });
 
-Participacion.hasMany(codigoReferido,{
+Participacion.hasMany(codigoReferido, {
     foreignKey: 'customerId',
-    sourceKey: 'customerId' 
+    sourceKey: 'customerId'
 });
 
 codigoReferido.belongsTo(Participacion, {
     foreignKey: 'customerId',
     targetKey: 'customerId',
     as: 'codigoReferidoAssociation'
-}); 
+});
 
 Participacion.hasMany(FailTransaccion, {
     foreignKey: 'idParticipacion',
@@ -116,7 +116,7 @@ FailTransaccion.belongsTo(Participacion, {
 //     try{ 
 //     await Participacion.sync({ alter: true });
 //     console.log("Se cargo correctamente");
-    
+
 
 //     } catch (error){
 //         console.error("hay problema al cargar el modelo",error);

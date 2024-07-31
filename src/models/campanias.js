@@ -6,6 +6,7 @@ const { Participacion } = require('./Participacion');
 const { Participantes } = require('./participantes');
 const { Parametro } = require('./parametro');
 const { FailTransaccion } = require('./failTransaccion');
+const { CampaniaValidation } = require('./campaniaValidation');
 
 // const {Usuario} = require('./usuario');
 const { Configuraciones } = require('./configuraciones');
@@ -111,7 +112,7 @@ const Campania = sequelize.define('campania', {
     emailspar: {
         type: DataTypes.STRING(1000),
         allowNull: true,
-    }    
+    }
 
 }, { timestamps: false });
 
@@ -195,6 +196,23 @@ FailTransaccion.belongsTo(Campania, {
 
 });
 
+Campania.hasMany(CampaniaValidation, {
+    foreignKey: 'idCampania',
+    sourceKey: 'id',
+    allowNull: false
+
+});
+
+CampaniaValidation.belongsTo(Campania, {
+    foreignKey: 'idCampania',
+    targetId: 'id',
+    allowNull: false
+
+
+});
+
+
+
 
 
 
@@ -233,6 +251,11 @@ FailTransaccion.belongsTo(Campania, {
 
 // FailTransaccion.sync({ alter: true }).then(() => {
 //     console.log('tabla failTransaccion creada');
+// });
+
+
+// CampaniaValidation.sync({ alter: true }).then(() => {
+//     console.log('tabla Configurevalidation creada');
 // });
 
 

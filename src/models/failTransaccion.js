@@ -24,10 +24,7 @@ const FailTransaccion = sequelize.define('failTransaccion', {
         type: DataTypes.INTEGER,
         defaultValue: 1
     },
-    motivo: {
-        type: DataTypes.STRING(1000),
-        allowNull: false
-    },
+
 
 }, { timestamps: false });
 
