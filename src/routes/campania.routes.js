@@ -16,7 +16,9 @@ const {
     CheckNombreCampaña,
     inabilitarEtapa,
     Addnumbers,
-    Getbloqueados
+    Getbloqueados,
+    validarNumeroTelefono,
+    testNotificacion
 } = require('../controllers/campania.controller');
 const authUser = require('../middlewares/auth.js');
 
@@ -39,14 +41,10 @@ router.delete(`/${path}/:id`, authUser, DeleteCampania);
 router.get(`/${path}/:id`, authUser, GetcampanasActivasById);
 router.post(`/${path}/num`, authUser, Addnumbers);
 router.get(`/${path}/:id/number`, authUser, Getbloqueados);
-
-
-
-
+router.get(`/${path}/telno/:numero`, validarNumeroTelefono);
+router.post(`/${path}/testNotificacion`, testNotificacion);
 router.put(`/${path}/inabilitar/:id`, authUser, inabilitarEtapa);
 
 
-
-
-
 module.exports = router;
+

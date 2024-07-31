@@ -90,14 +90,14 @@ async function usuarioParticipantes_get(fechaI, fechaF) {
             tc.telno, 
             CONCAT(tui.fname, ' ', tui.mname, ' ', tui.lname, ' ', tui.slname) AS nombre 
         FROM 
-            genesis.participante_campana_adicional pc 
+            dbepco7agwmwba.participacions pc 
         JOIN 
             pronet.tbl_customer tc ON tc.customer_id = pc.idUsuarioParticipante 
         JOIN 
             pronet.tblUserInformation tui ON tui.userid = tc.fk_userid 
         WHERE 
-            pc.yaAplico = 0 
-            AND pc.fechaParticipacion BETWEEN :fechaI AND :fechaF
+            pc.jugado = 0 
+            AND pc.fecha BETWEEN :fechaI AND :fechaF
         GROUP BY 
             pc.idUsuarioParticipante, 
             tc.telno, 
@@ -251,6 +251,17 @@ async function isEligibleForCampaign(participant, campaign, userInfo, customerIn
 
     if (!usuarioRegionValida) {
 
+        return false;
+    }
+    
+    // const participacionesHoyUsuario = await validarLimiteParticipacionesPorUsuario(participant.idUsuarioParticipante, idCampania);
+
+    // if (participacionesHoyUsuario >= limiteParticipaciones) {
+    //     return false;
+    // }
+
+    const numerosRestringidos = await campaniaNumerosRestringidos(idCampania, customerInfo.telno, 2);
+    if (numerosRestringidos.permitido === 0) {
         return false;
     }
 

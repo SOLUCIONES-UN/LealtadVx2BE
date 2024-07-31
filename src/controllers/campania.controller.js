@@ -1,4 +1,5 @@
 const { Op, Sequelize } = require('sequelize');
+const axios = require('axios');
 const { asignarCategoria } = require('../models/asignarCategoria');
 const { Campania } = require('../models/campanias');
 const { Etapa } = require('../models/etapa');
@@ -9,6 +10,7 @@ const { PremioCampania } = require('../models/premioCampania');
 const { Presupuesto } = require('../models/presupuesto');
 const { Transaccion } = require('../models/transaccion');
 const { Bloqueados } = require('../models/bloqueados');
+const { Customer } = require('../models/customerspro'); 
 const { sequelize } = require('../database/database');
 
 
@@ -1505,6 +1507,64 @@ const Getbloqueados = async(req, res) => {
 
 }
 
+const validarNumeroTelefono = async (req, res) => {
+    try {
+        const { numero } = req.params;
+        const numeroExiste = await Customer.findOne({
+            where: {
+                telno: numero
+            }
+        });
+
+        if (numeroExiste) {
+            res.status(200).json({ exists: true, numeroExiste });
+        } else {
+            res.status(404).json({ exists: false });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ errors: 'Ha sucedido un error al intentar verificar el número.' });
+    }
+}
+
+const testNotificacion = async (req, res) => {
+    try {
+        const { telefono, titulo, descripcion } = req.body;
+
+        const infCliente = await Customer.findOne({
+            where: { telno: telefono }
+        });
+
+        if (infCliente) {
+            const username = process.env.OFFERCRAFT_USER;
+            const password = process.env.OFFERCRAFT_PASSWORD;
+            const apikey = process.env.OFFERCRAFT_APIKEY;
+            const urlConsumo = `${process.env.BASE_URL}/api/v1/marketing/sendindividual_promotions`;
+
+            const auth = Buffer.from(`${username}:${password}`).toString('base64');
+
+            const response = await axios.post(urlConsumo, {
+                R1: telefono,
+                R2: titulo,
+                R3: descripcion,
+                R4: '',
+                R5: ''
+            }, {
+                headers: {
+                    'x-api-key': apikey,
+                    'Authorization': `Basic ${auth}`
+                }
+            });
+
+            res.status(200).json(response.data);
+        } else {
+            res.status(400).json({ status: 400, message: 'No.' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: 500, message: 'Error en el servidor.' });
+    }
+};
 
 
 
@@ -1524,5 +1584,8 @@ module.exports = {
     CheckNombreCampaña,
     inabilitarEtapa,
     Addnumbers,
-    Getbloqueados
+    Getbloqueados,
+    validarNumeroTelefono,
+    testNotificacion
 }
+

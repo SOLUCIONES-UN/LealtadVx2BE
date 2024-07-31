@@ -498,6 +498,35 @@ const validarLimiteParticipacionesPorUsuario = async (idUsuarioParticipante, idC
     }
 }
 
+
+// const validarLimiteParticipacionesPorUsuario = async (req, res) => {
+//     try {
+//         const { usuario, idCampania } = req.params;
+
+//         const result = await Participacion.findOne({
+//             attributes: [
+//                 [Sequelize.fn('COUNT', Sequelize.col('*')), 'participaHoy']
+//             ],
+//             where: {
+//                 idUsuarioParticipante: usuario,
+//                 idCampania: idCampania,
+//                 [Op.and]: Sequelize.where(
+//                     Sequelize.fn('DATE', Sequelize.col('fecha')),
+//                     Sequelize.fn('CURRENT_DATE')
+//                 )
+//             },
+//             raw: true
+//         });
+
+//         const participaHoy = result ? result.participaHoy : 0;
+
+//         res.status(200).json({ participaHoy });
+//     } catch (error) {
+//         console.error('Error al validar el límite de participaciones por usuario:', error);
+//         res.status(500).json({ error: 'Ha sucedido un error al intentar validar el límite de participaciones por usuario.' });
+//     }
+// };
+
 const TransaccionesDelUsuarioPendientesXcampana = async (idUsuarioParticipante, idParticipacion, fecha1, fecha2, idCampania) => {
     
 
@@ -547,39 +576,95 @@ const cantidadParametros = async (idCampania) => {
     }
 };
 
+// async function campaniaNumerosRestringidos(idCampania, numero, restringe) {
+//     // const { idCampania, numero, restringe } = req.params;
+
+//     if (!idCampania || !numero || restringe === undefined) {
+//         // return res.status(400).json({ error: 'Faltan parámetros necesarios' });
+//         throw new Error('Faltan parámetros necesarios');
+//     }
+
+//     try {
+//         if (parseInt(restringe) === 0) {
+//             return res.json({ permitido: 1 });
+//         }
+
+//         let queryResult;
+
+//         if (parseInt(restringe) === 1) {
+//             queryResult = await CampaniasNumeros.count({
+//                 where: {
+//                     idCampania: parseInt(idCampania),
+//                     numero: numero,
+//                     estado: 1
+//                 }
+//             });
+//             return res.json({ permitido: queryResult });
+//         }
+
+//         if (parseInt(restringe) === 2) {
+//             queryResult = await CampaniasNumeros.count({
+//                 where: {
+//                     idCampania: parseInt(idCampania),
+//                     numero: numero,
+//                     estado: 1
+//                 }
+//             });
+//             return res.json({ permitido: queryResult > 0 ? 0 : 1 });
+//         }
+
+//         // return res.json({ permitido: 0 });
+
+//         return {permitido: 0};
+
+//     } catch (error) {
+//         console.error(error);
+//         // res.status(500).json({ error: error.message });
+//         throw error;
+//     }
+// }
 
 const campaniaNumerosRestringidos = async (idCampania, numero, restringe) => {
+    if (!idCampania || !numero || restringe === undefined) {
+        throw new Error('Faltan parámetros necesarios');
+    }
 
     try {
-        let permitido;
-        const restringeParsed = parseInt(restringe);
+        if (parseInt(restringe) === 0) {
+            return { permitido: 1 };
+        }
 
-        if (restringeParsed === 0) {
-            permitido = 1;
-        } else {
-            const count = await CampaniasNumeros.count({
+        let queryResult;
+
+        if (parseInt(restringe) === 1) {
+            queryResult = await CampaniasNumeros.count({
                 where: {
-                    idCampania: idCampania,
+                    idCampania: parseInt(idCampania),
                     numero: numero,
                     estado: 1
                 }
             });
-
-            if (restringeParsed === 1) {
-                permitido = count; 
-            } else if (restringeParsed === 2) {
-                permitido = count > 0 ? 0 : 1; 
-            } else {
-                permitido = 0; 
-            }
+            return { permitido: queryResult };
         }
 
+        if (parseInt(restringe) === 2) {
+            queryResult = await CampaniasNumeros.count({
+                where: {
+                    idCampania: parseInt(idCampania),
+                    numero: numero,
+                    estado: 1
+                }
+            });
+            return { permitido: queryResult > 0 ? 0 : 1 };
+        }
 
-        return permitido;
+        return { permitido: 0 };
+
     } catch (error) {
+        console.error(error);
         throw error;
     }
-};
+}
 
 async function tienePremiosPendientesCampanas(idCampania, idUsuarioParticipante) {
 
