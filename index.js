@@ -65,9 +65,7 @@ app.use(require('./src/routes/correosAutomaticos.routes.js'));
 app.use(require('./src/routes/participantes.routes.js'));
 app.use(require('./src/routes/validaTransaccion.routes.js'));
 app.use(require('./src/routes/ReporteNotificaciones.routes.js'));
-
-
-
+app.use(require('./src/routes/campaniasInternasNumeros.routes.js'));
 
 
 //corremos el servidor
