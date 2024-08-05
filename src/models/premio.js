@@ -92,7 +92,17 @@ Premiacion.belongsTo(Premio, {
 
 });
 
+Premio.hasMany(CampaniaInterna, {
+    foreignKey: 'idPremio',
+    sourceKey: 'id',
+    allowNull: false
 
+});
+CampaniaInterna.belongsTo(Premio, {
+    foreignKey: 'idPremio',
+    targetId: 'id',
+    allowNull: false
+});
 
 
 
@@ -115,7 +125,7 @@ Premiacion.belongsTo(Premio, {
 
 
 
-//   Participacion.sync({ alter: true }).then(() => {
+//   CampaniaInterna.sync({ alter: true }).then(() => {
 //       console.log('se creo con exito la tabla  Participacion ');
 //   });
 
@@ -123,5 +133,9 @@ Premiacion.belongsTo(Premio, {
 //     await CampaniaInterna.sync({ alter: true });
 //     // Code here
 // })();
+
+// CampaniaInterna.sync({ alter: true }).then(() => {
+//       console.log('se creo con exito la tabla  Premio ');
+//   });
 
 module.exports = { Premio, sequelize }

@@ -65,7 +65,7 @@ const CampaniaInterna = sequelize.define('campanias_internas', {
     terminos: {
         type: DataTypes.STRING(1000),
         allowNull: true
-    },
+    }
 
 }, { timestamps: false });
 
@@ -83,6 +83,18 @@ CampaniaInternoNumber.belongsTo(CampaniaInterna, {
     allowNull: false
 });
 
+// CampaniaInterna.hasMany(Premio, {
+//     foreignKey: 'idPremio',
+//     sourceKey: 'id',
+//     allowNull: false
+
+// });
+
+// Premio.belongsTo(CampaniaInterna, {
+//     foreignKey: 'idPremio',
+//     targetId: 'id',
+//     allowNull: false
+// });
 
 // CampaniaInterna.sync({ alter: true }).then(() => {
 //     console.log('tabla CampaniaInterna creada');

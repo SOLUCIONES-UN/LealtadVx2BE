@@ -1,6 +1,8 @@
 const { CampaniaInterna } = require('../models/campaniasinterno');
 const { sequelize } = require('../database/database');
+const { Op } = require('sequelize');
 const { CampaniaInternoNumber } = require('../models/campaniaInternaNumber');
+const { Premio } = require('../models/premio');
 
 
 const AddCampaniaInterna = async (req, res) => {
@@ -111,6 +113,26 @@ const GetTelnoCampanias = async (req, res) => {
         res.status(403).send({ errors: 'Ha sucedido un error al intentar obtener los telefonos de la Campaña Interna' });
     }
 }
+
+const GetPremiosLink = async (req, res) => {
+    try {
+        const premios = await Premio.findAll({
+            where: {
+                estado: 1,
+                link: {
+                    [Op.and]: [
+                        { [Op.ne]: null },
+                        { [Op.ne]: '' }
+                    ]
+                }
+            }
+        });
+
+        res.status(200).json(premios);
+    } catch (error) {
+        res.status(403).send({ errors: 'Ha sucedido un error al intentar obtener el premio por link.' });
+    }
+};
 
 const PausarCampaniaInterna = async (req, res) => {
     try {
@@ -234,4 +256,4 @@ const actualizarNumero = async (req, res ) => {
     }
 }
 
-module.exports = { AddCampaniaInterna, Addnumbers, actualizarNumero, GetCampaniaInternaActivas, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias };
+module.exports = { AddCampaniaInterna, Addnumbers, actualizarNumero, GetCampaniaInternaActivas, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias, GetPremiosLink };
