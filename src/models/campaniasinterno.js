@@ -62,6 +62,10 @@ const CampaniaInterna = sequelize.define('campanias_internas', {
         type: DataTypes.STRING(1000),
         allowNull: true,
     },
+    terminos: {
+        type: DataTypes.STRING(1000),
+        allowNull: true
+    },
 
 }, { timestamps: false });
 
@@ -80,8 +84,8 @@ CampaniaInternoNumber.belongsTo(CampaniaInterna, {
 });
 
 
-// CampaniaInternoNumber.sync({ alter: true }).then(() => {
-//     console.log('tabla failTransaccion creada');
+// CampaniaInterna.sync({ alter: true }).then(() => {
+//     console.log('tabla CampaniaInterna creada');
 // });
 
 module.exports = { CampaniaInterna };

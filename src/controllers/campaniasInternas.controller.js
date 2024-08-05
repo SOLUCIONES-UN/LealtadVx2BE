@@ -21,6 +21,7 @@ const AddCampaniaInterna = async (req, res) => {
             observaciones,
             esArchivada,
             emails,
+            terminos,
             telefonos
         } = req.body;
 
@@ -37,7 +38,8 @@ const AddCampaniaInterna = async (req, res) => {
             tipoCampania,
             observaciones,
             esArchivada,
-            emails
+            emails,
+            terminos
         }, { transaction });
 
         if (telefonos && telefonos.length > 0) {
@@ -50,7 +52,7 @@ const AddCampaniaInterna = async (req, res) => {
         }
 
         await transaction.commit();
-        res.status(201).json(newCampaniaInterna);
+        return res.status(201).json({ code: 'ok', message: 'Campania Interna creado con exito.'});
 
     } catch (error) {
         await transaction.rollback();
@@ -170,8 +172,66 @@ const DeleteCampaniaInterna = async (req, res) => {
     }
 }
 
+const Addnumbers = async ( req, res ) => {
+
+    let transaction;
+    try {
+        const { idCampaniaInterna, telefonos } = req.body;
+
+        if (!Array.isArray(telefonos)) {
+            return res.status(400).json({ code: 'error', message: 'El campo "telefonos" debe ser un array.'});
+        }
+
+        transaction = await sequelize.transaction();
+
+        for (const telefono of telefonos) {
+            const numExistente = await CampaniaInternoNumber.findOne({
+                where: {
+                    telefono: telefono,
+                    idCampaniaInterna: idCampaniaInterna,
+                }
+            });
+
+            if (numExistente) {
+                await transaction.rollback();
+                return res.status(400).json({
+                    code: 'error',
+                    message: `El número ${telefono} ya existe en la campaña interna ${idCampaniaInterna}.`,
+                })
+            }
+
+        }
 
 
+        await transaction.commit();
+        return res.status(201).json({ code: 'ok', message: 'Numeros agregados con exito.' });
+    } catch (error) {
+        if (transaction) {
+            await transaction.rollback();
+        }
+        console.error('Error al agregar numeros:', error);
+        res.status(500).json({ error: 'Ha sucedido un error al intentar agregar los numeros', details: error.message });
+    }
+}
 
+const actualizarNumero = async (req, res ) => {
+    try {
+        const { id} = req.params;
+        
+        await CampaniaInternoNumber.update({
+            estado: 0
+        }, {
+            where: {
+                id: id
+            }
+        })
 
-module.exports = { AddCampaniaInterna, GetCampaniaInternaActivas, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias };
+        res.json({ code: 'ok', message: 'numero elminado con exito'});
+
+    }catch (error){
+        console.error('Error al actualizar numero:', error);
+        res.status(500).json({ error: 'Ha sucedido un error al intentar actualizar el número', details: error.message });
+    }
+}
+
+module.exports = { AddCampaniaInterna, Addnumbers, actualizarNumero, GetCampaniaInternaActivas, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias };
