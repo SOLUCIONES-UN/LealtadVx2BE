@@ -6,7 +6,7 @@ const { Promocion } = require('../models/promocion.js');
 
 const path = 'Promocion';
 
-router.get(`/${path}`,authUser, GetPromocion);
+router.get(`/${path}`, GetPromocion);
 router.get(`/${path}/:id`, GetPromocionById);
 router.post(`/${path}`, AddPromocion);
 router.put(`/${path}/:id`, UpdatePromocion);

@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const { Campania } = require('../models/campanias');
 const { Participacion } = require('../models/Participacion');
 const { sendEmails,sendEmailspart } = require('./sendEmail');
+const { CampaniaInterna } = require('../models/campaniasinterno');
 
 function validateEmails(emails) {
     if (!emails) {
@@ -50,8 +51,38 @@ const tareaVerificarCampanias = cron.schedule('00 00 * * *', async () => {
     }
 });
 
+const CampaniaInternaVencer = cron.schedule('15 8 * * *', async () => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
 
-// '*/15 * * * * *'
+    const campanias = await CampaniaInterna.findAll({
+        where: {
+            fechaFin: { [Op.between]: [new Date(hoy.getTime()), new Date(hoy.getTime() + 5 * 24 * 60 * 60 * 1000)] },
+            estado: [1, 2, 3]
+        },
+        attributes: ['id', 'nombre', 'fechaFin', 'emails']
+    });
+
+    console.log(`Encontradas ${campanias.length} campañas a vencer en los próximos 5 días.`);
+    for (let campania of campanias) {
+        if (validateEmails(campania.emails)) {
+            try {
+                const info = await sendEmails(
+                    campania.emails,
+                    `Aviso de finalización de la campaña interna : ${campania.nombre}`,
+                    `<p>La Campaña Interna <strong>${campania.nombre}</strong> vencerá en ${Math.ceil((new Date(campania.fechaFin) - hoy) / (1000 * 60 * 60 * 24))} días.</p>`,
+                    []
+                );
+                console.log(`Correo enviado: ${info.messageId}`);
+            } catch (error) {
+                console.error('Error al enviar correo:', error);
+            }
+        } else {
+            console.log('Formato de correos inválido o no proporcionado.');
+        }
+    }
+});
+
 
 const participacionesVencer = cron.schedule('00 00 * * *', async () => {
     const hoy = new Date();
@@ -100,4 +131,4 @@ const participacionesVencer = cron.schedule('00 00 * * *', async () => {
 
 
 
-module.exports = { tareaVerificarCampanias, participacionesVencer };
+module.exports = { tareaVerificarCampanias, participacionesVencer, CampaniaInternaVencer };

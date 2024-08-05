@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database/database');
-const {CampaniaInternoNumber} = require('../models/campaniaInternaNumber');
-const {Premio} = require('../models/premio');
+const { CampaniaInternoNumber } = require('../models/campaniaInternaNumber');
+const { Premio } = require('../models/premio');
+const { Campania } = require('./campanias');
 
 const CampaniaInterna = sequelize.define('campanias_internas', {
     id: {
@@ -57,64 +58,30 @@ const CampaniaInterna = sequelize.define('campanias_internas', {
         type: DataTypes.INTEGER,
         defaultValue: 0
     },
-    
+    emails: {
+        type: DataTypes.STRING(1000),
+        allowNull: true,
+    },
+
 }, { timestamps: false });
 
-CampaniaInterna.hasMany(CampaniaInternoNumber,{
+
+CampaniaInterna.hasMany(CampaniaInternoNumber, {
     foreignKey: 'idCampaniaInterna',
-    sourceKey: 'id'
+    sourceKey: 'id',
+    allowNull: false
+
 });
 
 CampaniaInternoNumber.belongsTo(CampaniaInterna, {
     foreignKey: 'idCampaniaInterna',
     targetId: 'id',
+    allowNull: false
 });
-// Campania.belongsTo(Usuario, { foreignKey: 'tipoUsuario' });
-
-// Campania.hasMany(Configuraciones, {
-//     foreignKey: 'idCampania',
-//     sourceKey: 'id'
-// });
-
-// Configuraciones.belongsTo(Campania, {
-//     foreignKey: 'idCampania',
-//     targetId: 'id',
-// });
 
 
-// Campania.sync({ alter: true }).then(() => {
-//     console.log('tabla campania creada');
-// });
-
-// Configuraciones.sync({ alter: true }).then(() => {
-//     console.log('Tabla Configuraciones creada o actualizada correctamente');
-// });
-
-// Etapa.sync({ alter: true }).then(() => {
-//     console.log('tabla Campania creada');
-// });
-
-
-// Participacion.sync({ alter: true }).then(() => {
-//     console.log('tabla Participacion creada');
-// });
-
-
-// FailTransaccion.sync({ alter: true }).then(() => {
+// CampaniaInternoNumber.sync({ alter: true }).then(() => {
 //     console.log('tabla failTransaccion creada');
 // });
-
-
-// CampaniaValidation.sync({ alter: true }).then(() => {
-//     console.log('tabla Configurevalidation creada');
-// });
-
-
-// (async () => {
-//     await CampaniaInternoNumber.sync({ alter: true });
-//     // Code here
-//  })();
-
-
 
 module.exports = { CampaniaInterna };

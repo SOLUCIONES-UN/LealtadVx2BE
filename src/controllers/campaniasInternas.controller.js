@@ -1,5 +1,6 @@
 const { CampaniaInterna } = require('../models/campaniasinterno');
 const { sequelize } = require('../database/database');
+const { CampaniaInternoNumber } = require('../models/campaniaInternaNumber');
 
 
 const AddCampaniaInterna = async (req, res) => {
@@ -19,7 +20,8 @@ const AddCampaniaInterna = async (req, res) => {
             tipoCampania,
             observaciones,
             esArchivada,
-            idPremio
+            emails,
+            telefonos
         } = req.body;
 
         const newCampaniaInterna = await CampaniaInterna.create({
@@ -35,8 +37,17 @@ const AddCampaniaInterna = async (req, res) => {
             tipoCampania,
             observaciones,
             esArchivada,
-            idPremio
+            emails
         }, { transaction });
+
+        if (telefonos && telefonos.length > 0) {
+            const numerosData = telefonos.map(telefono => ({
+                telefono,
+                estado: 1,
+                idCampaniaInterna: newCampaniaInterna.id
+            }));
+            await CampaniaInternoNumber.bulkCreate(numerosData, { transaction });
+        }
 
         await transaction.commit();
         res.status(201).json(newCampaniaInterna);
@@ -71,12 +82,33 @@ const GetCampaniaInternaById = async (req, res) => {
 
     try {
         const { id } = req.params;
-        const campaniainterna = await CampaniaInterna.findByPk(id);
+        const campaniainterna = await CampaniaInterna.findByPk(id, {
+            include: [
+                { model: CampaniaInternoNumber },
+            ],
+            where: {
+                id: id,
+                estado: 1,
+            },
+        });
         res.json(campaniainterna);
     } catch (error) {
         res.status(403).send({ errors: 'Ha sucedido un error al inentar obtener una Campaña Interna' });
     }
 };
+
+const GetTelnoCampanias = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const telefonos = await CampaniaInternoNumber.findByPk({
+            where: { idCampaniaInterna: id}
+        });
+        res.json(telefonos);
+    } catch (error) {
+        console.log("ha error", telefonos);
+        res.status(403).send({ errors: 'Ha sucedido un error al intentar obtener los telefonos de la Campaña Interna' });
+    }
+}
 
 const PausarCampaniaInterna = async (req, res) => {
     try {
@@ -142,4 +174,4 @@ const DeleteCampaniaInterna = async (req, res) => {
 
 
 
-module.exports = { AddCampaniaInterna, GetCampaniaInternaActivas, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna };
+module.exports = { AddCampaniaInterna, GetCampaniaInternaActivas, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias };
