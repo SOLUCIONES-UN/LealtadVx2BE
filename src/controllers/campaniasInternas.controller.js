@@ -24,6 +24,7 @@ const AddCampaniaInterna = async (req, res) => {
             esArchivada,
             emails,
             terminos,
+            idPremio,
             telefonos
         } = req.body;
 
@@ -41,7 +42,8 @@ const AddCampaniaInterna = async (req, res) => {
             observaciones,
             esArchivada,
             emails,
-            terminos
+            terminos,
+            idPremio
         }, { transaction });
 
         if (telefonos && telefonos.length > 0) {
