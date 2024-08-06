@@ -5,7 +5,7 @@ const { CampaniaInternoNumber } = require('../models/campaniaInternaNumber');
 const { Premio } = require('../models/premio');
 
 
-const AddCampaniaInterna = async (req, res) => {
+const AddCampaniaInterna = async(req, res) => {
     const transaction = await sequelize.transaction();
 
     try {
@@ -56,7 +56,7 @@ const AddCampaniaInterna = async (req, res) => {
         }
 
         await transaction.commit();
-        return res.status(201).json({ code: 'ok', message: 'Campania Interna creado con exito.'});
+        return res.status(201).json({ code: 'ok', message: 'Campania Interna creado con exito.' });
 
     } catch (error) {
         await transaction.rollback();
@@ -66,7 +66,7 @@ const AddCampaniaInterna = async (req, res) => {
 };
 
 
-const GetCampaniaInternaActivas = async (req, res) => {
+const GetCampaniaInternaActivas = async(req, res) => {
     try {
         const trx = await CampaniaInterna.findAll({
 
@@ -84,7 +84,7 @@ const GetCampaniaInternaActivas = async (req, res) => {
 };
 
 
-const GetCampaniaInternaById = async (req, res) => {
+const GetCampaniaInternaById = async(req, res) => {
 
     try {
         const { id } = req.params;
@@ -103,11 +103,11 @@ const GetCampaniaInternaById = async (req, res) => {
     }
 };
 
-const GetTelnoCampanias = async (req, res) => {
+const GetTelnoCampanias = async(req, res) => {
     try {
         const { id } = req.params;
         const telefonos = await CampaniaInternoNumber.findByPk({
-            where: { idCampaniaInterna: id}
+            where: { idCampaniaInterna: id }
         });
         res.json(telefonos);
     } catch (error) {
@@ -116,15 +116,17 @@ const GetTelnoCampanias = async (req, res) => {
     }
 }
 
-const GetPremiosLink = async (req, res) => {
+const GetPremiosLink = async(req, res) => {
     try {
         const premios = await Premio.findAll({
             where: {
                 estado: 1,
                 link: {
                     [Op.and]: [
-                        { [Op.ne]: null },
-                        { [Op.ne]: '' }
+                        {
+                            [Op.ne]: null },
+                        {
+                            [Op.ne]: '' }
                     ]
                 }
             }
@@ -136,7 +138,7 @@ const GetPremiosLink = async (req, res) => {
     }
 };
 
-const PausarCampaniaInterna = async (req, res) => {
+const PausarCampaniaInterna = async(req, res) => {
     try {
         const { id } = req.params;
 
@@ -155,7 +157,7 @@ const PausarCampaniaInterna = async (req, res) => {
     }
 }
 
-const ActivarCampaniaInterna = async (req, res) => {
+const ActivarCampaniaInterna = async(req, res) => {
     try {
         const { id } = req.params;
 
@@ -175,7 +177,7 @@ const ActivarCampaniaInterna = async (req, res) => {
     }
 }
 
-const DeleteCampaniaInterna = async (req, res) => {
+const DeleteCampaniaInterna = async(req, res) => {
     try {
 
         const { id } = req.params;
@@ -188,7 +190,7 @@ const DeleteCampaniaInterna = async (req, res) => {
             },
         });
 
-        res.status(200).json({ code: 'ok', message: 'Campaña deshabilitada con exito'});
+        res.status(200).json({ code: 'ok', message: 'Campaña deshabilitada con exito' });
 
     } catch (error) {
         res.status(404)
@@ -196,14 +198,14 @@ const DeleteCampaniaInterna = async (req, res) => {
     }
 }
 
-const Addnumbers = async ( req, res ) => {
+const Addnumbers = async(req, res) => {
 
     let transaction;
     try {
         const { idCampaniaInterna, telefonos } = req.body;
 
         if (!Array.isArray(telefonos)) {
-            return res.status(400).json({ code: 'error', message: 'El campo "telefonos" debe ser un array.'});
+            return res.status(400).json({ code: 'error', message: 'El campo "telefonos" debe ser un array.' });
         }
 
         transaction = await sequelize.transaction();
@@ -238,10 +240,10 @@ const Addnumbers = async ( req, res ) => {
     }
 }
 
-const actualizarNumero = async (req, res ) => {
+const actualizarNumero = async(req, res) => {
     try {
-        const { id} = req.params;
-        
+        const { id } = req.params;
+
         await CampaniaInternoNumber.update({
             estado: 0
         }, {
@@ -250,9 +252,9 @@ const actualizarNumero = async (req, res ) => {
             }
         })
 
-        res.json({ code: 'ok', message: 'numero elminado con exito'});
+        res.json({ code: 'ok', message: 'numero elminado con exito' });
 
-    }catch (error){
+    } catch (error) {
         console.error('Error al actualizar numero:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar actualizar el número', details: error.message });
     }
