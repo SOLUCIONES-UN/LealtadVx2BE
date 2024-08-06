@@ -18,7 +18,7 @@ router.delete(`/${path}/:id`, DeleteCampaniaInterna);
 router.get(`/${path}/allphone`, GetTelnoCampanias);
 router.get(`/${path}/premiosLink`, GetPremiosLink);
 router.put(`/${path}/updateNumber/:id`, actualizarNumero);
-router.get(`/${path}/compararTelefonos`, GetTelnoCustomerbilletera);
+router.get(`/${path}/compararTelefonos/:idCampaniaInterna`, GetTelnoCustomerbilletera);
 
 module.exports = router
 
