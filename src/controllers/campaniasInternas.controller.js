@@ -267,7 +267,6 @@ const DeleteCampaniaInterna = async(req, res) => {
 }
 
 const Addnumbers = async(req, res) => {
-
     let transaction;
     try {
         const { idCampaniaInterna, telefonos } = req.body;
@@ -283,7 +282,8 @@ const Addnumbers = async(req, res) => {
                 where: {
                     telefono: telefono,
                     idCampaniaInterna: idCampaniaInterna,
-                }
+                },
+                transaction
             });
 
             if (numExistente) {
@@ -291,22 +291,27 @@ const Addnumbers = async(req, res) => {
                 return res.status(400).json({
                     code: 'error',
                     message: `El número ${telefono} ya existe en la campaña interna ${idCampaniaInterna}.`,
-                })
+                });
             }
 
+
+            await CampaniaInternoNumber.create({
+                telefono: telefono,
+                idCampaniaInterna: idCampaniaInterna
+            }, { transaction });
         }
 
-
         await transaction.commit();
-        return res.status(201).json({ code: 'ok', message: 'Numeros agregados con exito.' });
+        return res.status(201).json({ code: 'ok', message: 'Números agregados con éxito.' });
     } catch (error) {
         if (transaction) {
             await transaction.rollback();
         }
-        console.error('Error al agregar numeros:', error);
-        res.status(500).json({ error: 'Ha sucedido un error al intentar agregar los numeros', details: error.message });
+        console.error('Error al agregar números:', error);
+        res.status(500).json({ error: 'Ha sucedido un error al intentar agregar los números', details: error.message });
     }
-}
+};
+
 
 const actualizarNumero = async(req, res) => {
     try {
