@@ -138,13 +138,18 @@ const GetTelnoCampanias = async(req, res) => {
 
 const GetTelnoCustomerbilletera = async(req, res) => {
     try {
+
+        const {idCampaniaInterna } = req.params;
+
         const customers = await Customer.findAll({
             attributes: ['telno']
         });
 
         const customerNumbers = customers.map(customer => customer.telno);
 
-        const campaniaNumbers = await CampaniaInternoNumber.findAll();
+        const campaniaNumbers = await CampaniaInternoNumber.findAll({
+            where: { idCampaniaInterna }
+        });
 
         for (const campaniaNumber of campaniaNumbers) {
             if (customerNumbers.includes(campaniaNumber.telefono)) {
@@ -160,7 +165,11 @@ const GetTelnoCustomerbilletera = async(req, res) => {
             }
         }
 
-        const updatedNumbers = await CampaniaInternoNumber.findAll();
+
+        const updatedNumbers = await CampaniaInternoNumber.findAll({
+            where: { idCampaniaInterna }
+        });
+
         res.json(updatedNumbers);
 
     } catch (error) {
