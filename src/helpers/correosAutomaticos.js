@@ -51,7 +51,7 @@ const tareaVerificarCampanias = cron.schedule('00 00 * * *', async () => {
     }
 });
 
-const CampaniaInternaVencer = cron.schedule('15 8 * * *', async () => {
+const CampaniaInternaVencer = cron.schedule('00 00 * * *', async () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
