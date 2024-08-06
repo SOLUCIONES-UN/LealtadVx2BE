@@ -143,8 +143,6 @@ const CheckNombreCampaña = async(req, res) => {
 };
 
 
-
-
 const GetCampania = async(req, res) => {
     try {
         const campanias = await Campania.findAll({
@@ -171,8 +169,6 @@ const GetCampania = async(req, res) => {
 };
 
 
-
-
 const GetEtapa = async(req, res) => {
     try {
         const etapas = await Etapa.findAll({
@@ -187,8 +183,6 @@ const GetEtapa = async(req, res) => {
         res.status(500).json({ error: 'Ha sucedido un error al intentar ver la campaña', details: error.message });
     }
 };
-
-
 
 
 const UpdateCampania = async (req, res) => {
@@ -324,14 +318,6 @@ const UpdateCampania = async (req, res) => {
         res.status(500).json({ error: 'Error general al actualizar la campaña', details: error.message });
     }
 };
-
-
-
-
-
-
-
-
 
 const GetcampanasActivasById = async(req, res) => {
     try {

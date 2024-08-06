@@ -23,6 +23,7 @@ const CampaniasNumeros = sequelize.define('campanianumeros', {
 },{timestamps: false});
 
 
+
 // (async () => {
 //     await CampaniasNumeros.sync({ alter: true });
 //     // Code here
