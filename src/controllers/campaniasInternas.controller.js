@@ -6,7 +6,7 @@ const { Premio } = require('../models/premio');
 const { Customer } = require('../models/customerspro');
 // const env = require('env');
 
-const AddCampaniaInterna = async (req, res) => {
+const AddCampaniaInterna = async(req, res) => {
     const transaction = await sequelize.transaction();
 
     try {
@@ -67,7 +67,7 @@ const AddCampaniaInterna = async (req, res) => {
 };
 
 
-const GetCampaniaInternaActivas = async (req, res) => {
+const GetCampaniaInternaActivas = async(req, res) => {
     try {
         const trx = await CampaniaInterna.findAll({
 
@@ -85,7 +85,7 @@ const GetCampaniaInternaActivas = async (req, res) => {
 };
 
 
-const GetCampaniaInternaById = async (req, res) => {
+const GetCampaniaInternaById = async(req, res) => {
 
     try {
         const { id } = req.params;
@@ -104,12 +104,12 @@ const GetCampaniaInternaById = async (req, res) => {
     }
 };
 
-const GetTelnoCampaniasById = async (req, res) => {
+const GetTelnoCampaniasById = async(req, res) => {
     try {
         const { id } = req.params;
         const telefonos = await CampaniaInternoNumber.findByPk({
-            where: { 
-                idCampaniaInterna: id 
+            where: {
+                idCampaniaInterna: id
             }
         });
         res.json(telefonos);
@@ -119,7 +119,7 @@ const GetTelnoCampaniasById = async (req, res) => {
     }
 }
 
-const GetTelnoCampanias = async (req, res) => {
+const GetTelnoCampanias = async(req, res) => {
     try {
         const trx = await CampaniaInternoNumber.findAll({
 
@@ -136,7 +136,7 @@ const GetTelnoCampanias = async (req, res) => {
     }
 };
 
-const GetTelnoCustomerbilletera = async (req, res) => {
+const GetTelnoCustomerbilletera = async(req, res) => {
     try {
 
         const {idCampaniaInterna } = req.params;
@@ -178,29 +178,32 @@ const GetTelnoCustomerbilletera = async (req, res) => {
     }
 };
 
-const GetTelnoCustomerbilleteras = async ( req, res) => {
-    try { 
+const GetTelnoCustomerbilleteras = async(req, res) => {
+    try {
         const customers = await Customer.findAll({
-            attributes: ['customer_id', 'telno'] 
+            attributes: ['customer_id', 'telno']
         });
 
         res.json(customers);
 
-    } catch(error) {
+    } catch (error) {
         console.error('Error al obtener los telefonos de la campaña interna:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar obtener los telefonos de los Usuarios Pronet' });
     }
 }
 
-const GetPremiosLink = async (req, res) => {
+const GetPremiosLink = async(req, res) => {
     try {
         const premios = await Premio.findAll({
             where: {
                 estado: 1,
                 link: {
-                    [Op.and]: [
-                        { [Op.ne]: null },
-                        { [Op.ne]: '' }
+                    [Op.and]: [{
+                            [Op.ne]: null
+                        },
+                        {
+                            [Op.ne]: ''
+                        }
                     ]
                 }
             }
@@ -212,7 +215,7 @@ const GetPremiosLink = async (req, res) => {
     }
 };
 
-const PausarCampaniaInterna = async (req, res) => {
+const PausarCampaniaInterna = async(req, res) => {
     try {
         const { id } = req.params;
 
@@ -231,7 +234,7 @@ const PausarCampaniaInterna = async (req, res) => {
     }
 }
 
-const ActivarCampaniaInterna = async (req, res) => {
+const ActivarCampaniaInterna = async(req, res) => {
     try {
         const { id } = req.params;
 
@@ -251,7 +254,7 @@ const ActivarCampaniaInterna = async (req, res) => {
     }
 }
 
-const DeleteCampaniaInterna = async (req, res) => {
+const DeleteCampaniaInterna = async(req, res) => {
     try {
 
         const { id } = req.params;
@@ -272,7 +275,7 @@ const DeleteCampaniaInterna = async (req, res) => {
     }
 }
 
-const Addnumbers = async (req, res) => {
+const Addnumbers = async(req, res) => {
 
     let transaction;
     try {
@@ -314,7 +317,7 @@ const Addnumbers = async (req, res) => {
     }
 }
 
-const actualizarNumero = async (req, res) => {
+const actualizarNumero = async(req, res) => {
     try {
         const { id } = req.params;
 
@@ -335,7 +338,7 @@ const actualizarNumero = async (req, res) => {
 }
 
 
-const enviarPremiosCampania = async (req, res) => {
+const enviarPremiosCampania = async(req, res) => {
     const { idCampaniaInterna, tituloNotificacion, descripcionNotificacion, valorpremiosPermitidos } = req.body;
 
     try {
@@ -368,15 +371,13 @@ const enviarPremiosCampania = async (req, res) => {
                 const urlConsumo = 'api/v1/marketing/sendindividual_promotions';
 
                 const response = await axios.post(
-                    urlConsumo,
-                    {
+                    urlConsumo, {
                         R1: numero.telefono,
                         R2: tituloNotificacion,
                         R3: descripcionNotificacion,
                         R4: '',
                         R5: ''
-                    },
-                    {
+                    }, {
                         headers: {
                             'x-api-key': apiKey
                         },
@@ -401,8 +402,8 @@ const enviarPremiosCampania = async (req, res) => {
 };
 
 
-const enviarPremioCampania = async (req, res) => {
-    const {  } = req.body;
+const enviarPremioCampania = async(req, res) => {
+    const {} = req.body;
 
     if (condicion) {
         try {
@@ -411,15 +412,13 @@ const enviarPremioCampania = async (req, res) => {
             const urlConsumo = 'api/v1/marketing/sendindividual_promotions';
 
             const response = await axios.post(
-                urlConsumo,
-                {
+                urlConsumo, {
                     R1: telefono,
                     R2: tituloNotificacion,
                     R3: descripcionNotificacion,
                     R4: '',
                     R5: ''
-                },
-                {
+                }, {
                     headers: {
                         'x-api-key': '7T1S9KEIKYQBCO30SHJSW'
                     },
@@ -443,15 +442,13 @@ const enviarPremioCampania = async (req, res) => {
         const textoAleatorio = new Date().toISOString().replace(/[-:.TZ]/g, '') + 'xx';
 
         const response = await axios.post(
-            urlConsumo,
-            {
+            urlConsumo, {
                 mobile: telno,
                 typeTranx: valorpremiosPermitidos.descripcion,
                 amount: valorpremiosPermitidos.valor,
                 urlGame: textoAleatorio,
                 empresa: 'AKISI'
-            },
-            {
+            }, {
                 headers: {
                     'x-api-key': '7T1S9KEIKYQBCO30SHJSW'
                 },
