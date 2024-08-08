@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const { AddCampaniaInterna, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, actualizarNumero, GetPremiosLink, ActivarCampaniaInterna, PausarCampaniaInterna, DeleteCampaniaInterna, GetCampaniaInternaById, GetTelnoCampanias, Addnumbers } = require('../controllers/campaniasInternas.controller.js')
+const { AddCampaniaInterna, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, enviarPremiosCampania, actualizarNumero, GetPremiosLink, ActivarCampaniaInterna, PausarCampaniaInterna, DeleteCampaniaInterna, GetCampaniaInternaById, GetTelnoCampanias, Addnumbers } = require('../controllers/campaniasInternas.controller.js')
 const { validateCreate } = require('../validators/usuario')
 
 const env = require('../bin/env');
@@ -19,6 +19,7 @@ router.get(`/${path}/allphone`, GetTelnoCampanias);
 router.get(`/${path}/premiosLink`, GetPremiosLink);
 router.put(`/${path}/updateNumber/:numero/:campaignId`, actualizarNumero);
 router.get(`/${path}/compararTelefonos/:idCampaniaInterna`, GetTelnoCustomerbilletera);
+router.post(`/${path}/enviarPremio`, enviarPremiosCampania);
 
 module.exports = router
 
