@@ -1122,7 +1122,7 @@ const actualizarNumero = async(req, res) => {
 
     try {
 
-        const { numero } = req.params;
+        const { numero, campaignId } = req.params;
 
 
         console.log('Número recibido:', numero);
@@ -1132,6 +1132,7 @@ const actualizarNumero = async(req, res) => {
         }, {
 
             where: {
+                idCampania: campaignId,
                 numero: numero,
                 
             }

@@ -324,13 +324,14 @@ const Addnumbers = async(req, res) => {
 
 const actualizarNumero = async(req, res) => {
     try {
-        const { id } = req.params;
-
+        const { numero, campaignId } = req.params;
+        console.log('Número recibido:', numero);
         await CampaniaInternoNumber.update({
             estado: 0
         }, {
             where: {
-                id: id
+                idCampaniaInterna: campaignId,
+                telefono: numero,
             }
         })
 
