@@ -1,12 +1,14 @@
+require('dotenv').config();
 const { CampaniaInterna } = require('../models/campaniasinterno');
-const { sequelize } = require('../database/database');
+const { sequelize, pronet } = require('../database/database');
 const { Op } = require('sequelize');
 const { CampaniaInternoNumber } = require('../models/campaniaInternaNumber');
 const { Premio } = require('../models/premio');
 const { Customer } = require('../models/customerspro');
-// const env = require('env');
+const { userInfo } = require('../models/UserInfo');
 
-const AddCampaniaInterna = async(req, res) => {
+
+const AddCampaniaInterna = async (req, res) => {
     const transaction = await sequelize.transaction();
 
     try {
@@ -67,7 +69,7 @@ const AddCampaniaInterna = async(req, res) => {
 };
 
 
-const GetCampaniaInternaActivas = async(req, res) => {
+const GetCampaniaInternaActivas = async (req, res) => {
     try {
         const trx = await CampaniaInterna.findAll({
 
@@ -85,7 +87,7 @@ const GetCampaniaInternaActivas = async(req, res) => {
 };
 
 
-const GetCampaniaInternaById = async(req, res) => {
+const GetCampaniaInternaById = async (req, res) => {
 
     try {
         const { id } = req.params;
@@ -104,7 +106,8 @@ const GetCampaniaInternaById = async(req, res) => {
     }
 };
 
-const GetTelnoCampaniasById = async(req, res) => {
+
+const GetTelnoCampaniasById = async (req, res) => {
     try {
         const { id } = req.params;
         const telefonos = await CampaniaInternoNumber.findByPk({
@@ -119,7 +122,8 @@ const GetTelnoCampaniasById = async(req, res) => {
     }
 }
 
-const GetTelnoCampanias = async(req, res) => {
+
+const GetTelnoCampanias = async (req, res) => {
     try {
         const trx = await CampaniaInternoNumber.findAll({
 
@@ -136,74 +140,140 @@ const GetTelnoCampanias = async(req, res) => {
     }
 };
 
-const GetTelnoCustomerbilletera = async(req, res) => {
+const GetTelnoCustomerbilletera = async (req, res) => {
     try {
+        const { idCampaniaInterna } = req.params;
 
-        const {idCampaniaInterna } = req.params;
+        const users = await pronet.query(
+            `SELECT username, status FROM tblUserInfo`,
+            { type: sequelize.QueryTypes.SELECT }
+        );
 
-        const customers = await Customer.findAll({
-            attributes: ['telno']
-        });
-
-        const customerNumbers = customers.map(customer => customer.telno);
+        const userStatus = users.reduce((acc, user) => {
+            acc[user.username] = user.status;
+            return acc;
+        }, {});
 
         const campaniaNumbers = await CampaniaInternoNumber.findAll({
             where: { idCampaniaInterna }
         });
 
         for (const campaniaNumber of campaniaNumbers) {
-            if (customerNumbers.includes(campaniaNumber.telefono)) {
-                if (campaniaNumber.estado !== 1) {
-                    campaniaNumber.estado = 1;
-                    await campaniaNumber.save();
+            const userState = userStatus[campaniaNumber.telefono];
+            if (userState !== undefined) {
+                console.log(`Teléfono encontrado, estado del usuario: `, userState);
+                switch (userState) {
+                    case 'ACTIVE':
+                        campaniaNumber.estado = 1;
+                        break;
+                    case 'STAND_BY':
+                        campaniaNumber.estado = 3;
+                        break;
+                    case 'BLOCK':
+                        campaniaNumber.estado = 4;
+                        break;
+                    case 'BLOCK_LOGIN':
+                        campaniaNumber.estado = 5;
+                        break;
+                    case 'CANCELLED':
+                        campaniaNumber.estado = 6;
+                        break;
+                    case 'REJECTED':
+                        campaniaNumber.estado = 7;
+                        break;
+                    case 'INACTIVE':
+                        campaniaNumber.estado = 2;
+                        break;
+                    default:
+                        campaniaNumber.estado = 2;
                 }
             } else {
-                if (campaniaNumber.estado !== 2) {
-                    campaniaNumber.estado = 2;
-                    await campaniaNumber.save();
-                }
+                campaniaNumber.estado = 2;
             }
+            await campaniaNumber.save();
         }
-
 
         const updatedNumbers = await CampaniaInternoNumber.findAll({
             where: { idCampaniaInterna }
         });
 
-        res.json(updatedNumbers);
+        console.log(`Números actualizados: `, updatedNumbers);
 
+        res.json(updatedNumbers);
     } catch (error) {
-        console.error('Error al comparar y actualizar los números telefónicos:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
     }
 };
 
-const GetTelnoCustomerbilleteras = async(req, res) => {
+// const GetTelnoCustomerbilletera = async(req, res) => {
+//     try {
+
+//         const {idCampaniaInterna } = req.params;
+
+//         const customers = await Customer.findAll({
+//             attributes: ['telno']
+//         });
+
+//         const customerNumbers = customers.map(customer => customer.telno);
+
+//         const campaniaNumbers = await CampaniaInternoNumber.findAll({
+//             where: { idCampaniaInterna }
+//         });
+
+//         for (const campaniaNumber of campaniaNumbers) {
+//             if (customerNumbers.includes(campaniaNumber.telefono)) {
+//                 if (campaniaNumber.estado !== 1) {
+//                     campaniaNumber.estado = 1;
+//                     await campaniaNumber.save();
+//                 }
+//             } else {
+//                 if (campaniaNumber.estado !== 2) {
+//                     campaniaNumber.estado = 2;
+//                     await campaniaNumber.save();
+//                 }
+//             }
+//         }
+
+
+//         const updatedNumbers = await CampaniaInternoNumber.findAll({
+//             where: { idCampaniaInterna }
+//         });
+
+//         res.json(updatedNumbers);
+
+//     } catch (error) {
+//         console.error('Error al comparar y actualizar los números telefónicos:', error);
+//         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
+//     }
+// };
+
+
+const GetTelnoCustomerbilleteras = async (req, res) => {
     try {
-        const customers = await Customer.findAll({
-            attributes: ['customer_id', 'telno']
-        });
+        const users = await pronet.query(
+            `SELECT username, status FROM tblUserInfo`,
+            { type: sequelize.QueryTypes.SELECT }
+        );
 
-        res.json(customers);
-
+        res.json(users);
     } catch (error) {
         console.error('Error al obtener los telefonos de la campaña interna:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar obtener los telefonos de los Usuarios Pronet' });
     }
 }
 
-const GetPremiosLink = async(req, res) => {
+const GetPremiosLink = async (req, res) => {
     try {
         const premios = await Premio.findAll({
             where: {
                 estado: 1,
                 link: {
                     [Op.and]: [{
-                            [Op.ne]: null
-                        },
-                        {
-                            [Op.ne]: ''
-                        }
+                        [Op.ne]: null
+                    },
+                    {
+                        [Op.ne]: ''
+                    }
                     ]
                 }
             }
@@ -215,7 +285,7 @@ const GetPremiosLink = async(req, res) => {
     }
 };
 
-const PausarCampaniaInterna = async(req, res) => {
+const PausarCampaniaInterna = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -234,7 +304,7 @@ const PausarCampaniaInterna = async(req, res) => {
     }
 }
 
-const ActivarCampaniaInterna = async(req, res) => {
+const ActivarCampaniaInterna = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -254,7 +324,7 @@ const ActivarCampaniaInterna = async(req, res) => {
     }
 }
 
-const DeleteCampaniaInterna = async(req, res) => {
+const DeleteCampaniaInterna = async (req, res) => {
     try {
 
         const { id } = req.params;
@@ -275,7 +345,7 @@ const DeleteCampaniaInterna = async(req, res) => {
     }
 }
 
-const Addnumbers = async(req, res) => {
+const Addnumbers = async (req, res) => {
     let transaction;
     try {
         const { idCampaniaInterna, telefonos } = req.body;
@@ -322,7 +392,7 @@ const Addnumbers = async(req, res) => {
 };
 
 
-const actualizarNumero = async(req, res) => {
+const actualizarNumero = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -343,18 +413,16 @@ const actualizarNumero = async(req, res) => {
 }
 
 
-const enviarPremiosCampania = async(req, res) => {
+const enviarPremiosCampania = async (req, res) => {
     const { idCampaniaInterna, tituloNotificacion, descripcionNotificacion, valorpremiosPermitidos } = req.body;
 
     try {
-        // Obtener la campaña interna
         const campania = await CampaniaInterna.findByPk(idCampaniaInterna);
 
         if (!campania) {
             return res.status(404).json({ message: 'Campaña interna no encontrada' });
         }
 
-        // Obtener todos los números relacionados con la campaña que no estén deshabilitados
         const numeros = await CampaniaInternoNumber.findAll({
             where: {
                 idCampaniaInterna: idCampaniaInterna,
@@ -366,7 +434,6 @@ const enviarPremiosCampania = async(req, res) => {
             return res.status(404).json({ message: 'No hay números habilitados para esta campaña' });
         }
 
-        // Enviar premios a todos los números
         const resultados = [];
         for (const numero of numeros) {
             try {
@@ -377,20 +444,20 @@ const enviarPremiosCampania = async(req, res) => {
 
                 const response = await axios.post(
                     urlConsumo, {
-                        R1: numero.telefono,
-                        R2: tituloNotificacion,
-                        R3: descripcionNotificacion,
-                        R4: '',
-                        R5: ''
-                    }, {
-                        headers: {
-                            'x-api-key': apiKey
-                        },
-                        auth: {
-                            username,
-                            password
-                        }
+                    R1: numero.telefono,
+                    R2: tituloNotificacion,
+                    R3: descripcionNotificacion,
+                    R4: '',
+                    R5: ''
+                }, {
+                    headers: {
+                        'x-api-key': apiKey
+                    },
+                    auth: {
+                        username,
+                        password
                     }
+                }
                 );
 
                 resultados.push({ telefono: numero.telefono, resultado: response.data });
@@ -407,74 +474,5 @@ const enviarPremiosCampania = async(req, res) => {
 };
 
 
-const enviarPremioCampania = async(req, res) => {
-    const {} = req.body;
 
-    if (condicion) {
-        try {
-            const username = process.env.OFFERCRAFT_USER;
-            const password = process.env.OFFERCRAFT_PASSWORD;
-            const urlConsumo = 'api/v1/marketing/sendindividual_promotions';
-
-            const response = await axios.post(
-                urlConsumo, {
-                    R1: telefono,
-                    R2: tituloNotificacion,
-                    R3: descripcionNotificacion,
-                    R4: '',
-                    R5: ''
-                }, {
-                    headers: {
-                        'x-api-key': '7T1S9KEIKYQBCO30SHJSW'
-                    },
-                    auth: {
-                        username,
-                        password
-                    }
-                }
-            );
-
-            return res.status(200).json({ estadoTransaccion: 1, message: "Se ha acreditado un premio", data: response.data });
-        } catch (error) {
-            return res.status(500).json({ estadoTransaccion: 0, message: `Error en envio API externa: ${error.message}`, data: null });
-        }
-    }
-
-    try {
-        const username = process.env.CARGAAKISI_USER;
-        const password = process.env.CARGAAKISI_PASSWORD;
-        const urlConsumo = 'api/v1/transaction/load_money_offercraft';
-        const textoAleatorio = new Date().toISOString().replace(/[-:.TZ]/g, '') + 'xx';
-
-        const response = await axios.post(
-            urlConsumo, {
-                mobile: telno,
-                typeTranx: valorpremiosPermitidos.descripcion,
-                amount: valorpremiosPermitidos.valor,
-                urlGame: textoAleatorio,
-                empresa: 'AKISI'
-            }, {
-                headers: {
-                    'x-api-key': '7T1S9KEIKYQBCO30SHJSW'
-                },
-                auth: {
-                    username,
-                    password
-                }
-            }
-        );
-
-        const resp = response.data;
-
-        if (resp.transaction_id) {
-            return res.status(200).json({ estadoTransaccion: 1, message: 'Se ha acreditado un premio', data: resp });
-        }
-
-        const errmsg = resp.error ? `Error: API externa ${resp.error}` : 'Error: API externa sin respuesta';
-        return res.status(500).json({ estadoTransaccion: 0, message: errmsg, data: resp });
-    } catch (error) {
-        return res.status(500).json({ estadoTransaccion: 0, message: `Error realizando envio API externa: ${error.message}`, data: null });
-    }
-};
-
-module.exports = { AddCampaniaInterna, Addnumbers, actualizarNumero, GetTelnoCampaniasById, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias, GetPremiosLink };
+module.exports = { AddCampaniaInterna, enviarPremiosCampania, Addnumbers, actualizarNumero, GetTelnoCampaniasById, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias, GetPremiosLink };

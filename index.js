@@ -1,8 +1,12 @@
 const express = require('express');
+require('dotenv').config();
 const { sequelize } = require('./src/database/database');
 const { sendEmail } = require('./src/helpers/sendEmail.js');
 const { taskSendEmail } = require('./src/helpers/envioReporteAuitomatico.js');
 
+console.log('OFFERCRAFT_USER:', process.env.OFFERCRAFT_USER);
+console.log('OFFERCRAFT_PASSWORD:', process.env.OFFERCRAFT_PASSWORD);
+console.log('OFFERCRAFT_APIKEY:', process.env.OFFERCRAFT_APIKEY);
 
 const app = express();
 // Configurar cabeceras y cors
