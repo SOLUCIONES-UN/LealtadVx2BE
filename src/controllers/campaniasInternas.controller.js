@@ -395,15 +395,31 @@ const Addnumbers = async (req, res) => {
 const actualizarNumero = async (req, res) => {
     try {
         const { numero, campaignId } = req.params;
-        console.log('Número recibido:', numero);
-        await CampaniaInternoNumber.update({
+        console.log('Número recibido: y campania', numero, campaignId);
+
+        const [updatedRows] = await CampaniaInternoNumber.update({
             estado: 0
         }, {
             where: {
                 idCampaniaInterna: campaignId,
                 telefono: numero,
             }
-        })
+        });
+
+        if (updatedRows > 0) {
+            console.log('Actualización exitosa:', updatedRows);
+        } else {
+            console.log('No se actualizó ningún registro.');
+        }
+
+        const numeroActualizado = await CampaniaInternoNumber.findOne({
+            where: {
+                idCampaniaInterna: campaignId,
+                telefono: numero,
+            }
+        });
+
+        console.log('Número después de la actualización:', numeroActualizado);
 
         res.json({ code: 'ok', message: 'numero elminado con exito' });
 
@@ -411,7 +427,8 @@ const actualizarNumero = async (req, res) => {
         console.error('Error al actualizar numero:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar actualizar el número', details: error.message });
     }
-}
+};
+
 
 
 const enviarPremiosCampania = async (req, res) => {
