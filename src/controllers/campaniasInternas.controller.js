@@ -140,9 +140,19 @@ const GetTelnoCampanias = async (req, res) => {
     }
 };
 
+
+
+
+
+
+
 const GetTelnoCustomerbilletera = async (req, res) => {
     try {
         const { idCampaniaInterna } = req.params;
+
+        const campaniaNumbers = await CampaniaInternoNumber.findAll({
+            where: { idCampaniaInterna }
+        });
 
         const users = await pronet.query(
             `SELECT username, status FROM tblUserInfo`,
@@ -154,11 +164,15 @@ const GetTelnoCustomerbilletera = async (req, res) => {
             return acc;
         }, {});
 
-        const campaniaNumbers = await CampaniaInternoNumber.findAll({
-            where: { idCampaniaInterna }
-        });
+        const validNumbers = [];
 
+        
         for (const campaniaNumber of campaniaNumbers) {
+           
+            if (campaniaNumber.estado === 0) {
+                continue;
+            }
+
             const userState = userStatus[campaniaNumber.telefono];
             if (userState !== undefined) {
                 console.log(`Teléfono encontrado, estado del usuario: `, userState);
@@ -191,61 +205,20 @@ const GetTelnoCustomerbilletera = async (req, res) => {
                 campaniaNumber.estado = 2;
             }
             await campaniaNumber.save();
+            validNumbers.push(campaniaNumber); 
         }
 
-        const updatedNumbers = await CampaniaInternoNumber.findAll({
-            where: { idCampaniaInterna }
-        });
+        console.log(`Números actualizados: `, validNumbers);
 
-        console.log(`Números actualizados: `, updatedNumbers);
-
-        res.json(updatedNumbers);
+        res.json(validNumbers);
     } catch (error) {
         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
     }
 };
 
-// const GetTelnoCustomerbilletera = async(req, res) => {
-//     try {
-
-//         const {idCampaniaInterna } = req.params;
-
-//         const customers = await Customer.findAll({
-//             attributes: ['telno']
-//         });
-
-//         const customerNumbers = customers.map(customer => customer.telno);
-
-//         const campaniaNumbers = await CampaniaInternoNumber.findAll({
-//             where: { idCampaniaInterna }
-//         });
-
-//         for (const campaniaNumber of campaniaNumbers) {
-//             if (customerNumbers.includes(campaniaNumber.telefono)) {
-//                 if (campaniaNumber.estado !== 1) {
-//                     campaniaNumber.estado = 1;
-//                     await campaniaNumber.save();
-//                 }
-//             } else {
-//                 if (campaniaNumber.estado !== 2) {
-//                     campaniaNumber.estado = 2;
-//                     await campaniaNumber.save();
-//                 }
-//             }
-//         }
 
 
-//         const updatedNumbers = await CampaniaInternoNumber.findAll({
-//             where: { idCampaniaInterna }
-//         });
 
-//         res.json(updatedNumbers);
-
-//     } catch (error) {
-//         console.error('Error al comparar y actualizar los números telefónicos:', error);
-//         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
-//     }
-// };
 
 
 const GetTelnoCustomerbilleteras = async (req, res) => {
