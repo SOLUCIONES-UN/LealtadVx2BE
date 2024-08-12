@@ -1,11 +1,12 @@
-require('dotenv').config();
+// require('dotenv').config();
 const { CampaniaInterna } = require('../models/campaniasinterno');
 const { sequelize, pronet } = require('../database/database');
 const { Op } = require('sequelize');
 const { CampaniaInternoNumber } = require('../models/campaniaInternaNumber');
 const { Premio } = require('../models/premio');
 const { Customer } = require('../models/customerspro');
-const { userInfo } = require('../models/UserInfo');
+const axios = require('axios');
+
 
 
 const AddCampaniaInterna = async (req, res) => {
@@ -161,7 +162,6 @@ const GetTelnoCustomerbilletera = async (req, res) => {
         for (const campaniaNumber of campaniaNumbers) {
             const userState = userStatus[campaniaNumber.telefono];
             if (userState !== undefined) {
-                console.log(`Teléfono encontrado, estado del usuario: `, userState);
                 switch (userState) {
                     case 'ACTIVE':
                         campaniaNumber.estado = 1;
@@ -197,55 +197,11 @@ const GetTelnoCustomerbilletera = async (req, res) => {
             where: { idCampaniaInterna }
         });
 
-        console.log(`Números actualizados: `, updatedNumbers);
-
         res.json(updatedNumbers);
     } catch (error) {
         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
     }
 };
-
-// const GetTelnoCustomerbilletera = async(req, res) => {
-//     try {
-
-//         const {idCampaniaInterna } = req.params;
-
-//         const customers = await Customer.findAll({
-//             attributes: ['telno']
-//         });
-
-//         const customerNumbers = customers.map(customer => customer.telno);
-
-//         const campaniaNumbers = await CampaniaInternoNumber.findAll({
-//             where: { idCampaniaInterna }
-//         });
-
-//         for (const campaniaNumber of campaniaNumbers) {
-//             if (customerNumbers.includes(campaniaNumber.telefono)) {
-//                 if (campaniaNumber.estado !== 1) {
-//                     campaniaNumber.estado = 1;
-//                     await campaniaNumber.save();
-//                 }
-//             } else {
-//                 if (campaniaNumber.estado !== 2) {
-//                     campaniaNumber.estado = 2;
-//                     await campaniaNumber.save();
-//                 }
-//             }
-//         }
-
-
-//         const updatedNumbers = await CampaniaInternoNumber.findAll({
-//             where: { idCampaniaInterna }
-//         });
-
-//         res.json(updatedNumbers);
-
-//     } catch (error) {
-//         console.error('Error al comparar y actualizar los números telefónicos:', error);
-//         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
-//     }
-// };
 
 
 const GetTelnoCustomerbilleteras = async (req, res) => {
@@ -414,7 +370,7 @@ const actualizarNumero = async (req, res) => {
 
 
 const enviarPremiosCampania = async (req, res) => {
-    const { idCampaniaInterna, tituloNotificacion, descripcionNotificacion, valorpremiosPermitidos } = req.body;
+    const { idCampaniaInterna, tituloNotificacion, descripcionNotificacion } = req.body;
 
     try {
         const campania = await CampaniaInterna.findByPk(idCampaniaInterna);
@@ -437,10 +393,10 @@ const enviarPremiosCampania = async (req, res) => {
         const resultados = [];
         for (const numero of numeros) {
             try {
-                const username = process.env.OFFERCRAFT_USER;
-                const password = process.env.OFFERCRAFT_PASSWORD;
-                const apiKey = process.env.OFFERCRAFT_APIKEY;
-                const urlConsumo = 'api/v1/marketing/sendindividual_promotions';
+                const username = 'PRONET';
+                const password = 'ADU381NUYAHPPL9281SD';
+                const apiKey = '7T1S9KEIKYQBCO30SHJSW';
+                const urlConsumo = 'dev.akisi.com/api/v1/marketing/sendindividual_promotions';
 
                 const response = await axios.post(
                     urlConsumo, {

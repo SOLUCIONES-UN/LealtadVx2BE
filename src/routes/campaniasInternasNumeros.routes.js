@@ -21,5 +21,7 @@ router.put(`/${path}/updateNumber/:id`, actualizarNumero);
 router.get(`/${path}/compararTelefonos/:idCampaniaInterna`, GetTelnoCustomerbilletera);
 router.post(`/${path}/enviarPremio`, enviarPremiosCampania);
 
+
 module.exports = router
+
 

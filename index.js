@@ -1,5 +1,5 @@
 const express = require('express');
-require('dotenv').config();
+// require('dotenv').config();
 const { sequelize } = require('./src/database/database');
 const { sendEmail } = require('./src/helpers/sendEmail.js');
 const { taskSendEmail } = require('./src/helpers/envioReporteAuitomatico.js');

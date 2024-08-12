@@ -498,7 +498,6 @@ const validarLimiteParticipacionesPorUsuario = async (idUsuarioParticipante, idC
     }
 }
 
-
 const TransaccionesDelUsuarioPendientesXcampana = async (idUsuarioParticipante, idParticipacion, fecha1, fecha2, idCampania) => {
     
 
@@ -550,46 +549,37 @@ const cantidadParametros = async (idCampania) => {
 
 
 const campaniaNumerosRestringidos = async (idCampania, numero, restringe) => {
-    if (!idCampania || !numero || restringe === undefined) {
-        throw new Error('Faltan parámetros necesarios');
-    }
 
     try {
-        if (parseInt(restringe) === 0) {
-            return { permitido: 1 };
-        }
+        let permitido;
+        const restringeParsed = parseInt(restringe);
 
-        let queryResult;
-
-        if (parseInt(restringe) === 1) {
-            queryResult = await CampaniasNumeros.count({
+        if (restringeParsed === 0) {
+            permitido = 1;
+        } else {
+            const count = await CampaniasNumeros.count({
                 where: {
-                    idCampania: parseInt(idCampania),
+                    idCampania: idCampania,
                     numero: numero,
                     estado: 1
                 }
             });
-            return { permitido: queryResult };
+
+            if (restringeParsed === 1) {
+                permitido = count; 
+            } else if (restringeParsed === 2) {
+                permitido = count > 0 ? 0 : 1; 
+            } else {
+                permitido = 0; 
+            }
         }
 
-        if (parseInt(restringe) === 2) {
-            queryResult = await CampaniasNumeros.count({
-                where: {
-                    idCampania: parseInt(idCampania),
-                    numero: numero,
-                    estado: 1
-                }
-            });
-            return { permitido: queryResult > 0 ? 0 : 1 };
-        }
 
-        return { permitido: 0 };
-
+        return permitido;
     } catch (error) {
-        console.error(error);
         throw error;
     }
-}
+};
 
 async function tienePremiosPendientesCampanas(idCampania, idUsuarioParticipante) {
 
