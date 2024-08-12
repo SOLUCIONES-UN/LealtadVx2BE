@@ -17,7 +17,7 @@ router.get(`/${path}/campaniaInternaById/:id`, GetCampaniaInternaById);
 router.delete(`/${path}/:id`, DeleteCampaniaInterna);
 router.get(`/${path}/allphone`, GetTelnoCampanias);
 router.get(`/${path}/premiosLink`, GetPremiosLink);
-router.put(`/${path}/updateNumber/:id`, actualizarNumero);
+router.delete(`/${path}/:numero/:campaignId`, actualizarNumero);
 router.get(`/${path}/compararTelefonos/:idCampaniaInterna`, GetTelnoCustomerbilletera);
 router.post(`/${path}/enviarPremio`, enviarPremiosCampania);
 

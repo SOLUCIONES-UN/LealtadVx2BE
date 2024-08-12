@@ -118,11 +118,9 @@ const GetTelnoCampaniasById = async (req, res) => {
         });
         res.json(telefonos);
     } catch (error) {
-        console.log("ha error", telefonos);
         res.status(403).send({ errors: 'Ha sucedido un error al intentar obtener los telefonos de la Campaña Interna' });
     }
 }
-
 
 const GetTelnoCampanias = async (req, res) => {
     try {
@@ -141,9 +139,14 @@ const GetTelnoCampanias = async (req, res) => {
     }
 };
 
+
 const GetTelnoCustomerbilletera = async (req, res) => {
     try {
         const { idCampaniaInterna } = req.params;
+
+        const campaniaNumbers = await CampaniaInternoNumber.findAll({
+            where: { idCampaniaInterna }
+        });
 
         const users = await pronet.query(
             `SELECT username, status FROM tblUserInfo`,
@@ -155,11 +158,15 @@ const GetTelnoCustomerbilletera = async (req, res) => {
             return acc;
         }, {});
 
-        const campaniaNumbers = await CampaniaInternoNumber.findAll({
-            where: { idCampaniaInterna }
-        });
+        const validNumbers = [];
 
+        
         for (const campaniaNumber of campaniaNumbers) {
+           
+            if (campaniaNumber.estado === 0) {
+                continue;
+            }
+
             const userState = userStatus[campaniaNumber.telefono];
             if (userState !== undefined) {
                 switch (userState) {
@@ -191,32 +198,15 @@ const GetTelnoCustomerbilletera = async (req, res) => {
                 campaniaNumber.estado = 2;
             }
             await campaniaNumber.save();
+            validNumbers.push(campaniaNumber); 
         }
+        res.json(validNumbers);
 
-        const updatedNumbers = await CampaniaInternoNumber.findAll({
-            where: { idCampaniaInterna }
-        });
-
-        res.json(updatedNumbers);
     } catch (error) {
         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
     }
 };
 
-
-const GetTelnoCustomerbilleteras = async (req, res) => {
-    try {
-        const users = await pronet.query(
-            `SELECT username, status FROM tblUserInfo`,
-            { type: sequelize.QueryTypes.SELECT }
-        );
-
-        res.json(users);
-    } catch (error) {
-        console.error('Error al obtener los telefonos de la campaña interna:', error);
-        res.status(500).json({ error: 'Ha sucedido un error al intentar obtener los telefonos de los Usuarios Pronet' });
-    }
-}
 
 const GetPremiosLink = async (req, res) => {
     try {
@@ -342,7 +332,6 @@ const Addnumbers = async (req, res) => {
         if (transaction) {
             await transaction.rollback();
         }
-        console.error('Error al agregar números:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar agregar los números', details: error.message });
     }
 };
@@ -350,23 +339,40 @@ const Addnumbers = async (req, res) => {
 
 const actualizarNumero = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { numero, campaignId } = req.params;
+        console.log('Número recibido: y campania', numero, campaignId);
 
-        await CampaniaInternoNumber.update({
+        const [updatedRows] = await CampaniaInternoNumber.update({
             estado: 0
         }, {
             where: {
-                id: id
+                idCampaniaInterna: campaignId,
+                telefono: numero,
             }
-        })
+        });
+
+        if (updatedRows > 0) {
+            console.log('Actualización exitosa:', updatedRows);
+        } else {
+            console.log('No se actualizó ningún registro.');
+        }
+
+        const numeroActualizado = await CampaniaInternoNumber.findOne({
+            where: {
+                idCampaniaInterna: campaignId,
+                telefono: numero,
+            }
+        });
+
+        console.log('Número después de la actualización:', numeroActualizado);
 
         res.json({ code: 'ok', message: 'numero elminado con exito' });
 
     } catch (error) {
-        console.error('Error al actualizar numero:', error);
         res.status(500).json({ error: 'Ha sucedido un error al intentar actualizar el número', details: error.message });
     }
-}
+};
+
 
 
 const enviarPremiosCampania = async (req, res) => {
@@ -424,7 +430,6 @@ const enviarPremiosCampania = async (req, res) => {
 
         res.status(200).json({ message: 'Premios enviados', resultados });
     } catch (error) {
-        console.error('Error al enviar premios:', error);
         res.status(500).json({ message: 'Error al enviar premios', details: error.message });
     }
 };
