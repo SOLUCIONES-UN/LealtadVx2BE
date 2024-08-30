@@ -68,7 +68,7 @@ app.use(require('./src/routes/ReporteNotificaciones.routes.js'));
 
 
 
-
+app.use(require('./src/routes/participacionTransacciones.routes.js'))
 
 //corremos el servidor
 app.listen(app.get('port'), () => {
