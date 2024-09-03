@@ -9,7 +9,7 @@ const BitacoraParticipacion = sequelize.define('bitacoraparticipacion', {
     },
     fecha: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: DataTypes.NOW(),
     },
     customerId: {
         type: DataTypes.STRING(100),
@@ -30,7 +30,7 @@ const BitacoraPromocion = sequelize.define('bitacorapromocion', {
     },
     fecha: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: DataTypes.NOW(),
     },
 }, { timestamps: false });
 
@@ -42,7 +42,7 @@ const BitacoraJuegoAbierto = sequelize.define('bitacorajuegoabierto', {
     },
     fecha: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: DataTypes.NOW(),
     },
 }, { timestamps: false });
 
@@ -54,7 +54,7 @@ const BitacoraReferido = sequelize.define('bitacorareferido', {
     },
     fecha: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        defaultValue: DataTypes.NOW(),
     },
 }, { timestamps: false });
 

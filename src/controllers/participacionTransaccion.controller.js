@@ -74,7 +74,7 @@ const programaReferidos_post = async(req, res) => {
     if (obtieneCodigo.status){
         res.status(200).json({ status: true, message: `${obtieneCodigo.message}`, data: obtieneCodigo.data });
     }else{
-        res.status(400).json({ status: true, message: `${obtieneCodigo.message}`, data: [] });
+        res.status(400).json({ status: false, message: `${obtieneCodigo.message}`, data: [] });
     }
 }
 
@@ -104,7 +104,7 @@ const programaTerceros_post = async(req, res) => {
     if (validarParticipacionTerceros.status){
         res.status(200).json({ status: true, message: `${validarParticipacionTerceros.message}`, data: validarParticipacionTerceros.data });
     }else{
-        res.status(400).json({ status: true, message: `${validarParticipacionTerceros.message}`, data: validarParticipacionTerceros.data });
+        res.status(400).json({ status: false, message: `${validarParticipacionTerceros.message}`, data: validarParticipacionTerceros.data });
     }
 }
 

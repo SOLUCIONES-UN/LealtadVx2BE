@@ -17,14 +17,14 @@ const authUser = require('../middlewares/auth.js');
 const path = 'participacionTransacciones';
 
 // router.post(`/${path}`, authUser, campanasUsuariosEmulador_get);
-router.get(`/${path}`, participacionTransaccion_get);
-router.get(`/${path}/campanasUsuarios`, participacionCampanias_get);
+router.get(`/${path}`, participacionTransaccion_get); // LISTO
+router.get(`/${path}/campanasUsuarios`, participacionCampanias_get); // LISTO
 router.get(`/${path}/juegoAbierto`, juegoAbierto_get);
-router.get(`/${path}/programaReferidosGet`, programaReferidos_get);
-router.get(`/${path}/programaReferidosPost`, programaReferidos_post);
+router.get(`/${path}/programaReferidosGet`, programaReferidos_get); // LISTO
+router.get(`/${path}/programaReferidosPost`, programaReferidos_post); // LISTO
 router.get(`/${path}/programaReferidosPut`, programaReferidos_put);
-router.get(`/${path}/validateCupon`, validateCupon_get);
-router.get(`/${path}/programaTerceros`, programaTerceros_post);
+router.get(`/${path}/validateCupon`, validateCupon_get); // FALTA BITACORA
+router.get(`/${path}/programaTerceros`, programaTerceros_post); // LISTO
 
 
 module.exports = router;

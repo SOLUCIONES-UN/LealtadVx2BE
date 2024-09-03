@@ -15,7 +15,7 @@ const { Acumulados } = require('../models/acumulados');
 const { Premio } = require('../models/premio');
 const { codigoReferido } = require('../models/codigoReferidos');
 const { referidosIngresos } = require('../models/ReferidosIngresos');
-const { Tercero } = require('../models/tercero');
+const { TransaccionesTerceros} = require('../models/transaccionesTerceros');
 const { BitacoraParticipacion, BitacoraPromocion, BitacoraJuegoAbierto, BitacoraReferido } = require('../models/bitacora');
 
 const { sendOffercraft, sendBilletera, getImgBase64 } = require('../helpers/externalApi');
@@ -925,20 +925,24 @@ const validaParticipacionTerceros = async (codigoTercero, codigoUnico, idTrx, mo
         if (await validarKrezcoBilletera(telno)==0){
             return { status: false, data: [], message: `El número de la billetera no es valido` };
         }
-        const regDataTerceros = await sequelize.query(`SELECT id FROM terceros WHERE token='${codigoTercero}' AND estado=1 LIMIT 1;`, { type: Sequelize.QueryTypes.SELECT });
-        if (regDataTerceros.length==0){
+        const regDataTerceros = await buscaDataTerceros(codigoTercero);
+        if (!regDataTerceros.status){
             return { status: false, data: [], message: `No fue posible encontrar el token` };
         }
-        const valida = await validaTeceros(codigoTercero, telno, codigoUnico, fecha, idTrx, monto, `(${codigoTercero})${adicionales.descTransaccion}`);
+        const regBilletera = await buscaBilleteraConTel(telno);
+        if (!regBilletera.status){
+            return { status: false, data: [], message: `${regBilletera.message}` };
+        }
+        const valida = await validaTeceros(codigoTercero, telno, codigoUnico, fecha, idTrx, monto, `(${codigoTercero})${adicionales.descTransaccion}`, regBilletera.data.customer_id);
         if (!valida.status){
             return { status: false, data: [], message: `${valida.message}` };
-        }   
-        const registra = await registraTerceros({ fecha_transaccion: fecha, cod_unico: codigoUnico, idtrx: idTrx, total_amount: monto, idUsuario: krezcoInfo.data.customer_id, cupo: cupo, desc_transaccion: `(${codigoTercero})${adicionales.descTransaccion}` });
+        }
+        const registra = await registraTransaccionTerceros({ fechaTransaccion: fecha, codigoUnico: codigoUnico, idTrx: idTrx, totalAmount: monto, customerId: regBilletera.data.customer_id, cupo: cupo, descTransaccion: `(${codigoTercero})${adicionales.descTransaccion}` });
         if (!registra.status){
             return { status: false, data: [], message: `${registra.message}` };
         }
-        const transaccionTercero = await validaParticipacionTransaccion(krezcoInfo.data.customer_id, registra.id);
-        // XXXXXX
+        const transaccionTercero = await validaParticipacionTransaccion(regBilletera.data.customer_id, registra.id);
+        return transaccionTercero;
     } catch (error) {
         return { status: false, data: [], message: `Error: Validando Participacion Terceros.` };
     }
@@ -947,10 +951,9 @@ const validaParticipacionTerceros = async (codigoTercero, codigoUnico, idTrx, mo
 const krezcoInformacion = async (cupo) => {
     try {
         const regData = await sequelize.query(`SELECT telno, a.dpi, customer_id, cupo,customer_reference FROM pronet.tbl_customer_supply_genesis a INNER JOIN pronet.tbl_customer b ON a.fk_customer_id = b.customer_id WHERE cast(cupo as decimal) = cast(${codigo} as decimal) LIMIT 1;`, { type: Sequelize.QueryTypes.SELECT });
-        // if (regData.length==0){
-        //     return '0';
-        // }
-        // return regData[0].telno;
+        if (regData.length==0){
+            return { status: false, data: {}, message: 'Error: No fue posible encontrar la información del cliente' };
+        }
         return { status: true, data: regData[0], message: '' };
     } catch (error) {
         return { status: false, data: {}, message: 'Error: Obteniendo información del cliente' };
@@ -969,31 +972,56 @@ const validarKrezcoBilletera = async (telno) => {
     }
 }
 
-const validaTeceros = async (codigoTercero, telno, codigoUnico, fecha, idTrx, monto, descripcion) => {
-    const regDataToken = await sequelize.query(`SELECT COUNT(*) siHay FROM terceros WHERE token='${codigoTercero}' AND estado=1;`, { type: Sequelize.QueryTypes.SELECT });
-    if (regDataToken[0].siHay==0){
-        return { status: false, message: `Token no existe` };
+const buscaDataTerceros = async (codigoTercero) => {
+    try{
+        const regDataTerceros = await sequelize.query(`SELECT id FROM terceros WHERE token='${codigoTercero}' AND estado=1 LIMIT 1;`, { type: Sequelize.QueryTypes.SELECT });
+        if (regDataTerceros.length==0){
+            return { status: false, data: [], message: `No fue posible encontrar el token` };
+        }
+        return { status: true, data: regDataTerceros, message: `` };
+    } catch (error) {
+        return { status: false, data: [], message: `Error: buscando registro de terceros` };
     }
-    const regDataUsuario = await pronet.query(`SELECT customer_id, customer_reference FROM pronet.tbl_customer WHERE telno='${telno}' LIMIT 1;`, { type: Sequelize.QueryTypes.SELECT });
-    if (regDataUsuario.length==0){
-        return { status: false, message: `Usuario no existe` };
-    }
-    const regDataCodigo = await sequelize.query(`SELECT COUNT(*) siHay FROM transacciones_terceros WHERE cod_unico='${codigoUnico}';`, { type: Sequelize.QueryTypes.SELECT });
-    if (regDataCodigo[0].siHay>0){
-        return { status: false, message: `Error de codigo` };
-    }
-    const regDataDuplicado = await sequelize.query(`SELECT COUNT(*) siHay FROM transacciones_terceros WHERE fecha_transaccion='${fecha}' AND idtrx=${idTrx} AND total_amount=${monto} AND desc_transaccion='${descripcion}' AND idUsuario=${usuario} AND idtercerosCampanas=${tercero} AND cod_unico='${codigoUnico}';`, { type: Sequelize.QueryTypes.SELECT });
-    if (regDataDuplicado[0].siHay>0){
-        return { status: false, message: `Transacción duplicada` }
-    }
-    return { status: true, message: `` };
 }
 
-const registraTerceros = async (dataInsert) => {
+const validaTeceros = async (codigoTercero, telno, codigoUnico, fecha, idTrx, monto, descripcion, customerId) => {
+    try{
+        const regDataToken = await sequelize.query(`SELECT COUNT(*) siHay FROM terceros WHERE token='${codigoTercero}' AND estado=1;`, { type: Sequelize.QueryTypes.SELECT });
+        if (regDataToken[0].siHay==0){
+            return { status: false, message: `Token no existe` };
+        }
+        const regDataCodigo = await sequelize.query(`SELECT COUNT(*) siHay FROM transaccionesterceros WHERE codigoUnico='${codigoUnico}';`, { type: Sequelize.QueryTypes.SELECT });
+        if (regDataCodigo[0].siHay>0){
+            return { status: false, message: `Error de codigo` };
+        }
+        const regDataDuplicado = await sequelize.query(`SELECT COUNT(*) siHay FROM transaccionesterceros WHERE fechaTransaccion='${fecha}' AND idTrx=${idTrx} AND totalAmount=${monto} AND descTransaccion='${descripcion}' AND customerId=${customerId} AND codigoUnico='${codigoUnico}';`, { type: Sequelize.QueryTypes.SELECT });
+        if (regDataDuplicado[0].siHay>0){
+            return { status: false, message: `Transacción duplicada` }
+        }
+        return { status: true, message: `` };
+    } catch (error) {
+        return { status: false, data: [], message: `Error: Validando registro de terceros` };
+    }
+}
+
+const registraTransaccionTerceros = async (dataInsert) => {
     try {
-        // XXXXXX
-        const regData = await Tercero.create(dataInsert);
+        console.log(dataInsert);
+        const regData = await TransaccionesTerceros.create(dataInsert);
         return { status: true, data: regData, message: `Registro De Terceros Agregado Con Exito` };
+    } catch (error) {
+        console.log(error);
+        return { status: false, data: [], message: `Error: Intentando Agregar El Registro De Terceros.` };
+    }
+}
+
+const buscaBilleteraConTel = async (telno) => {
+    try{
+        const regDataUsuario = await pronet.query(`SELECT customer_id, customer_reference FROM pronet.tbl_customer WHERE telno='${telno}' LIMIT 1;`, { type: Sequelize.QueryTypes.SELECT });
+        if (regDataUsuario.length==0){
+            return { status: false, data: [], message: `Usuario no existe` };
+        }
+        return { status: true, data: regDataUsuario[0], message: `` };
     } catch (error) {
         console.log(error);
         return { status: false, data: [], message: `Error: Intentando Agregar El Registro De Terceros.` };
