@@ -44,9 +44,10 @@ const validateCupon_get = async (req, res) => {
 };
 
 const juegoAbierto_get = async (req, res) => {
-    // const { urlJuego } = req.params;
+    // const { urlJuego, monto } = req.params;
     const urlJuego = "240611179351lKy5MixbFtqvPXoLc";
-    const actualizaParticipacion = await actualizaJuego(urlJuego);
+    const monto = "100";
+    const actualizaParticipacion = await actualizaJuego(urlJuego, monto);
     if (actualizaParticipacion.status) {
         res.status(200).json({ status: true, message: ``, data: [] });
     }else{
@@ -66,7 +67,7 @@ const programaReferidos_get = async(req, res) => {
 }
 
 const programaReferidos_post = async(req, res) => {
-    // const { idtipo, idConfi, usuario } = req.params;
+    // const { idtipo, idConfi, usuario } = req.body;
     const idtipo = 1;
     const idConfi = 5;
     const usuario = '696w18a14ab1dcd3bw011806f07d85gf1f5';
@@ -79,8 +80,8 @@ const programaReferidos_post = async(req, res) => {
 }
 
 const programaReferidos_put = async(req, res) => {
-    // const { codigo, usuario } = req.params;
-    const codigo = '2408TQRDJU';
+    // const { codigo, usuario } = req.body;
+    const codigo = '3M5B4C3'; // '2408TQRDJU';
     const usuario = '696w18a14ab1dcd3bw011806f07d85gf1f5';
     const validaCodigo = await referidosValidaCodigo(usuario, codigo);
     if (validaCodigo.status){
@@ -91,7 +92,7 @@ const programaReferidos_put = async(req, res) => {
 }
 
 const programaTerceros_post = async(req, res) => {
-    // const { codigoTercero, codigoUnico, idTrx, monto, numBilletera, cupo } = req.params;
+    // const { codigoTercero, codigoUnico, idTrx, monto, numBilletera, cupo, fecha, adicionales } = req.body;
     const codigoTercero = 'APPSIP';
     const codigoUnico = '582917062024010316';
     const idTrx = '582917062024010316';

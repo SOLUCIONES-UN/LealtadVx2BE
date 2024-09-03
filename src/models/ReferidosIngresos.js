@@ -16,16 +16,13 @@ const referidosIngresos = sequelize.define('referidosingresos', {
     },
     usuario : {
         type: DataTypes.INTEGER,
-        
         allowNull: false
     },
     fecha: {
         type: DataTypes.DATE,
-        allowNull: false
+        defaultValue: DataTypes.NOW(),
     },
-    
 },{timestamps: false});
-
 
 
 
