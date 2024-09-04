@@ -3,11 +3,11 @@ const { request } = require('express');
 
 const baseUrl = 'http://localhost:3000/';
 
-const sendOffercraft = async () => {
+const sendOffercraft = async (telno, titulo, descripcion) => {
     // axios.post(`${baseUrl}api/v1/marketing/sendindividual_promotions`, {
-    //     'R1' => $infCliente[0]->telno,
-    //     'R2' => $tituloNotificacion,
-    //     'R3' => $descripcionNotificacion,
+    //     'R1' => telno,
+    //     'R2' => titulo,
+    //     'R3' => descripcion,
     //     'R4' => '',
     //     'R5' => ''
     // },{
@@ -30,13 +30,13 @@ const sendOffercraft = async () => {
     return false
 }
 
-const sendBilletera = async () => {
+const sendBilletera = async (telno, descripcion, valor, url) => {
     // $textoAleatorio = (string)date("d") . (string)date("m") . (string)date("Y") . (string)date("H") . (string)date("i") . (string)date("s");
     // axios.post(`${baseUrl}api/v1/transaction/load_money_offercraft`, {
-    //     'mobile' => $informacionUsuario[0]->telno,
-    //     'typeTranx' => $valorpremiosPermitidos->descripcion,
-    //     'amount' => $valorpremiosPermitidos->valor,
-    //     'urlGame' => $textoAleatorio,
+    //     'mobile' => telno,
+    //     'typeTranx' => descripcion,
+    //     'amount' => valor,
+    //     'urlGame' => url,
     //     'empresa' => 'AKISI'
     // },{
     //     Headers:{

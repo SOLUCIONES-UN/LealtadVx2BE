@@ -242,7 +242,6 @@ const registrarParticipacion = async (dataInsert) => {
         const regData = await Participacion.create(dataInsert);
         return { status: true, data: regData, message: `Registro De Participacion Agregada Con Exito` };
     } catch (error) {
-        console.log(error);
         return { status: false, data: dataInsert, message: `Error: Intentando Agregar El Registro De Participacion.` };
     }
 }
@@ -371,8 +370,7 @@ const participacionPorTransaccion = async (infoBilletera, infoTransaccion, infoC
         }
         const registraParticipacion = await registrarParticipacion(newData);
         if(!registraParticipacion.status) {
-            // AQUI DEBERIA DE HABER UNA ALERTA PORQUE NO SE PUDO REGISTRAR EL PREMIO
-            // GUARDAMOS UN REGISTRO PARA DESPUES REVISARLO ???
+            console.log('AQUI DEBERIA DE HABER UNA ALERTA PORQUE NO SE PUDO REGISTRAR EL PREMIO');
             return { status: false, data: [], message: `${registraParticipacion.message}` }
         }
         // 02 MARCAR LOS REGISTROS DE ACUMULACION PARA ASIGNARLOS A ESTA PARTICIPACION
@@ -381,11 +379,11 @@ const participacionPorTransaccion = async (infoBilletera, infoTransaccion, infoC
         }
         //03 HACER EL LLAMADO PARA LA OPCION Y ESPERAR LA RESPUESTA DEL PREMIO
         if (infoCampania.premiocampania[0].premio.idTransaccion==0) {
-            // XXXXXX PREMIO OFERCRAFT
-            // XXXXXX const abcdef = await sendOffercraft();
+            console.log('PREMIO OFERCRAFT');
+            // const enviaPremio = await sendOffercraft();
         } else {
-            // XXXXXX PREMIO BILLETERA
-            // XXXXXX const abcdef = await sendBilletera();
+            console.log('PREMIO BILLETERA');
+            // const enviaPremio = await sendBilletera();
         }
         return { status: true, data: newData, message: `Participacion Registrada [${registraParticipacion.data.id}]` }
     } else {
@@ -716,7 +714,6 @@ const validaCupon = async (idRevision, cupon) => {
         actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 2);
         return respu;
     } catch (error) {
-        console.error("Error en validaCupon_get:", error);
         dataBitacora.push(`{"status": false, "data": ${JSON.stringify({ imagen: defData.ImgFail, premio: '', codigo: defData.codFail, premio: '' })}, "message": 'Error interno del servidor. [${error}]'`);
         actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 2);
         return { status: false, data: { imagen: defData.ImgFail, premio: '', codigo: defData.codFail, premio: `` }, message: `Error interno del servidor. [${error}]` };
@@ -752,11 +749,11 @@ const obtienePremioCupon = async (infoCupon) => {
 const cuponParticipacion = async (infoCupon, infoPremio, infoBilletera) => {
     try {
         if(infoPremio.idTransaccion==0) {
-            // XXXXXX PREMIO OFERCRAFT
-            // XXXXXX const abcdef = await sendOffercraft();
+            console.log('PREMIO OFERCRAFT');
+            // const enviaPremio = await sendOffercraft();
         } else {
-            // XXXXXX PREMIO BILLETERA
-            // XXXXXX const abcdef = await sendBilletera();
+            console.log('PREMIO BILLETERA');
+            // const enviaPremio = await sendBilletera();
         }
         const marcaCupon = await actualizaCupon(infoCupon.id, infoBilletera.customer_id);
         return { status: true, message: infoCupon.message };
@@ -767,9 +764,7 @@ const cuponParticipacion = async (infoCupon, infoPremio, infoBilletera) => {
 
 const actualizaCupon = async (cuponId, customerId) => {
     try {
-        const updData = await sequelize.query(`UPDATE detallepromocions SET estado=2 WHERE id=${cuponId};`, { type: Sequelize.QueryTypes.SELECT });
-        console.log(updData);
-        // XXXXXX , fecha=NOW(), customerId=${customerId}
+        const updData = await sequelize.query(`UPDATE detallepromocions SET estado=2, fecha=NOW(), customerId=${customerId} WHERE id=${cuponId};`, { type: Sequelize.QueryTypes.SELECT });
         return { status: true, data: [], message: `` };
     } catch (error) {
         return { status: false, data: [], message: `Error: Actualizando el cupon.` };
@@ -791,7 +786,6 @@ const actualizaJuego = async (urlPremio, valor="0") => {
         }
         return { status: true, data: [], message: `` };
     } catch (error) {
-        console.log(error);
         dataBitacora.push(JSON.stringify({ status: false, data: [], message: `Error: Actualizando el cupon. [${error}]` }));
         actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 3);
         return { status: false, data: [], message: `Error: Actualizando el cupon.` };
@@ -803,19 +797,25 @@ const registraCodigoReferidos = async (dataInsert) => {
         const regData = await codigoReferido.create(dataInsert);
         return { status: true, data: regData, message: `Registro De Codigo Referido Agregado Con Exito` };
     } catch (error) {
-        console.log(error);
         return { status: false, data: [], message: `Error: Intentando Agregar El Registro Del Codigo Referido.` };
     }
 }
 
 const registraReferidos = async (dataInsert) => {
-    console.log('=====', dataInsert);
     try {
         const regData = await referidosIngresos.create(dataInsert);
         return { status: true, data: regData, message: `Registro De Referidos Agregado Con Exito` };
     } catch (error) {
-        console.log(error);
         return { status: false, data: [], message: `Error: Intentando Agregar El Registro De Referidos.` };
+    }
+}
+
+const actualizaReferidos = async (id, dataInsert) => {
+    try {
+        const regData = await referidosIngresos.update(dataInsert, { where: { id }});
+        return { status: true, data: regData, message: `Registro De Referidos Actualizado Con Exito` };
+    } catch (error) {
+        return { status: false, data: [], message: `Error: Intentando Actualizar El Registro De Referidos.` };
     }
 }
 
@@ -868,7 +868,6 @@ const referidosBuscaCodigo = async (customerId) => {
         }
         return { status: true, data: codigoRetornar, message: `` };
     } catch (error) {
-        console.log(error);
         return { status: false, data: '', message: `Error: Buscando codigo para referidos.` };
     }
 }
@@ -917,11 +916,11 @@ const referidosValidaCodigo = async (customerReference, codigo) => {
             actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
             return { status: false, data: '', message: `${regDataReferido.message}` };
         }
-        // if (regDataReferido.data.diasdecracion > 4) {
-        //     dataBitacora.push(JSON.stringify({ status: false, data: regDataReferido.data, message: `Lo sentimos, No cumples con las características de un usuario nuevo. [${regDataReferido.data.diasdecracion}]` }));
-        //     actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
-        //     return { status: false, data: [], message: `Lo sentimos, No cumples con las características de un usuario nuevo.` };
-        // }
+        if (regDataReferido.data.diasdecracion > 4) {
+            dataBitacora.push(JSON.stringify({ status: false, data: regDataReferido.data, message: `Lo sentimos, No cumples con las características de un usuario nuevo. [${regDataReferido.data.diasdecracion}]` }));
+            actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
+            return { status: false, data: [], message: `Lo sentimos, No cumples con las características de un usuario nuevo.` };
+        }
         // REVISAR EL CODIGO SI ES VALIDO Y NO ES CODIGO PROPIO
         const regData = await sequelize.query(`SELECT cr.*, tc.customer_reference FROM codigosreferidos cr INNER JOIN pronet.tbl_customer tc ON tc.customer_id = cr.customerId WHERE cr.codigo = '${codigo}' LIMIT 1;`, { type: Sequelize.QueryTypes.SELECT });
         if (regData.length==0){
@@ -935,38 +934,41 @@ const referidosValidaCodigo = async (customerReference, codigo) => {
             return { status: false, data: [], message: `Lo sentimos, el código ingresado ha caducado o es invalido` };
         }
         // REVISAR SI EL USUARIO REFERIDOR ES VALIDO
-        // const regDataReferidor = await revisaBilletera(regData[0].customerId);
-        // if (!regDataReferidor.status) { 
-        //     dataBitacora.push(JSON.stringify(regDataReferidor));
-        //     actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
-        //     return { status: false, data: [], message: `${regDataReferidor.message}` };
-        // }
+        const regDataReferidor = await revisaBilletera(regData[0].customerId);
+        if (!regDataReferidor.status) { 
+            dataBitacora.push(JSON.stringify(regDataReferidor));
+            actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
+            return { status: false, data: [], message: `${regDataReferidor.message}` };
+        }
+        // REVISAR SI YA PARTICIPO
+        const regParticipo = await sequelize.query(`SELECT COUNT(*) AS SiHay FROM referidosingresos WHERE estado>0 AND customerId=${regDataReferido.data.customer_id};`, { type: Sequelize.QueryTypes.SELECT });
+        if(regParticipo[0].SiHay>0){
+            dataBitacora.push(JSON.stringify({ status: false, data: regData.data, message: `Lo sentimos, el usuario referido ya participo` }));
+            actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
+            return { status: false, data: [], message: `Lo sentimos, el usuario referido ya participo` };
+        }
         //INSERTAR EL REGISTRO DEL REFERIDO
-        const insData = await registraReferidos({ idRefIngresos: 0, id: regData[0].id, usuario: regDataReferido.data.customer_id });
+        const insData = await registraReferidos({ idCodigoReferido: regData[0].id, customerId: regDataReferido.data.customer_id });
         if (!insData.status){
             dataBitacora.push(JSON.stringify(insData));
             actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
             return { status: false, data: [], message: `${insData.message}` };
         }
 
-        const transaccionReferido = await validaParticipacionTransaccion(regDataReferido.data.customer_id, insData.id);
-        const transaccionReferidor = await validaParticipacionTransaccion(regDataReferidor.data.customer_id, insData.id);
-
+        const transaccionReferido = await validaParticipacionTransaccion(regDataReferido.data.customer_id, "REF".concat(insData.data.id));
+        const transaccionReferidor = await validaParticipacionTransaccion(regData[0].customerId, "REF".concat(insData.data.id));
+        
         if(!transaccionReferido.status && !transaccionReferidor.status){
             dataBitacora.push(JSON.stringify({ status: false, data: {referido: transaccionReferido, referidor: transaccionReferidor}, message: `No fue posible registrar la participacion` }));
             actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
             return { status: false, data: {referido: transaccionReferido, referidor: transaccionReferidor}, message: `No fue posible registrar la participacion` };
         }
-
-        // XXXXXX UPDATE registrarReferidos
-        // XXXXXX CREAR EL CAMPO PARA INSERTAR EL RESULTADO
-        // XXXXXX { referido: transaccionReferido, referidor: transaccionReferidor }
         
+        const updData = await actualizaReferidos(insData.data.id, { estado: (transaccionReferido.status && transaccionReferidor.status) ? 2 : (transaccionReferido.status ? 1 : (transaccionReferidor.status ? 3 : 0))});        
         dataBitacora.push(JSON.stringify({ status: true, data: {referido: transaccionReferido, referidor: transaccionReferidor}, message: `Alguien que te quiere mucho te ha referido! Haz cualquier transacción usando tu billetera akisí y recibe tu bono de bienvenida!!` }));
         actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
         return { status: true, data: [], message: `Alguien que te quiere mucho te ha referido! Haz cualquier transacción usando tu billetera akisí y recibe tu bono de bienvenida!!` };
     } catch (error) {
-        console.log(error);
         dataBitacora.push(`{"status": false, "data": [], "message": 'ERROR: '${error}}`)
         actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 4);
         return { status: false, data: [], message: `Error: Validando codigo de referidos.` };
@@ -1002,7 +1004,7 @@ const validaParticipacionTerceros = async (codigoTercero, codigoUnico, idTrx, mo
         if (!registra.status){
             return { status: false, data: [], message: `${registra.message}` };
         }
-        const transaccionTercero = await validaParticipacionTransaccion(regBilletera.data.customer_id, registra.id);
+        const transaccionTercero = await validaParticipacionTransaccion(regBilletera.data.customer_id, "TER".concat(registra.id));
         return transaccionTercero;
     } catch (error) {
         return { status: false, data: [], message: `Error: Validando Participacion Terceros.` };
@@ -1067,11 +1069,9 @@ const validaTeceros = async (codigoTercero, telno, codigoUnico, fecha, idTrx, mo
 
 const registraTransaccionTerceros = async (dataInsert) => {
     try {
-        console.log(dataInsert);
         const regData = await TransaccionesTerceros.create(dataInsert);
         return { status: true, data: regData, message: `Registro De Terceros Agregado Con Exito` };
     } catch (error) {
-        console.log(error);
         return { status: false, data: [], message: `Error: Intentando Agregar El Registro De Terceros.` };
     }
 }
@@ -1084,7 +1084,6 @@ const buscaBilleteraConTel = async (telno) => {
         }
         return { status: true, data: regDataUsuario[0], message: `` };
     } catch (error) {
-        console.log(error);
         return { status: false, data: [], message: `Error: Intentando Agregar El Registro De Terceros.` };
     }
 }
