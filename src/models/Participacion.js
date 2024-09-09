@@ -8,7 +8,6 @@ const { FailTransaccion } = require('./failTransaccion');
 const { sumaTotal } = require('sequelize');
 
 const Participacion = sequelize.define('participacions', {
-
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -22,7 +21,6 @@ const Participacion = sequelize.define('participacions', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-
     fecha: {
         type: DataTypes.DATE,
         allowNull: false
@@ -51,7 +49,6 @@ const Participacion = sequelize.define('participacions', {
         type: DataTypes.STRING(255),
         allowNull: false
     },
-
     etapa: {
         type: DataTypes.INTEGER,
         allowNull: false
@@ -60,11 +57,14 @@ const Participacion = sequelize.define('participacions', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
+    jugadoFecha: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
     idTransaccion: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-
     tipoTransaccion: {
         type: DataTypes.CHAR(1),
         allowNull: false

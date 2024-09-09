@@ -5,27 +5,29 @@ const { sequelize } = require('../database/database');
 
 //Creacion de tabla y declaracion de sus atributos correspondientes
 const referidosIngresos = sequelize.define('referidosingresos', {
-    idRefIngresos: {
-        type: DataTypes.INTEGER,
-         primaryKey: true,
-        autoIncrement: true,
-    },
     id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        primaryKey: true,
+        autoIncrement: true,
     },
-    usuario : {
+    idCodigoReferido: {
         type: DataTypes.INTEGER,
-        
-        allowNull: false
+        allowNull: false,
+    },
+    customerId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
     fecha: {
         type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW(),
+    },
+    estado: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
         allowNull: false
     },
-    
 },{timestamps: false});
-
 
 
 
