@@ -116,9 +116,12 @@ const getAllCapaniasDisponibles= async () => {
     try {
         const campanias = await Campania.findAll({
         where: {
-            id: [93],
             estado: 1
-            // XXXXXX CONDICIONES: ESTADO => 1, FECHA-INCIO>=Now(), FECHA-FINAL<=HOY
+            // TODO - CONDICIONES: 
+            // estado => 1, 
+            // fecha-INCIO>=Now(), 
+            // fecha-FINAL<=HOY,
+            // edades OPCIONAL?
         },
         include: [
             { model: Bloqueados, attributes: ['numero'] },
@@ -370,7 +373,7 @@ const participacionPorTransaccion = async (infoBilletera, infoTransaccion, infoC
         }
         const registraParticipacion = await registrarParticipacion(newData);
         if(!registraParticipacion.status) {
-            console.log('AQUI DEBERIA DE HABER UNA ALERTA PORQUE NO SE PUDO REGISTRAR EL PREMIO');
+            // TODO: AQUI DEBERIA DE HABER UNA ALERTA PORQUE NO SE PUDO REGISTRAR EL PREMIO ???
             return { status: false, data: [], message: `${registraParticipacion.message}` }
         }
         // 02 MARCAR LOS REGISTROS DE ACUMULACION PARA ASIGNARLOS A ESTA PARTICIPACION
@@ -379,11 +382,13 @@ const participacionPorTransaccion = async (infoBilletera, infoTransaccion, infoC
         }
         //03 HACER EL LLAMADO PARA LA OPCION Y ESPERAR LA RESPUESTA DEL PREMIO
         if (infoCampania.premiocampania[0].premio.idTransaccion==0) {
-            console.log('PREMIO OFERCRAFT');
+            // TODO: PREMIO OFERCRAFT
             // const enviaPremio = await sendOffercraft();
+            // if (!enviaPremio) ...
         } else {
-            console.log('PREMIO BILLETERA');
+            // TODO: PREMIO BILLETERA
             // const enviaPremio = await sendBilletera();
+            // if (!enviaPremio) ...
         }
         return { status: true, data: newData, message: `Participacion Registrada [${registraParticipacion.data.id}]` }
     } else {
@@ -749,11 +754,13 @@ const obtienePremioCupon = async (infoCupon) => {
 const cuponParticipacion = async (infoCupon, infoPremio, infoBilletera) => {
     try {
         if(infoPremio.idTransaccion==0) {
-            console.log('PREMIO OFERCRAFT');
+            // TODO: PREMIO OFERCRAFT
             // const enviaPremio = await sendOffercraft();
+            // if (!enviaPremio) ...
         } else {
-            console.log('PREMIO BILLETERA');
+            // TODO: PREMIO BILLETERA
             // const enviaPremio = await sendBilletera();
+            // if (!enviaPremio) ...
         }
         const marcaCupon = await actualizaCupon(infoCupon.id, infoBilletera.customer_id);
         return { status: true, message: infoCupon.message };
