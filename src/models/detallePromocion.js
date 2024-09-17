@@ -17,6 +17,15 @@ const DetallePromocion = sequelize.define('detallepromocions', {
         allowNull: false,
         defaultValue: 0
     },
+    fecha: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    customerId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
     estado: {
         type: DataTypes.INTEGER,
         allowNull: false,

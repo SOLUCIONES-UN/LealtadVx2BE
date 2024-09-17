@@ -11,7 +11,7 @@ const codigoReferido = sequelize.define('codigosreferidos', {
         primaryKey: true,
         autoIncrement: true,
     },
-    codigoReferido: {   
+    codigo: {   
         type: DataTypes.STRING(200),
         allowNull: false
     },

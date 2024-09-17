@@ -1,15 +1,11 @@
 const express = require('express');
-// require('dotenv').config();
 const { sequelize } = require('./src/database/database');
 const { sendEmail } = require('./src/helpers/sendEmail.js');
 const { taskSendEmail } = require('./src/helpers/envioReporteAuitomatico.js');
 
-console.log('OFFERCRAFT_USER:', process.env.OFFERCRAFT_USER);
-console.log('OFFERCRAFT_PASSWORD:', process.env.OFFERCRAFT_PASSWORD);
-console.log('OFFERCRAFT_APIKEY:', process.env.OFFERCRAFT_APIKEY);
+
 
 const app = express();
-// Configurar cabeceras y cors
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
@@ -18,12 +14,9 @@ app.use((req, res, next) => {
     next();
 });
 
-//Seting
 app.set('port', process.env.PORT || 3000);
 
-//app.use(express.urlencoded({ limit: '2048kb' }));
 app.use(express.json({ limit: '2048kb' }));
-
 
 app.use(require('./src/routes/transaccion.routes'));
 app.use(require('./src/routes/columna.routes'));
@@ -70,9 +63,8 @@ app.use(require('./src/routes/participantes.routes.js'));
 app.use(require('./src/routes/validaTransaccion.routes.js'));
 app.use(require('./src/routes/ReporteNotificaciones.routes.js'));
 app.use(require('./src/routes/campaniasInternasNumeros.routes.js'));
+app.use(require('./src/routes/participacionTransacciones.routes.js'))
 
-
-//corremos el servidor
 app.listen(app.get('port'), () => {
     console.log('Server Running on Port: ' + app.get('port'));
 
