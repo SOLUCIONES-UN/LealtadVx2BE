@@ -1,4 +1,4 @@
-// require('dotenv').config();
+
 const { CampaniaInterna } = require('../models/campaniasinterno');
 const { sequelize, pronet } = require('../database/database');
 const { Op } = require('sequelize');
@@ -145,7 +145,7 @@ const GetTelnoCustomerbilletera = async (req, res) => {
         const { idCampaniaInterna } = req.params;
 
         const campaniaNumbers = await CampaniaInternoNumber.findAll({
-            where: { idCampaniaInterna }
+            where: { idCampaniaInterna },
         });
 
         const users = await pronet.query(
@@ -160,45 +160,47 @@ const GetTelnoCustomerbilletera = async (req, res) => {
 
         const validNumbers = [];
 
-        
         for (const campaniaNumber of campaniaNumbers) {
-           
-            if (campaniaNumber.estado === 0) {
-                continue;
-            }
-
-            const userState = userStatus[campaniaNumber.telefono];
-            if (userState !== undefined) {
-                switch (userState) {
-                    case 'ACTIVE':
-                        campaniaNumber.estado = 1;
-                        break;
-                    case 'STAND_BY':
-                        campaniaNumber.estado = 3;
-                        break;
-                    case 'BLOCK':
-                        campaniaNumber.estado = 4;
-                        break;
-                    case 'BLOCK_LOGIN':
-                        campaniaNumber.estado = 5;
-                        break;
-                    case 'CANCELLED':
-                        campaniaNumber.estado = 6;
-                        break;
-                    case 'REJECTED':
-                        campaniaNumber.estado = 7;
-                        break;
-                    case 'INACTIVE':
+            if (campaniaNumber.estado !== 0) {
+                if (campaniaNumber.estado !== 8) {
+                    const userState = userStatus[campaniaNumber.telefono];
+                    if (userState !== undefined) {
+                        switch (userState) {
+                            case 'ACTIVE':
+                                campaniaNumber.estado = 1;
+                                break;
+                            case 'STAND_BY':
+                                campaniaNumber.estado = 3;
+                                break;
+                            case 'BLOCK':
+                                campaniaNumber.estado = 4;
+                                break;
+                            case 'BLOCK_LOGIN':
+                                campaniaNumber.estado = 5;
+                                break;
+                            case 'CANCELLED':
+                                campaniaNumber.estado = 6;
+                                break;
+                            case 'REJECTED':
+                                campaniaNumber.estado = 7;
+                                break;
+                            case 'ENVIADO':
+                                campaniaNumber.estado = 8;
+                                break;
+                            case 'INACTIVE':
+                                campaniaNumber.estado = 2;
+                                break;
+                            default:
+                                campaniaNumber.estado = 2;
+                        }
+                    } else {
                         campaniaNumber.estado = 2;
-                        break;
-                    default:
-                        campaniaNumber.estado = 2;
+                    }
+                    await campaniaNumber.save();
                 }
-            } else {
-                campaniaNumber.estado = 2;
+
+                validNumbers.push(campaniaNumber);
             }
-            await campaniaNumber.save();
-            validNumbers.push(campaniaNumber); 
         }
         res.json(validNumbers);
 
@@ -206,6 +208,7 @@ const GetTelnoCustomerbilletera = async (req, res) => {
         res.status(500).json({ error: 'Ha sucedido un error al intentar comparar y actualizar los números telefónicos.' });
     }
 };
+
 
 
 const GetPremiosLink = async (req, res) => {
@@ -256,6 +259,7 @@ const ActivarCampaniaInterna = async (req, res) => {
 
         await CampaniaInterna.update({
             estado: 1,
+            esArchivada: 0
         }, {
             where: {
                 id: id,
@@ -269,6 +273,45 @@ const ActivarCampaniaInterna = async (req, res) => {
         res.send({ error: 'Ha sucedido un error al intentar Activar la Campaña Interna' });
     }
 }
+
+const ArchivarCampaniaInterna = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const campania = await CampaniaInterna.findByPk(id);
+
+        if (!campania) {
+            return res.status(404).json({ error: 'Campaña no encontrada' });
+        }
+
+        const hoy = new Date();
+        const fechaFin = campania.fechaFin && campania.fechaFin !== '0000-00-00 00:00:00' ? new Date(campania.fechaFin) : null;
+        const fechaInicio = campania.fechaInicio && campania.fechaInicio !== '0000-00-00 00:00:00' ? new Date(campania.fechaInicio) : null;
+
+        const esManual = (!fechaInicio || fechaInicio.toString() === 'Invalid Date') &&
+            (!fechaFin || fechaFin.toString() === 'Invalid Date');
+
+        const estaVencida = fechaFin && fechaFin < hoy;
+        const estaPausada = campania.estado === 2;
+
+        if (esManual || estaVencida || estaPausada) {
+            campania.estado = 3;
+            campania.esArchivada = 1;
+
+            await campania.save();
+
+            return res.status(200).json({ message: 'Campaña Interna archivada con éxito' });
+        } else {
+            return res.status(403).json({
+                error: 'No se puede archivar la campaña interna. Debe estar vencida, pausada o ser manual.'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Error al intentar archivar la campaña', details: error.message });
+    }
+};
+
+
 
 const DeleteCampaniaInterna = async (req, res) => {
     try {
@@ -290,6 +333,22 @@ const DeleteCampaniaInterna = async (req, res) => {
         res.send({ errors: 'Ha sucedido un error al intentar deshabilitar la Campaña Interna' });
     }
 }
+
+const checkNombre = async (req, res) => {
+    try {
+        const { nombre } = req.body;
+        const campania = await CampaniaInterna.findOne({ where: { nombre: nombre.trim() } });
+
+        if (campania) {
+            return res.json({ exists: true });
+        } else {
+            return res.json({ exists: false });
+        }
+    } catch (error) {
+        res.status(500).send({ errors: 'Error al verificar nombre campania.' });
+    }
+};
+
 
 const Addnumbers = async (req, res) => {
     let transaction;
@@ -373,10 +432,8 @@ const actualizarNumero = async (req, res) => {
     }
 };
 
-
-
 const enviarPremiosCampania = async (req, res) => {
-    const { idCampaniaInterna, tituloNotificacion, descripcionNotificacion } = req.body;
+    const { idCampaniaInterna } = req.body;
 
     try {
         const campania = await CampaniaInterna.findByPk(idCampaniaInterna);
@@ -384,6 +441,9 @@ const enviarPremiosCampania = async (req, res) => {
         if (!campania) {
             return res.status(404).json({ message: 'Campaña interna no encontrada' });
         }
+
+        const tituloNotificacion = campania.tituloNotificacion;
+        const descripcionNotificacion = campania.descripcionNotificacion;
 
         const numeros = await CampaniaInternoNumber.findAll({
             where: {
@@ -393,7 +453,7 @@ const enviarPremiosCampania = async (req, res) => {
         });
 
         if (numeros.length === 0) {
-            return res.status(404).json({ message: 'No hay números habilitados para esta campaña' });
+            return res.status(202).json({ message: 'No hay números habilitados para esta campaña' });
         }
 
         const resultados = [];
@@ -402,7 +462,7 @@ const enviarPremiosCampania = async (req, res) => {
                 const username = 'PRONET';
                 const password = 'ADU381NUYAHPPL9281SD';
                 const apiKey = '7T1S9KEIKYQBCO30SHJSW';
-                const urlConsumo = 'dev.akisi.com/api/v1/marketing/sendindividual_promotions';
+                const urlConsumo = 'https://dev.akisi.com/api/v1/marketing/sendindividual_promotions';
 
                 const response = await axios.post(
                     urlConsumo, {
@@ -419,10 +479,17 @@ const enviarPremiosCampania = async (req, res) => {
                         username,
                         password
                     }
-                }
-                );
+                });
 
-                resultados.push({ telefono: numero.telefono, resultado: response.data });
+                if (response.data && response.data.status) {
+
+                    numero.estado = 8;
+                    await numero.save();
+
+                    resultados.push({ telefono: numero.telefono, resultado: 'Enviado y estado actualizado.' });
+                } else {
+                    resultados.push({ telefono: numero.telefono, error: 'Fallo en el envío de la notificación.' });
+                }
             } catch (error) {
                 resultados.push({ telefono: numero.telefono, error: error.message });
             }
@@ -434,6 +501,28 @@ const enviarPremiosCampania = async (req, res) => {
     }
 };
 
+const getCampaniasInternasUltimos7Dias = async (req, res) => {
+    try {
+        const currentDate = new Date();
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(currentDate.getDate() - 7);
+
+        const campaniasUltimos7Dias = await CampaniaInterna.count({
+            where: {
+                fechaCreacion: {
+                    [Op.between]: [sevenDaysAgo, currentDate]
+                }
+            }
+        });
+
+        res.json({ campanias: campaniasUltimos7Dias });
+
+    } catch (error) {
+        console.error("Este es el error:", error);
+        res.status(403).send({ errors: 'Ha sucedido un error al intentar obtener la lista de campanias internas.' });
+    }
+}
 
 
-module.exports = { AddCampaniaInterna, enviarPremiosCampania, Addnumbers, actualizarNumero, GetTelnoCampaniasById, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias, GetPremiosLink };
+
+module.exports = { AddCampaniaInterna, enviarPremiosCampania, Addnumbers, checkNombre, ArchivarCampaniaInterna, actualizarNumero, GetTelnoCampaniasById, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias, GetPremiosLink, getCampaniasInternasUltimos7Dias };

@@ -2,13 +2,10 @@ const { pronet, genesis } = require('../database/database');
 const { Campania } = require('../models/campanias');
 const { Etapa } = require('../models/etapa');
 const { Participacion } = require('../models/Participacion');
-
 const { PremioCampania } = require('../models/premioCampania');
 const { Premio } = require('../models/premio');
-
-
 const { Op } = require('sequelize');
-
+const { CampaniaInterna } = require('../models/campaniasinterno');
 
 const getUsuariosNotificacionesOfferCraftSel = async (req, res) => {
     try {
@@ -71,7 +68,7 @@ const getUsuariosNotificacionesOfferCraftSel = async (req, res) => {
         const newArray = [];
         for (const c of envio) {
             const participaciones = [];
-            for (const p of c.participacions) { // Usamos el nombre de la relación aquí
+            for (const p of c.participacions) {
                 const customerInfo = await getCustomerInfoById(p.customerId);
                 participaciones.push({
                     ...p.toJSON(),
@@ -141,4 +138,52 @@ const getCustomerInfoById = async (customerId) => {
     }
 };
 
-module.exports = { getUsuariosNotificacionesOfferCraftSel };
+const getCampaniasInternas = async (req, res) => {
+    try {
+        const { idCampaniaInterna, fecha1, fecha2 } = req.body;
+
+        const whereClause = {
+            fechaInicio: {
+                [Op.gte]: new Date(fecha1)
+            },
+            fechaFin: {
+                [Op.lte]: new Date(fecha2)
+            },
+            estado: 1
+        };
+
+        if (idCampaniaInterna) {
+            whereClause.id = idCampaniaInterna;
+        }
+
+        const internas = await CampaniaInterna.findAll({
+            where: whereClause,
+            attributes: [
+                'id', 
+                'nombre', 
+                'descripcion', 
+                'fechaCreacion', 
+                'fechaInicio', 
+                'fechaFin', 
+                'tituloNotificacion', 
+                'descripcionNotificacion', 
+                'imgCampania', 
+                'imgNotificacion', 
+                'estado', 
+                'tipoCampania', 
+                'observaciones', 
+                'esArchivada', 
+                'emails', 
+                'terminos'
+            ],
+        });
+
+        return res.json(internas.length ? internas : []);
+    } catch (error) {
+        console.error('Error al obtener las campañas internas:', error);
+        res.status(500).send({ errors: 'Ha ocurrido un error al obtener las campañas internas.' });
+    }
+};
+
+
+module.exports = { getUsuariosNotificacionesOfferCraftSel, getCampaniasInternas, getCustomerInfoById };

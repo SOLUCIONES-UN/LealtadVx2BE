@@ -87,8 +87,6 @@ const AddPromocion = async (req, res) => {
             }
         });
 
-
-
         const nuevoArrarPremios = premios.map((item) => ({
             ...item,
             idPromocion: id,

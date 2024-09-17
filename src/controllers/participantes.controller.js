@@ -4,9 +4,6 @@ const { TransaccionPremio } = require("../models/transaccionPremio");
 const { Campania } = require('../models/campanias');
 const { pronet, genesis } = require('../database/database');
 
-
-
-
 const getCustomerInfoById = async(customerId) => {
     try {
         const customerInfo = await pronet.query(`
@@ -55,6 +52,5 @@ const getParticipantes = async(req, res) => {
         res.status(500).json({ error: 'Ha ocurrido un error al obtener las participaciones.' });
     }
 };
-
 
 module.exports = { getParticipantes };

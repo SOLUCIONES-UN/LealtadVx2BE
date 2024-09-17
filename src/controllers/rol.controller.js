@@ -1,7 +1,5 @@
 const { Rol } = require('../models/rol')
 
-
-//controllador paa obtener la lista de roles
 const GetRoles = async(req, res) => {
     try {
         const trx = await Rol.findAll({
@@ -24,13 +22,11 @@ const AddRol = async(req, res) => {
     try {
         const { descripcion } = req.body;
 
-        // Verifica si el rol ya existe
         const rolExistente = await Rol.findOne({ where: { descripcion } });
         if (rolExistente) {
             return res.status(400).json({ code: 'error', message: 'El rol ya existe con esta Descripcion.' });
         }
 
-        // Si no existe, crea el nuevo rol
         await Rol.create({
             descripcion,
         });
@@ -44,8 +40,6 @@ const AddRol = async(req, res) => {
 }
 
 
-
-//controllador para actualizar los roles
 const UpdateRol = async(req, res) => {
 
     try {
@@ -71,7 +65,6 @@ const UpdateRol = async(req, res) => {
 }
 
 
-//controllador para eliminar roles
 const DeleteRol = async(req, res) => {
 
     try {
@@ -107,7 +100,6 @@ const GetRolById = async(req, res) => {
     }
 
 }
-
 
 
 module.exports = { GetRoles, AddRol, UpdateRol, DeleteRol, GetRolById }
