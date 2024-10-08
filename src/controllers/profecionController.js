@@ -1,7 +1,6 @@
 const { Profecion } = require('../models/profecion.js');
 
 
-//controllador paa obtener la lista de Columnaes
 const GetProfecion = async (req, res) => {
     try {
         const trx = await Profecion.findAll({
@@ -16,13 +15,6 @@ const GetProfecion = async (req, res) => {
         res.send({ errors: 'Ha sucedido un  error al intentar obtener la lista de profeciones.' });
     }
 }
-
-
-
-
-
-
-
 
 const AddProfecion= async (req, res) => {
     try {
@@ -41,12 +33,6 @@ const AddProfecion= async (req, res) => {
     }
 }
 
-
-
-
-
-
-// controllador para actualizar Menus
 const UpdateProfecion = async (req, res) => {
     try {
         const { descripcion, proyecto } = req.body;
@@ -68,7 +54,7 @@ const UpdateProfecion = async (req, res) => {
     }
 }
 
-//controllador para eliminar Menus
+
 const DeleteProfecion = async (req, res) => {
     try {
         const { id } = req.params
@@ -87,7 +73,7 @@ const DeleteProfecion = async (req, res) => {
     }
 }
 
-//obtener la Profecion por su id 
+
 const GetProfecionById = async (req, res) => {
     try {
         const { id } = req.params;

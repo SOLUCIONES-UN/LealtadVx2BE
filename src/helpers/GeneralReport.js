@@ -26,8 +26,6 @@ const  getParticipacionesFechasGeneral = async (fecha1, fecha2) => {
             WHERE ri.fecha BETWEEN '${fechaInicioFormatted} 00:00:00' AND '${fechaFinFormatted} 23:59:59'
             LIMIT 10;
         `);
-
-        
         return results;
         
     } catch (error) {

@@ -1,9 +1,8 @@
 const express = require('express');
+const cors = require('cors');
 const { sequelize } = require('./src/database/database');
 const { sendEmail } = require('./src/helpers/sendEmail.js');
 const { taskSendEmail } = require('./src/helpers/envioReporteAuitomatico.js');
-
-
 
 const app = express();
 app.use((req, res, next) => {
@@ -14,8 +13,26 @@ app.use((req, res, next) => {
     next();
 });
 
-app.set('port', process.env.PORT || 3000);
+// app.use(cors({
+//     origin: 'http://localhost:4200', // Cambia esto al origen de tu frontend
+//     methods: 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
+//     allowedHeaders: 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method',
+//     credentials: true
+// }));
 
+// // Middleware para manejar solicitudes preflight OPTIONS
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', 'http://localhost:4200'); // Cambia esto al origen de tu frontend
+//     res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+//     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH');
+//     if (req.method === 'OPTIONS') {
+//         res.sendStatus(204); // Responde con un estado 204 No Content
+//     } else {
+//         next();
+//     }
+// });
+
+app.set('port', process.env.PORT || 3000);
 app.use(express.json({ limit: '2048kb' }));
 
 app.use(require('./src/routes/transaccion.routes'));

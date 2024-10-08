@@ -9,8 +9,6 @@ const sequelize = new Sequelize("dbepco7agwmwba", "devusr","efHBxdcV",
     }
 );
 
-
-
 const pronet = new Sequelize("pronet", "devusr", "efHBxdcV", {
     host: "172.16.50.27",
     port: "3306",

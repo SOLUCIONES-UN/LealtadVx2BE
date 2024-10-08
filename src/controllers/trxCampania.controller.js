@@ -242,7 +242,6 @@ const datosCampania = async () => {
 const transaccionesValidas = async (id) => {
     try {
         const transaccion = await Transaccion.findOne({ where: { id: id } });
-        // console.log(transaccion.dataValues);
         return transaccion;
     } catch (error) {
         console.log(error)

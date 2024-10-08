@@ -7,12 +7,6 @@ const { Promocion } = require('../models/promocion.js');
 
 const { generarReportereReferidos, generarReporteClientesParticipando,generarReportereGeneralReferidos, generarReporteOferCraft, generarReportePromociones,reporteClientesContraCampanasAcumulativas } = require('./generarReportes.js');
 
-
-// 0 * * * *'
-
-// '*/15 * * * * *'
-// '0 0 * * *'
-
 const taskSendEmail = cron.schedule( '0 0 * * *', async () => {
     console.log('Ejecutando una tarea cada minuto');
 

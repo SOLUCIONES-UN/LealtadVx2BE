@@ -21,17 +21,17 @@ const getUsuariosParticipantesFechasCampanasSel = async (req, res) => {
         u.nombre AS nombre_usuario,
         u.telefono AS telefono_usuario
       FROM 
-        Campania c
+        campania c
       LEFT JOIN 
-        Participacions pr ON c.id = pr.idCampania 
+        participacions pr ON c.id = pr.idCampania 
       LEFT JOIN 
-        CodigosReferidos cr ON cr.customerId = pr.customerId 
+        codigosreferidos cr ON cr.customerId = pr.customerId 
       LEFT JOIN 
-        ConfigReferidos crf ON cr.codigo = crf.id
+        configreferidos crf ON cr.codigo = crf.id
       LEFT JOIN 
         premios p ON p.id = pr.id 
       LEFT JOIN 
-        Usuarios u ON u.nombre = u.username 
+        usuarios u ON u.nombre = u.username 
       WHERE pr.fecha BETWEEN '${fechaInicio}' AND '${fechaFin}'
     `;
     

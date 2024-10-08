@@ -1,4 +1,4 @@
-// const {Participantes} = require("../models/participantes");
+
 const { Participacion } = require("../models/Participacion");
 const { TransaccionPremio } = require("../models/transaccionPremio");
 const { Campania } = require('../models/campanias');
@@ -25,7 +25,6 @@ const getCustomerInfoById = async(customerId) => {
 
         return customerInfo[0];
     } catch (error) {
-        console.error('Error al obtener la información del cliente:', error);
         throw new Error('Error al obtener la información del cliente');
     }
 };
@@ -48,7 +47,6 @@ const getParticipantes = async(req, res) => {
 
         res.json(participantes);
     } catch (error) {
-        console.error("Error al obtener las participaciones:", error);
         res.status(500).json({ error: 'Ha ocurrido un error al obtener las participaciones.' });
     }
 };

@@ -12,11 +12,7 @@ const GetReferidos = async (req, res)=>{
             res.status(403)
             res.send({ errors: 'Ha sucedido un  error al intentar obtener la lista de referidos.' });
         }
-   
-
 }
-
-
 
 const GetReferidoscount = async (req, res) => {
     try {

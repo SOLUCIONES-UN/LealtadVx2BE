@@ -11,6 +11,7 @@ const {
 
 const participacionTransaccion_get = async (req, res) => {
     const { codigoBilletera, numeroTransaccion } = req.params;
+    
     const validaParticipacion = await validaParticipacionTransaccion(codigoBilletera, numeroTransaccion);
     if (validaParticipacion.status){
         res.status(200).json(validaParticipacion);
@@ -28,13 +29,49 @@ const participacionCampanias_get = async (req, res) => {
     });
 };
 
+// const validateCupon_get = async (req, res) => {
+//     const { idRevision, cupon } = req.params;
+//     const validaCuponPromo = await validaCupon(idRevision, cupon);
+//     if (validaCuponPromo.status){
+//         res.status(200).json({ 
+//             status: validaCuponPromo.status, 
+//             message: validaCuponPromo.data.mesajeExito, 
+//             premio: validaCuponPromo.data.premio, 
+//             imagen: validaCuponPromo.data.imgSuccess, 
+//             codigo: validaCuponPromo.data.codigo });
+//     }else {
+//         res.status(400).json({ 
+//             status: validaCuponPromo.status, 
+//             message: validaCuponPromo.message, 
+//             premio: '', 
+//             imagen: validaCuponPromo.data.imagen, 
+//             codigo: validaCuponPromo.data.codigo });
+//     }
+// };
 const validateCupon_get = async (req, res) => {
     const { idRevision, cupon } = req.params;
     const validaCuponPromo = await validaCupon(idRevision, cupon);
-    if (validaCuponPromo.status){
-        res.status(200).json({ status: validaCuponPromo.status, message: validaCuponPromo.data.mesajeExito, premio: validaCuponPromo.data.premio, imagen: validaCuponPromo.data.imagen, codigo: validaCuponPromo.data.codigo });
-    }else {
-        res.status(400).json({ status: validaCuponPromo.status, message: validaCuponPromo.message, premio: '', imagen: validaCuponPromo.data.imagen, codigo: validaCuponPromo.data.codigo });
+    
+    console.log('Contenido completo de validaCuponPromo:', validaCuponPromo);
+
+    if (validaCuponPromo.status) {
+        console.log("Imagen en caso de éxito:", validaCuponPromo.data.imagen);
+        res.status(200).json({
+            status: validaCuponPromo.status,
+            message: validaCuponPromo.message,
+            premio: validaCuponPromo.data.premio,
+            imagen: validaCuponPromo.data.imagen,
+            codigo: validaCuponPromo.data.codigo
+        });
+    } else {
+        console.log("Imagen en caso de fallo:", validaCuponPromo.data.imagen);
+        res.status(400).json({
+            status: validaCuponPromo.status,
+            message: validaCuponPromo.message,
+            premio: validaCuponPromo.data.premio,
+            imagen: validaCuponPromo.data.imagen,
+            codigo: validaCuponPromo.data.codigo
+        });
     }
 };
 

@@ -4,11 +4,9 @@ const { Campania } = require('../models/campanias');
 const { participacionReferidos } = require('../models/participacionReferidos');
 const { Participacion } = require('../models/Participacion');
 const { codigoReferido } = require('../models/codigoReferidos');
-// const { referidosIngresos } = require('../models/ReferidosIngresos'); // Aquí se agregó la importación faltante
 const { ConfigReferido } = require('../models/configReferidos');
 const { Usuario } = require('../models/usuario');
 const { Op } = require('sequelize');
-
 
 const getParticipaciones = async (req, res) => {
   try {
@@ -53,7 +51,7 @@ const getParticipaciones = async (req, res) => {
     
     const participacionesConCliente = await Promise.all(participaciones.map(async (participacion) => {
       const customerInfo = await getCustomerById(participacion.customerId);
-      participacion.customerInfo = customerInfo; // Asignar la información del cliente a la participación
+      participacion.customerInfo = customerInfo;
       return participacion;
     }));
 
