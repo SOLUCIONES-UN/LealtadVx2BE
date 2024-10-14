@@ -234,6 +234,25 @@ const GetPremiosLink = async (req, res) => {
     }
 };
 
+const GetPremiosSinLink = async (req, res) => {
+    try {
+        const premios = await Premio.findAll({
+            where: {
+                estado: 1,
+                [Op.or]: [
+                    { link: null },
+                    { link: '' }
+                ]
+            }
+        });
+
+        res.status(200).json(premios);
+    } catch (error) {
+        res.status(403).send({ errors: 'Error al obtener premios sin link.' });
+    }
+};
+
+
 const PausarCampaniaInterna = async (req, res) => {
     try {
         const { id } = req.params;
@@ -525,4 +544,4 @@ const getCampaniasInternasUltimos7Dias = async (req, res) => {
 
 
 
-module.exports = { AddCampaniaInterna, enviarPremiosCampania, Addnumbers, checkNombre, ArchivarCampaniaInterna, actualizarNumero, GetTelnoCampaniasById, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias, GetPremiosLink, getCampaniasInternasUltimos7Dias };
+module.exports = { AddCampaniaInterna, GetPremiosSinLink, enviarPremiosCampania, Addnumbers, checkNombre, ArchivarCampaniaInterna, actualizarNumero, GetTelnoCampaniasById, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, GetCampaniaInternaById, PausarCampaniaInterna, ActivarCampaniaInterna, DeleteCampaniaInterna, GetTelnoCampanias, GetPremiosLink, getCampaniasInternasUltimos7Dias };

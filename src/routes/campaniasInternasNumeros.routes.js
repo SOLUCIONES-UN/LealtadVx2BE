@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const { AddCampaniaInterna, GetCampaniaInternaActivas, GetTelnoCustomerbilletera, getCampaniasInternasUltimos7Dias, GetcampaniaInternaCount, ArchivarCampaniaInterna, enviarPremiosCampania, actualizarNumero, GetPremiosLink, checkNombre, ActivarCampaniaInterna, PausarCampaniaInterna, DeleteCampaniaInterna, GetCampaniaInternaById, GetTelnoCampanias, Addnumbers } = require('../controllers/campaniasInternas.controller.js');
+const { AddCampaniaInterna, GetCampaniaInternaActivas, GetPremiosSinLink, GetTelnoCustomerbilletera, getCampaniasInternasUltimos7Dias, GetcampaniaInternaCount, ArchivarCampaniaInterna, enviarPremiosCampania, actualizarNumero, GetPremiosLink, checkNombre, ActivarCampaniaInterna, PausarCampaniaInterna, DeleteCampaniaInterna, GetCampaniaInternaById, GetTelnoCampanias, Addnumbers } = require('../controllers/campaniasInternas.controller.js');
 const { GetcampanasActivas} = require('../controllers/campania.controller.js')
 const { validateCreate } = require('../validators/usuario')
 
@@ -22,6 +22,7 @@ router.get(`/${path}/campaniaInternaById/:id`, GetCampaniaInternaById);
 router.delete(`/${path}/:id`, DeleteCampaniaInterna);
 router.get(`/${path}/allphone`, GetTelnoCampanias);
 router.get(`/${path}/premiosLink`, GetPremiosLink);
+router.get(`/${path}/premiossinLink`, GetPremiosSinLink);
 router.delete(`/${path}/:numero/:campaignId`, actualizarNumero);
 router.get(`/${path}/compararTelefonos/:idCampaniaInterna`, GetTelnoCustomerbilletera);
 router.post(`/${path}/enviarPremio`, enviarPremiosCampania);
