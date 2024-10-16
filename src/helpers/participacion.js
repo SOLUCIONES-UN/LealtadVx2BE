@@ -88,6 +88,7 @@ const revisaBilletera = async (codigoReferencia) => {
 
 const revisaBilleteraPorReferencia = async (codigoReferencia) => {
     try {
+        console.log("Transaccion revisaBilleterea por Referencia")
         const data = await pronet.query(
             `SELECT tc.customer_id, tc.customer_reference, 
             DATE_FORMAT(tc.created_date, '%Y-%m-%d') 
@@ -96,7 +97,7 @@ const revisaBilleteraPorReferencia = async (codigoReferencia) => {
             tc.telno, tc.department, tc.municipality, tc.is_finish_registration, tc.has_life_validate, tc.has_complete_profile, tc.has_validate_dpi, tc.has_commerce, CURDATE() AS hoy 
             FROM pronet.tblUserInformation tui 
             INNER JOIN pronet.tbl_customer tc ON tc.fk_userid = tui.userid 
-            WHERE tc.customer_reference = ?`, // Usa ? en lugar de $
+            WHERE tc.customer_reference = ?`,
             {
                 replacements: [codigoReferencia],
                 type: Sequelize.QueryTypes.SELECT
@@ -111,33 +112,28 @@ const revisaBilleteraPorReferencia = async (codigoReferencia) => {
         if(data[0].has_life_validate == '0' || data[0].has_validate_dpi == 0){
             return { status: true, data: [], message: `Error: El Perfil De Billetera No Esta Completo` }
         }
+        console.log("Saliendo revision por referenciaS")
         return { status: true, data: data[0], message: `` }
     } catch (err) {
-        console.error('Error:', err); // Agrega más detalle del error en la consola
         return { status: false, data: 0, message: `Error: Consultando Billetera` }
     }
 }
-
 
 const getAllCapaniasDisponibles= async () => {
     try {
         const campanias = await Campania.findAll({
         where: {
             estado: 1
-            // TODO - CONDICIONES: 
-            // estado => 1, 
-            // fecha-INCIO>=Now(), 
-            // fecha-FINAL<=HOY,
-            // edades OPCIONAL?
         },
         include: [
-            { model: Bloqueados, attributes: ['numero'] },
-            { model: Participantes, attributes: ['numero'] },
+            // { model: Bloqueados, attributes: ['numero'] },
+            // { model: Participantes, attributes: ['numero'] },
             { model: Etapa,
                 include: [
                     { model: Presupuesto },
                     { model: Parametro , attributes: { exclude: ['idCampania'] } },
-                    { model: PremioCampania, attributes: { exclude: ['idEtapa'] }, include: [ { model: Premio } ] }
+                    { model: PremioCampania, attributes: { exclude: ['idEtapa'] }, 
+                    include: [ { model: Premio } ] }
                 ],
             },
         ],
@@ -163,6 +159,7 @@ const obtieneCampanasActivas = async (codigoReferencia) => {
         const infoBilletera = await revisaBilleteraPorReferencia(codigoReferencia);
         if(infoBilletera.status) {
             const camapanasDisponibles = await getAllCapaniasDisponibles();
+            console.log("obtenemos todas las campanias")
             for (let i = 0; i < camapanasDisponibles.data.length; i++) {
                 const puedeParticipar = await puedeParticiparEnCampaia(infoBilletera.data, camapanasDisponibles.data[i]);
                 if (puedeParticipar.status) {
@@ -185,7 +182,9 @@ const obtieneCampanasActivas = async (codigoReferencia) => {
                         botones: await obtieneBotonTransaccion(camapanasDisponibles.data[i].etapas[0].parametros[0].idTransaccion),    
                     });
                 }
+                console.log('Nombre ', camapanasDisponibles.data[i].nombre);
             }
+            console.log('saliendo de validaciones.................',   );
         }
         return { status: true, data: campanaParticipar, message: `` }
     } catch (error) {
