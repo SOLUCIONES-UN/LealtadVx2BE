@@ -45,9 +45,7 @@ const AddCampania = async(req, res) => {
             emailspar,
             ultimoCorreoEnviado
         } = req.body;
-
-
-
+        
 
         const newCampains = await Campania.create({
             nombre,
@@ -143,8 +141,6 @@ const CheckNombreCampaña = async(req, res) => {
 };
 
 
-
-
 const GetCampania = async(req, res) => {
     try {
         const campanias = await Campania.findAll({
@@ -171,8 +167,6 @@ const GetCampania = async(req, res) => {
 };
 
 
-
-
 const GetEtapa = async(req, res) => {
     try {
         const etapas = await Etapa.findAll({
@@ -187,8 +181,6 @@ const GetEtapa = async(req, res) => {
         res.status(500).json({ error: 'Ha sucedido un error al intentar ver la campaña', details: error.message });
     }
 };
-
-
 
 
 const UpdateCampania = async (req, res) => {
@@ -324,14 +316,6 @@ const UpdateCampania = async (req, res) => {
         res.status(500).json({ error: 'Error general al actualizar la campaña', details: error.message });
     }
 };
-
-
-
-
-
-
-
-
 
 const GetcampanasActivasById = async(req, res) => {
     try {
@@ -1136,7 +1120,7 @@ const actualizarNumero = async(req, res) => {
 
     try {
 
-        const { numero } = req.params;
+        const { numero, campaignId } = req.params;
 
 
         console.log('Número recibido:', numero);
@@ -1146,6 +1130,7 @@ const actualizarNumero = async(req, res) => {
         }, {
 
             where: {
+                idCampania: campaignId,
                 numero: numero,
                 
             }
@@ -1194,6 +1179,3 @@ module.exports = {
     Getbloqueados,
     actualizarNumero
 }
-
-
-

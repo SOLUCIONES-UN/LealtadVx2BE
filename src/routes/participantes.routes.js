@@ -4,8 +4,6 @@ const {GetTransaccions, getParticipantes,} = require('../controllers/participant
 const {validateCreate} = require('../validators/transaccion')
 const authUser = require('../middlewares/auth.js');
 
-
-//declarampos nuestra constante para almacenar el path`
 const path = 'Participante';
 //rutas del proyecto
 router.get(`/${path}`, getParticipantes);

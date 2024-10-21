@@ -4,6 +4,7 @@ const { Premiacion } = require('./premiacion');
 const { PremioCampania } = require('./premioCampania');
 const { PremioPromocion } = require('./premioPromocion');
 const { Participacion } = require('./Participacion');
+const { CampaniaInterna } = require('./campaniasinterno');
 
 
 
@@ -17,12 +18,12 @@ const Premio = sequelize.define('premios', {
     descripcion: {
         type: DataTypes.STRING(150),
         allowNull: true,
-     
+
     },
     usuario: {
         type: DataTypes.STRING(150),
         allowNull: true,
-   
+
     },
     tipo: {
         type: DataTypes.INTEGER,
@@ -41,7 +42,7 @@ const Premio = sequelize.define('premios', {
         defaultValue: 1,
         allowNull: false
     },
- 
+
 }, { timestamps: false });
 
 
@@ -53,7 +54,6 @@ Premio.hasMany(PremioCampania, {
 PremioCampania.belongsTo(Premio, {
     foreignKey: 'idPremio',
     targetId: 'id',
-
 });
 
 
@@ -92,7 +92,17 @@ Premiacion.belongsTo(Premio, {
 
 });
 
+Premio.hasMany(CampaniaInterna, {
+    foreignKey: 'idPremio',
+    sourceKey: 'id',
+    allowNull: false
 
+});
+CampaniaInterna.belongsTo(Premio, {
+    foreignKey: 'idPremio',
+    targetId: 'id',
+    allowNull: false
+});
 
 
 
@@ -105,7 +115,7 @@ Premiacion.belongsTo(Premio, {
 //     try{ 
 //     await Premio.sync({ alter: true });
 //     console.log("Se cargo correctamente");
-    
+
 
 //     } catch (error){
 //         console.error("hay problema al cargar el modelo",error);
@@ -115,8 +125,17 @@ Premiacion.belongsTo(Premio, {
 
 
 
-    //   Participacion.sync({ alter: true }).then(() => {
-    //       console.log('se creo con exito la tabla  Participacion ');
-    //   });
+//   CampaniaInterna.sync({ alter: true }).then(() => {
+//       console.log('se creo con exito la tabla  Participacion ');
+//   });
+
+// (async () => {
+//     await CampaniaInterna.sync({ alter: true });
+//     // Code here
+// })();
+
+// CampaniaInterna.sync({ alter: true }).then(() => {
+//       console.log('se creo con exito la tabla  Premio ');
+//   });
 
 module.exports = { Premio, sequelize }

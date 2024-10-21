@@ -40,14 +40,8 @@ router.delete(`/${path}/:id`, authUser, DeleteCampania);
 router.get(`/${path}/:id`, authUser, GetcampanasActivasById);
 router.post(`/${path}/num`, authUser, Addnumbers);
 router.get(`/${path}/number/:id`, Getbloqueados);
-router.put(`/${path}/numdelete/:numero`, authUser, actualizarNumero);
-
-
+router.put(`/${path}/numdelete/:numero/:campaignId`, authUser, actualizarNumero);
 
 router.put(`/${path}/inabilitar/:id`, authUser, inabilitarEtapa);
-
-
-
-
 
 module.exports = router;

@@ -1,29 +1,53 @@
-const { Premio } = require('../models/premio')
+const { Premio } = require('../models/premio');
+const { Transaccion } = require('../models/transaccion');
 
 
-//controllador paa obtener la lista de transacciones
-const GetPremios = async(req, res) => {
+const GetPremios = async (req, res) => {
     try {
         const trx = await Premio.findAll({
             where: {
                 estado: 1
+            },
+            include: [
+                {
+                    model: Transaccion,
+                    as: 'transaccion',
+                    attributes: ['descripcion'],
+                    required: false,
+                }
+            ]
+        });
+
+        const premiosConDescripcion = trx.map(premio => {
+            const premioData = premio.toJSON();
+            if (!premioData.descripcion && premioData.transaccion) {
+              
+                premioData.descripcion = `Premio relacionado a ${premioData.transaccion.descripcion}`;
             }
-        })
-        res.json({ premio: trx })
+            delete premioData.transaccion;
+            return premioData;
+        });
+
+        res.json({ premio: premiosConDescripcion });
     } catch (error) {
-        res.status(403)
-        res.send({ errors: 'Ha sucedido un  error al intentar agregar el premio.' });
+        console.error(error);
+        res.status(403).send({ errors: 'Ha sucedido un error al intentar obtener los premios.' });
     }
+};
 
-}
 
-
-//controllador para agregar nuevos Premios
 const AddPremio = async (req, res) => {
     console.log("si llega el metodo crear ");
     console.log(req.body);
     try {
-        const { descripcion, link, claveSecreta, tipoTransaccion, idTransaccion } = req.body;
+        const {
+            descripcion,
+            link,
+            claveSecreta,
+            tipoTransaccion,
+            idTransaccion,
+            usuario
+        } = req.body;
 
         if (!descripcion && tipoTransaccion === "2") {
             return res.status(400).json({ code: 'error', message: 'La descripción del premio es requerida' });
@@ -48,6 +72,7 @@ const AddPremio = async (req, res) => {
             await Premio.create({
                 tipo: tipoTransaccion,
                 idTransaccion: idTransaccion,
+                usuario: usuario
             })
             res.json({ code: 'ok', message: 'Premio creado con éxito' });
         } else if (tipoTransaccion === "2") {
@@ -56,9 +81,11 @@ const AddPremio = async (req, res) => {
                 descripcion: descripcion,
                 link: link,
                 claveSecreta: claveSecreta,
+                usuario: usuario
             })
             res.json({ code: 'ok', message: 'Premio creado con éxito' });
         }
+
     } catch (error) {
         console.log(error)
         res.status(403).send({ errors: 'Ha sucedido un error al intentar agregar el premio.' });
@@ -67,25 +94,24 @@ const AddPremio = async (req, res) => {
 }
 
 
-
-//controllador para actualizar los premios
-const UpdatePremio = async(req, res) => {
-    const { descripcion,link, claveSecreta, tipoTransaccion, idTransaccion } = req.body;
+const UpdatePremio = async (req, res) => {
+    const { descripcion, link, claveSecreta, tipoTransaccion, usuario, idTransaccion } = req.body;
 
 
     try {
-        
+
         const { id } = req.params
 
         if (tipoTransaccion === "1") {
             const { idTransaccion } = req.body;
             await Premio.update({
                 tipo: tipoTransaccion,
-                idTransaccion:idTransaccion ,
-                tipo: null,
-                descripcion:null,
-                link:null ,
-                claveSecreta:null,
+                idTransaccion: idTransaccion,
+                // tipo: null,
+                descripcion: null,
+                link: null,
+                claveSecreta: null,
+                usuario: usuario
             }, {
                 where: {
                     id: id
@@ -96,14 +122,14 @@ const UpdatePremio = async(req, res) => {
 
         } else if (tipoTransaccion === "2") {
 
-            
+
             await Premio.update({
                 tipo: tipoTransaccion,
-                idTransaccion:null ,
-                tipo: tipoTransaccion,
-                descripcion:descripcion,
-                link:link ,
-                claveSecreta:claveSecreta,
+                idTransaccion: null,
+                descripcion: descripcion,
+                link: link,
+                claveSecreta: claveSecreta,
+                usuario: usuario
             }, {
                 where: {
                     id: id
@@ -120,8 +146,7 @@ const UpdatePremio = async(req, res) => {
 }
 
 
-//controllador para actualizar transacciones
-const DeletePremio = async(req, res) => {
+const DeletePremio = async (req, res) => {
 
     try {
         const { id } = req.params
@@ -156,6 +181,7 @@ const GetPremioById = async(req, res) => {
     }
 
 }
+
 
 
 module.exports = { GetPremios, AddPremio, UpdatePremio, DeletePremio, GetPremioById }

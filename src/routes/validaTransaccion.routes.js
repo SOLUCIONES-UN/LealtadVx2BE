@@ -23,20 +23,4 @@ router.put(`/${path}/config/:id`, updateConfig);
 router.put(`/${path}/configValidate/:id`, updateCofigValidate);
 router.delete(`/${path}/configValidate/:idConfiguration`, DeleteConfig);
 
-
-router.get(`/${path}/customers/:customerId`, async(req, res) => {
-    const { customerId } = req.params;
-    try {
-        const telno = await getCustomerInfoFromPronet(customerId);
-        if (telno) {
-            return res.json({ telno });
-        } else {
-            return res.status(404).json({ error: 'CustomerId no encontrado' });
-        }
-    } catch (error) {
-        console.error(`Error al obtener datos de Pronet para customerId ${customerId}:`, error);
-        return res.status(500).json({ error: 'Error al obtener datos del cliente' });
-    }
-});
-
 module.exports = router

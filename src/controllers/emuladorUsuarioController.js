@@ -13,6 +13,7 @@ const { pronet, sequelize, genesis, Op } = require('../database/database');
 const { Sequelize, where } = require('sequelize');
 const { CampaniaRegiones } = require('../models/campaniaregions');
 const { CampaniasNumeros } = require('../models/campanianumero');
+const { getAllCapaniasDisponibles, revisaBilleteraPorReferencia, obtienePremiosPendintes, puedeParticiparEnCampaia, obtieneAcumulacion, obtieneBotonTransaccion, revisaBilleteraPorTelno } = require('../helpers/participacion');
 
 const transaccionesValidasCampanasFusionL = async (id) => {
     try {
@@ -212,32 +213,51 @@ async function procesarCampanas(usuario, campanas) {
     return retorno;
 }
 
-const generaCampanasUsuarios = async (req, res) => {
+
+const generaCampanasUsuarios_get = async (codigoReferencia) => {
+    let campanaParticipar = [];
     try {
-        const { referens } = req.params;
-
-        const usuario = await obtenerUsuarioPorReferens(referens);
-        if (!usuario) {
-            return res.status(404).json({ message: "No se encontró ningún usuario con este referens." });
+        const infoBilletera = await revisaBilleteraPorTelno(codigoReferencia);
+        if(infoBilletera.status) {
+            const camapanasDisponibles = await getAllCapaniasDisponibles();
+            for (let i = 0; i < camapanasDisponibles.data.length; i++) {
+                const puedeParticipar = await puedeParticiparEnCampaia(infoBilletera.data, camapanasDisponibles.data[i]);
+                if (puedeParticipar.status) {
+                    const tienePendientes = await obtienePremiosPendintes(infoBilletera.data, camapanasDisponibles.data[i]);
+                    const misParticipaciones = camapanasDisponibles.data[i].etapas[0].tipoParticipacion==0 ? [] : await obtieneAcumulacion(camapanasDisponibles.data[i].id, infoBilletera.data.customer_id);
+                    campanaParticipar.push({
+                        idCampana: camapanasDisponibles.data[i].id,
+                        nombreCampana: camapanasDisponibles.data[i].nombre,
+                        descripcion: camapanasDisponibles.data[i].descripcion,
+                        tipoParticipacion: camapanasDisponibles.data[i].etapas[0].tipoParticipacion,
+                        notificacion: tienePendientes!='' ? 1 : 0,
+                        urlNotificacion: tienePendientes,
+                        tituloNotificacion: camapanasDisponibles.data[i].tituloNotificacion,
+                        descripcionNotificacion: camapanasDisponibles.data[i].descripcionNotificacion,
+                        infoAdd: [],
+                        mistransacciones: misParticipaciones.length,
+                        transacciones: parseInt(camapanasDisponibles.data[i].etapas[0].minimoTransaccion),
+                        imagenIcono: camapanasDisponibles.data[i].imgPush,
+                        imagenGrande: camapanasDisponibles.data[i].imgAkisi,
+                        botones: await obtieneBotonTransaccion(camapanasDisponibles.data[i].etapas[0].parametros[0].idTransaccion),    
+                    });
+                }
+            }
         }
-
-        const campanasActivas = await obtenerCampanasActivas();
-        const campanasValidas = await Promise.all(campanasActivas.map(async (campania) => {
-            const regionesValidas = await regionesValidasCampania(campania.id);
-            if (regionesValidas.length > 0) return campania;
-            return null;
-        }));
-
-        const campanasFiltradas = campanasValidas.filter(campania => campania !== null);
-        const resultado = await procesarCampanas(usuario, campanasFiltradas);
-
-        res.json(resultado);
+        return { status: true, data: campanaParticipar, message: `` }
     } catch (error) {
-        res.status(500).json({ message: "Error interno del servidor." });
+        return { status: false, data: [], message: `Error interno del servidor. [${error}]` }
     }
+}
+
+const generaCampanasUsuarios = async (req, res) => {
+    const { telefono } = req.params;
+    const camapansActivas = await generaCampanasUsuarios_get(telefono);
+    res.status(200).json({ 
+        textoSinInfo: "Estamos trabajando para traerte más promociones.", 
+        promociones: camapansActivas.data,
+    });
 };
-
-
 
 const campanasUsuariosEmulador_get = async (req, res) => {
     try {
@@ -739,10 +759,11 @@ const GetNumeroById = async (req, res) => {
 
 module.exports = {
 
-    campanasUsuariosEmulador_get,
+    // campanasUsuariosEmulador_get,
     validarLimiteParticipacionesPorUsuario,
     campaniaNumerosRestringidos,
     regionesValidasCampania,
     obtenerMistransacciones,
-    obtenerTransaccionesValidas
+    obtenerTransaccionesValidas,
+    generaCampanasUsuarios
 }

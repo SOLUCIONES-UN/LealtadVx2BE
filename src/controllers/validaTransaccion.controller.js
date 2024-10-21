@@ -11,6 +11,7 @@ const { Participacion } = require('../models/Participacion');
 const { FailTransaccion } = require('../models/failTransaccion');
 const { Configurevalidation } = require('../models/configurevalidation');
 const { CampaniaValidation } = require('../models/campaniaValidation');
+const { TransaccionesTerceros } = require("../models/transaccionesTerceros");
 
 async function getCustomerInfoFromPronet(customerId) {
     try {
@@ -127,26 +128,51 @@ async function getFailTransaccions(req, res) {
     }
 }
 
-
-
-
 const validaciones = ['primera', 'segunda', 'tercera', 'primera_segunda', 'primera_tercera', 'segunda_tercera', 'ambas'];
-
-
-
-
 
 const getransaccion = async (req, res) => {
     try {
-        let customerInfo = [{
-            idParticipacion: 24,
-            fk_customer_id: 242,
-            fecha: '2024-07-29T12:12:00.000Z',
-            descripcionTrx: 'Recarga de saldo Tigo 3',
-            idPremio: 24,
-            idCampania: 26,
-            idTransaccion: 1
-        }];
+
+        const transacciones = await TransaccionesTerceros.findAll();
+
+        if (!transacciones || transacciones.length === 0) {
+            return res.status(404).json({ message: 'Transacciones no encontradas' });
+        }
+
+        const customerInfoPromises = transacciones.map(async (trx) => {
+            const participacion = await Participacion.findOne({
+                where: {
+                    customerId: trx.customerId
+                },
+                attributes: ['idCampania', 'idPremio']
+            });
+
+            return {
+                idParticipacion: trx.id,
+                fk_customer_id: trx.customerId,
+                fecha: trx.fechaTransaccion ? trx.fechaTransaccion.toISOString() : new Date().toISOString(), // Default to current date if not provided
+                descripcionTrx: trx.descTransaccion,
+                idPremio: participacion ? participacion.idPremio : null,
+                idCampania: participacion ? participacion.idCampania : null,
+                idTransaccion: trx.id
+            };
+        });
+
+        const customerInfo = await Promise.all(customerInfoPromises);
+
+        if (customerInfo.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron participaciones relacionadas' });
+        }
+
+            // let customerInfo = [{
+            //     idParticipacion: 24,
+            //     fk_customer_id: 242,
+            //     fecha: '2024-07-29T12:12:00.000Z',
+            //     descripcionTrx: 'Recarga de saldo Tigo 3',
+            //     idPremio: 24,
+            //     idCampania: 26,
+            //     idTransaccion: 1
+            // }];
 
         const idCampania = customerInfo[0].idCampania;
 
@@ -172,9 +198,6 @@ const getransaccion = async (req, res) => {
         const tiempoIntervalo = config.time_minutes;
         const cantTransaccion = config.cantTransaccion_time;
         const validacionesSeleccionadas = [config.validacion];
-
-        console.log('Data obtenida de pronet:', customerInfo);
-        console.log('Validaciones solicitadas:', validacionesSeleccionadas);
 
         let transaccionesValidadas = [];
         let transaccionesSospechosas = [];
@@ -218,12 +241,12 @@ const getransaccion = async (req, res) => {
             transaccionesSospechosasTerceraValidacion: transaccionesSospechosas3
         });
     } catch (error) {
-        console.error('Error al obtener participaciones en la base de datos "genesis":', error);
         res.status(500).json({ message: 'Error al obtener participaciones' });
     }
 };
 
 const contarTransacciones = async (customerId, fecha, tiempoIntervalo) => {
+
     const participaciones = await Participacion.count({
         where: {
             customerId: customerId,
@@ -294,14 +317,6 @@ const validarTransaccion = async (customerInfo, tiempoIntervalo, cantTransaccion
     };
 };
 
-
-
-
-
-
-
-
-
 const validarDuplicados = async(customerInfo) => {
     const transaccionesValidadas2 = [];
     const transaccionesSospechosas2 = [];
@@ -349,11 +364,6 @@ const validarDuplicados = async(customerInfo) => {
     };
 };
 
-
-
-
-
-
 const validarValorTotalPorDia = async(customerInfo) => {
     const transaccionesValidadas3 = [];
     const transaccionesSospechosas3 = [];
@@ -383,8 +393,6 @@ const validarValorTotalPorDia = async(customerInfo) => {
             });
 
             const totalValor = parseFloat(participacionesDia[0].totalValor) || 0;
-
-            console.log(`Total valor para la campaña ${idCampania} en el día ${fecha}: ${totalValor}`);
 
             if (totalValor >= 1000) {
                 transaccionesSospechosas3.push(info);
@@ -433,7 +441,6 @@ const aceptarTransaccionSospechosa = async(req, res) => {
         res.status(403)
         res.send({ errors: 'Ha sucedido un  error al intentar pausar la Promocion.' });
     }
-
 }
 
 const rechazarTransaccion = async(req, res) => {
@@ -455,7 +462,6 @@ const rechazarTransaccion = async(req, res) => {
         res.status(403)
         res.send({ errors: 'Ha sucedido un  error al intentar rechazar la transaccion.' });
     }
-
 }
 
 

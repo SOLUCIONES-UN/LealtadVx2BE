@@ -57,7 +57,7 @@ const Participacion = sequelize.define('participacions', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    jugadoFecha: {
+    fechaJugado: {
         type: DataTypes.DATE,
         allowNull: true
     },

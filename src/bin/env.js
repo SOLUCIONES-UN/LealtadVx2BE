@@ -10,6 +10,8 @@ const env = {
     },
     EMAIL_USER: 'appsolucionesun@gmail.com',
     EMAIL_PASS: 'ncjwwibwbqwknliy',
+
 }
+
 
 module.exports = env;

@@ -578,7 +578,7 @@ const getPremiosXCamapa = async idCampana =>
                                         ON p.idTransaccion = t.idTransaccion
                             WHERE dcp.idCampana = :idCampana;`
         , { raw: false, type: QueryTypes.SELECT, replacements: { idCampana } });
-    
+
 
 module.exports = {
     check_auth_client, auth, getTestTransaccion, campanasActualesActivas, campanasActualesActivasTercero, campanaTransaccionesValidas, campanaPremiosRetornarRandom, campanaPremiosRetornarTodas, campanaPremiosInfoCliente,
