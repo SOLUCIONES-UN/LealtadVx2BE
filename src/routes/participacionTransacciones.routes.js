@@ -10,8 +10,8 @@ const {
     programaReferidos_post,
     programaReferidos_put,
     programaTerceros_post,
+
 } = require('../controllers/participacionTransaccion.controller.js');
-const {revisaBilleteraPorReferencia} = require('../helpers/participacion.js');
 // const {validateCreate} = require('../validators/participacionTransaccion.js')
 const authUser = require('../middlewares/auth.js');
 
@@ -26,15 +26,6 @@ router.put(`/${path}/programaReferidosPut`, programaReferidos_put);
 router.get(`/${path}/validateCupon/:idRevision/:cupon`, validateCupon_get);
 router.post(`/${path}/programaTerceros`, programaTerceros_post);
 
-router.get(`/${path}/revisaBilletera/:codigoReferencia`, async (req, res) => {
-    try {
-        const codigoReferencia = req.params.codigoReferencia;
-        const result = await revisaBilleteraPorReferencia(codigoReferencia);
-        res.json(result);
-    } catch (err) {
-        res.status(500).json({ message: 'Error al consultar la billetera' });
-    }
-});
 
 
 module.exports = router;

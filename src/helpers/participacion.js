@@ -119,30 +119,100 @@ const revisaBilleteraPorReferencia = async (codigoReferencia) => {
     }
 }
 
-const getAllCapaniasDisponibles= async () => {
+const revisaBilleteraPorTelno = async (telefono) => {
     try {
-        const campanias = await Campania.findAll({
-        where: {
-            estado: 1
-        },
-        include: [
-            // { model: Bloqueados, attributes: ['numero'] },
-            // { model: Participantes, attributes: ['numero'] },
-            { model: Etapa,
-                include: [
-                    { model: Presupuesto },
-                    { model: Parametro , attributes: { exclude: ['idCampania'] } },
-                    { model: PremioCampania, attributes: { exclude: ['idEtapa'] }, 
-                    include: [ { model: Premio } ] }
-                ],
-            },
-        ],
-        });
-        return { status: true, data: campanias, message: `` }
-    } catch (error) {
-        return { status: false, data: [], message: `Error: Consultando Campañas Disponibles` }
+        const data = await pronet.query(
+            `SELECT tc.customer_id, tc.customer_reference, 
+            DATE_FORMAT(tc.created_date, '%Y-%m-%d') 
+            fechaCreacion,timestampdiff(YEAR,tui.bdate,now()) edad, 
+            CASE WHEN tui.gender = 'MALE' THEN 1 WHEN tui.gender = 'FEMALE' THEN 2 END genero, 
+            tc.telno, tc.department, tc.municipality, tc.is_finish_registration, tc.has_life_validate, tc.has_complete_profile, tc.has_validate_dpi, tc.has_commerce, CURDATE() AS hoy 
+            FROM pronet.tblUserInformation tui 
+            INNER JOIN pronet.tbl_customer tc ON tc.fk_userid = tui.userid 
+            WHERE tc.telno = ?`,
+            {
+                replacements: [telefono],
+                type: Sequelize.QueryTypes.SELECT
+            }
+        );
+        
+        if(data.length == 0){
+            return { status: true, data: [], message: `Error: No Existe Billetera` }
+        }
+        if(data[0].has_life_validate == '0' || data[0].has_validate_dpi == 0){
+            return { status: true, data: [], message: `Error: El Perfil De Billetera No Esta Completo` }
+        }
+        return { status: true, data: data[0], message: `` }
+    } catch (err) {
+        return { status: false, data: 0, message: `Error: Consultando Billetera` }
     }
 }
+
+const getAllCapaniasDisponibles = async () => {
+    try {
+
+        const campanias = await Campania.findAll({
+            where: { estado: 1 },
+        });
+
+        campanias.forEach(campania => {
+            if (!campania.imgAkisi || campania.imgAkisi.trim() === "") {
+                campania.imgAkisi = 'data:image/png;base64,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';
+            }
+            if (!campania.imgPush || campania.imgPush.trim() === "") {
+                campania.imgPush = 'data:image/png;base64,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';
+            }
+        });
+
+        const campaniaIds = campanias.map(c => c.id); 
+
+        const [
+            bloqueados,
+            participantes,
+            etapas
+        ] = await Promise.all([
+            Bloqueados.findAll({
+                where: { idCampania: campaniaIds },
+                attributes: ['idCampania', 'numero']
+            }),
+            Participantes.findAll({
+                where: { idCampania: campaniaIds },
+                attributes: ['idCampania', 'numero']
+            }),
+            Etapa.findAll({
+                where: { idCampania: campaniaIds },
+                include: [
+                    { model: Presupuesto },
+                    { model: Parametro, attributes: { exclude: ['idCampania'] } },
+                    {
+                        model: PremioCampania,
+                        attributes: { exclude: ['idEtapa'] },
+                        include: { model: Premio, }
+                    }
+                ]
+            })
+        ]);
+
+        const campaniasConRelaciones = campanias.map(campania => {
+            const bloques = bloqueados.filter(b => b.idCampania === campania.id);
+            const participantesRelacionados = participantes.filter(p => p.idCampania === campania.id);
+            const etapasRelacionadas = etapas.filter(e => e.idCampania === campania.id);
+
+            return {
+                ...campania.toJSON(),
+                bloqueados: bloques,
+                participantes: participantesRelacionados,
+                etapas: etapasRelacionadas
+            };
+        });
+
+        return { status: true, data: campaniasConRelaciones, message: '' };
+    } catch (error) {
+        console.error('Error al consultar campañas disponibles:', error);
+        return { status: false, data: [], message: 'Error: Consultando Campañas Disponibles' };
+    }
+};
+
 
 const participacionesCampania = async (idCampania) => {
     const campanias = await sequelize.query(`SELECT COUNT(*) AS cantidad FROM campania WHERE id=${idCampania};`, { type: Sequelize.QueryTypes.SELECT });
@@ -159,7 +229,6 @@ const obtieneCampanasActivas = async (codigoReferencia) => {
         const infoBilletera = await revisaBilleteraPorReferencia(codigoReferencia);
         if(infoBilletera.status) {
             const camapanasDisponibles = await getAllCapaniasDisponibles();
-            console.log("obtenemos todas las campanias")
             for (let i = 0; i < camapanasDisponibles.data.length; i++) {
                 const puedeParticipar = await puedeParticiparEnCampaia(infoBilletera.data, camapanasDisponibles.data[i]);
                 if (puedeParticipar.status) {
@@ -177,14 +246,14 @@ const obtieneCampanasActivas = async (codigoReferencia) => {
                         infoAdd: [],
                         mistransacciones: misParticipaciones.length,
                         transacciones: parseInt(camapanasDisponibles.data[i].etapas[0].minimoTransaccion),
-                        imagenIcono: await getImgBase64(camapanasDisponibles.data[i].imgPush),
-                        imagenIcono: await getImgBase64(camapanasDisponibles.data[i].imgAkisi),
+                        imagenIcono: camapanasDisponibles.data[i].imgPush,
+                        imagenGrande: camapanasDisponibles.data[i].imgAkisi,
+                        // imagenIcono: await getImgBase64(camapanasDisponibles.data[i].imgPush),
+                        // imagenIcono: await getImgBase64(camapanasDisponibles.data[i].imgAkisi),
                         botones: await obtieneBotonTransaccion(camapanasDisponibles.data[i].etapas[0].parametros[0].idTransaccion),    
                     });
                 }
-                console.log('Nombre ', camapanasDisponibles.data[i].nombre);
             }
-            console.log('saliendo de validaciones.................',   );
         }
         return { status: true, data: campanaParticipar, message: `` }
     } catch (error) {
@@ -192,22 +261,21 @@ const obtieneCampanasActivas = async (codigoReferencia) => {
     }
 }
 
+
 const validaParticipacionTransaccion = async (codigoBilletera, numeroTransaccion) => {
-    // Crear la bitacora de recepcion de transaccion
+
     const newBitacora = await creaBitacora(codigoBilletera, numeroTransaccion, 1);
     if(!newBitacora.status) {
         return { status: false, data: [], message: `${newBitacora.message}` }
     }
     let dataBitacora = [];
     try {
-        // Obtener la informacion de la transaccion realizada
         const infoTransaccion = await revisaTransaccion(codigoBilletera, numeroTransaccion);
         if(!infoTransaccion.status) {
             dataBitacora.push(`{campana: 0, info: ${infoTransaccion.message}}`)
             actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 1);
             return { status: false, data: [], message: `${infoTransaccion.message}` }
         }
-        // Obtener la informacion de la Billetera
         const infoBilletera = await revisaBilletera(codigoBilletera);
         if(!infoBilletera.status) {
             dataBitacora.push(`{campana: 0, info: ${infoBilletera.message}}`)
@@ -1164,5 +1232,11 @@ module.exports = {
     validaCupon,
     obtieneCodigoReferidos,
     validaParticipacionTerceros,
-    revisaBilleteraPorReferencia
+    revisaBilleteraPorReferencia,
+    getAllCapaniasDisponibles,
+    obtienePremiosPendintes,
+    puedeParticiparEnCampaia,
+    obtieneAcumulacion,
+    obtieneBotonTransaccion,
+    revisaBilleteraPorTelno
 }

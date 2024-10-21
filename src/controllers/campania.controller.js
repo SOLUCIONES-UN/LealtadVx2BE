@@ -45,9 +45,7 @@ const AddCampania = async(req, res) => {
             emailspar,
             ultimoCorreoEnviado
         } = req.body;
-
-
-
+        
 
         const newCampains = await Campania.create({
             nombre,
