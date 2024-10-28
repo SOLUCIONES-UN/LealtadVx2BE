@@ -7,13 +7,12 @@ const {
     validaCupon,
     obtieneCodigoReferidos,
     validaParticipacionTerceros,
-
-    
+    cronJobParticipacionBilletera,
+    cronJobParticipacionOffercraft,
 } = require('../helpers/participacion.js');
 
-const participacionTransaccion_get = async (req, res) => {
-    const { codigoBilletera, numeroTransaccion } = req.params;
-    
+const participacionTransaccion_post = async (req, res) => {
+    const { codigoBilletera, numeroTransaccion } = req.body;
     const validaParticipacion = await validaParticipacionTransaccion(codigoBilletera, numeroTransaccion);
     if (validaParticipacion.status){
         res.status(200).json(validaParticipacion);
@@ -109,8 +108,26 @@ const programaTerceros_post = async(req, res) => {
     }
 }
 
+const cronJobParticipacionBilletera_get = async(req, res) => {
+    const cronJob = await cronJobParticipacionBilletera();
+    if (cronJob.status){
+        res.status(200).json({ status: true, message: `${cronJob.message}`, data: cronJob.data });
+    }else{
+        res.status(400).json({ status: false, message: `${cronJob.message}`, data: cronJob.data });
+    }
+}
+
+const cronJobParticipacionOffercraft_get = async(req, res) => {
+    const cronJob = await cronJobParticipacionOffercraft();
+    if (cronJob.status){
+        res.status(200).json({ status: true, message: `${cronJob.message}`, data: cronJob.data });
+    }else{
+        res.status(400).json({ status: false, message: `${cronJob.message}`, data: cronJob.data });
+    }
+}
+
 module.exports = {
-    participacionTransaccion_get,
+    participacionTransaccion_post,
     participacionCampanias_get,
     validateCupon_get,
     juegoAbierto_get,
@@ -118,4 +135,6 @@ module.exports = {
     programaReferidos_post,
     programaReferidos_put,
     programaTerceros_post,
+    cronJobParticipacionBilletera_get,
+    cronJobParticipacionOffercraft_get,
 }

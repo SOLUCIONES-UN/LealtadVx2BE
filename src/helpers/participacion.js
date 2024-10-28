@@ -16,6 +16,7 @@ const { Premio } = require('../models/premio');
 const { codigoReferido } = require('../models/codigoReferidos');
 const { referidosIngresos } = require('../models/ReferidosIngresos');
 const { TransaccionesTerceros} = require('../models/transaccionesTerceros');
+const { DetallePromocion } = require('../models/detallePromocion')
 const { BitacoraParticipacion, BitacoraCupon, BitacoraJuego, BitacoraReferido } = require('../models/bitacora');
 
 const { sendOffercraft, sendBilletera, getImgBase64 } = require('../helpers/externalApi');
@@ -46,7 +47,7 @@ const getTransacciones = async (codigoReferencia, cantidadRegistros) => {
 }
 
 const revisaTransaccion = async (codigoReferencia, numeroTransaccion) => {
-    const ultimasTransacciones = await getTransacciones(codigoReferencia, 20);
+    const ultimasTransacciones = await getTransacciones(codigoReferencia, 40);
     if(!ultimasTransacciones.status) {
         return { status: false, data: [], message: `${ultimasTransacciones.message}` }
     }
@@ -322,6 +323,15 @@ const registrarParticipacion = async (dataInsert) => {
     }
 }
 
+const actualizaParticipacion = async (dataUpdate, id) => {
+    try {
+        const regData = await Participacion.update(dataUpdate, {where: {id: id}});
+        return { status: true, data: regData, message: `Registro De Participacion Actualizada Con Exito` };
+    } catch (error) {
+        return { status: false, data: dataUpdate, message: `Error: Intentando Actualizar El Registro De Participacion.` };
+    }
+}
+
 const registrarAcumulacion = async (dataInsert) => { 
     try {
         const regData = await Acumulados.create(dataInsert);
@@ -437,12 +447,14 @@ const participacionPorTransaccion = async (infoBilletera, infoTransaccion, infoC
             idTransaccion: infoTransaccion.transaction_code,
             idCampania: infoCampania.idCampania,
             idPremio: infoCampania.premiocampania[0].premio.id,
-            urlPremio: infoCampania.premiocampania[0].premio.idTransaccion==0 ? iniDate.concat('1aAbBc2CdDeE3fF4gGhH5iI6jJkKlL7mMnNoO8pPqQ9rRsStT0uUvVwWxXyYzZ'.split('').sort(function(){return 0.5-Math.random()}).join('').slice(0, 18)) : '',
+            urlPremio: infoCampania.premiocampania[0].premio.idTransaccion==0 ? getNewUrlGame('p') : '',
             idPresupuesto: infoCampania.presupuestos[0].id,
             jugado: 0,
             idProyecto: 0,
             idUsuarioParticipante: 0,
             tipoTransaccion: '',
+            trxBilletera: '',
+            estado: infoCampania.premiocampania[0].premio.idTransaccion==0 ? 1 : 3,
         }
         const registraParticipacion = await registrarParticipacion(newData);
         if(!registraParticipacion.status) {
@@ -453,16 +465,7 @@ const participacionPorTransaccion = async (infoBilletera, infoTransaccion, infoC
         if(dataAcumulado.length>0){
             const actualizaAcumulacion = await actualizarAcumulacion(dataAcumulado.map((item) => { return {id: item.id, idParticipacion: registraParticipacion.data.id}}));
         }
-        //03 HACER EL LLAMADO PARA LA OPCION Y ESPERAR LA RESPUESTA DEL PREMIO
-        if (infoCampania.premiocampania[0].premio.idTransaccion==0) {
-            // TODO: PREMIO OFERCRAFT
-            // const enviaPremio = await sendOffercraft();
-            // if (!enviaPremio) ...
-        } else {
-            // TODO: PREMIO BILLETERA
-            // const enviaPremio = await sendBilletera();
-            // if (!enviaPremio) ...
-        }
+        // 03 EJECUTARLE PREMIO (SE TRASLADO A UN CRONJOB)
         return { status: true, data: newData, message: `Participacion Registrada [${registraParticipacion.data.id}]` }
     } else {
         return { status: false, data: [], message: `Acumulacion Registrada [${idAcumulado}]` }
@@ -843,29 +846,48 @@ const obtienePremioCupon = async (infoCupon) => {
     }
 }
 
+const getNewUrlGame = (prefix='x') => {
+    const todayDate = new Date();
+    const iniDate = todayDate.getFullYear().toString().slice(-2).concat(todayDate.getMonth()<9 ? '0' : '').concat((todayDate.getMonth() + 1).toString()).concat(todayDate.getDate()<10 ? '0' : '').concat(todayDate.getDate().toString()).concat(`${todayDate.getHours().toString()}${todayDate.getMinutes().toString()}${todayDate.getSeconds().toString()}`);
+    return prefix.concat(iniDate.concat('1aAbBc2CdDeE3fF4gGhH5iI6jJkKlL7mMnNoO8pPqQ9rRsStT0uUvVwWxXyYzZ'.split('').sort(function(){return 0.5-Math.random()}).join('').slice(0, 17)));
+}
+
 const cuponParticipacion = async (infoCupon, infoPremio, infoBilletera) => {
     try {
+        let infoMsg = '';
         if(infoPremio.idTransaccion==0) {
-            // TODO: PREMIO OFERCRAFT
-            // const enviaPremio = await sendOffercraft();
-            // if (!enviaPremio) ...
+            const newUrlGame= getNewUrlGame('c');
+            const enviaPremio = await sendOffercraft(infoBilletera.telno, `Sigue participando y gana mas premios`, `TODO: PENDIENTE`);
+            infoMsg = enviaPremio.status ? '' : enviaPremio.message;
+            const marcaCupon = await actualizaCupon(infoCupon.id, infoBilletera.customer_id, enviaPremio.status ? 2 : 1, newUrlGame, 0);
+            infoMsg = infoMsg.concat(marcaCupon.status ? '' : "   ".concat(marcaCupon.message));
         } else {
-            // TODO: PREMIO BILLETERA
-            // const enviaPremio = await sendBilletera();
-            // if (!enviaPremio) ...
+            const idTrx = "CU".concat(Math.floor(Math.random() * 9999).toString().padStart(4, '0')).concat(infoCupon.id.toString().padStart(8, '0'))
+            const enviaPremio = await sendBilletera(infoBilletera.telno, infoPremio.desTransaccion, infoPremio.valor, idTrx);
+            infoMsg = enviaPremio.status ? '' : enviaPremio.message;
+            const marcaCupon = await actualizaCupon(infoCupon.id, infoBilletera.customer_id, enviaPremio.status ? 100 : 3, '', infoPremio.valor, enviaPremio.status ? enviaPremio.data.transaction_id : '', idTrx);
+            infoMsg = infoMsg.concat(marcaCupon.status ? '' : "   ".concat(marcaCupon.message));
         }
-        const marcaCupon = await actualizaCupon(infoCupon.id, infoBilletera.customer_id);
+        if(infoMsg!=''){
+            return { status: false, message: infoMsg };
+        }
         return { status: true, message: infoCupon.message };
     } catch (error) {
         return { status: false, message: `Error: No fue posible registrar el cupon, por favor intentelo mas tarde.` };
     }
 }
 
-const actualizaCupon = async (cuponId, customerId) => {
+const actualizaCupon = async (cuponId, customerId, estado, urlJuego, valor, trxBille, regBille) => {
     try {
-        const updData = await sequelize.query(`UPDATE detallepromocions SET estado=2, fecha=NOW(), customerId=${customerId} WHERE id=${cuponId};`, { type: Sequelize.QueryTypes.SELECT });
+        if(estado==1 || estado==2){
+            const updData = await sequelize.query(`UPDATE detallepromocions SET estado=${estado}, fecha=NOW(), customerId=${customerId}, urlPremio='${urlJuego}', jugado=0, valor=0 WHERE id=${cuponId};`);
+        }else if(estado==3 || estado==100){
+            const updData = await sequelize.query(`UPDATE detallepromocions SET estado=${estado}, fecha=NOW(), customerId=${customerId}, valor=${valor}, trxBilletera='${trxBille}', regBilletera='${regBille}' WHERE id=${cuponId};`);
+        }else{
+            return { status: false, data: [], message: `Error: Actualizando el cupon (No existe informacion).` };
+        }
         return { status: true, data: [], message: `` };
-    } catch (error) {
+    } catch (error) { 
         return { status: false, data: [], message: `Error: Actualizando el cupon.` };
     }
 }
@@ -877,17 +899,30 @@ const actualizaJuego = async (urlPremio, valor="0") => {
     }
     let dataBitacora = [];
     try {
-        const updData = await sequelize.query(`UPDATE participacions SET jugado=1, fechaJugado=NOW(), valor=${valor} WHERE jugado=0 AND urlPremio='${urlPremio}';`);
-        dataBitacora.push(JSON.stringify(updData));
-        actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 3);
-        if (updData[0].affectedRows==0){
-            return { status: false, data: [], message: `No fue posible actulizar el registro` };
+        if(urlPremio.chartAt(0)=='p'){
+            const updData = await sequelize.query(`UPDATE participacions SET jugado=1, fechaJugado=NOW(), valor=${valor}, estado=3, trxBilletera='', regBilletera='' WHERE jugado=0 AND urlPremio='${urlPremio}';`);
+            dataBitacora.push(JSON.stringify(updData));
+            actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 3);
+            if (updData[0].affectedRows==0){
+                return { status: false, data: [], message: `No fue posible actulizar el registro` };
+            }
+        } else if(urlPremio.chartAt(0)=='c'){
+            const updData = await sequelize.query(`UPDATE detallepromocions SET jugado=1, fechaJugado=NOW(), valor=${valor}, estado=3, trxBilletera='', regBilletera='' WHERE jugado=0 AND urlPremio='${urlPremio}';`);
+            dataBitacora.push(JSON.stringify(updData));
+            actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 3);
+            if (updData[0].affectedRows==0){
+                return { status: false, data: [], message: `No fue posible actulizar el registro` };
+            }
+        } else {
+            dataBitacora.push(JSON.stringify({ status: false, data: [], message: `Error: No se encotro el registro` }));
+            actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 3);
+            return { status: false, data: [], message: `Error: No se encotro el registro.` };
         }
         return { status: true, data: [], message: `` };
     } catch (error) {
-        dataBitacora.push(JSON.stringify({ status: false, data: [], message: `Error: Actualizando el cupon. [${error}]` }));
+        dataBitacora.push(JSON.stringify({ status: false, data: [], message: `Error: Actualizando el registro. [${error}]` }));
         actualizaBitacora(newBitacora.status ? newBitacora.data.id : 0, dataBitacora.toString(), 3);
-        return { status: false, data: [], message: `Error: Actualizando el cupon.` };
+        return { status: false, data: [], message: `Error: Actualizando el registro.` };
     }
 }
 
@@ -1211,6 +1246,96 @@ const buscaBilleteraConTel = async (telno) => {
     }
 }
 
+const buscaParticipaiones = async (tipo) => {
+    try{
+        const todayDate = new Date();
+        const iniDate = todayDate.getFullYear().toString().slice(-2).concat(todayDate.getMonth()<9 ? '0' : '').concat((todayDate.getMonth() + 1).toString()).concat(todayDate.getDate()<10 ? '0' : '').concat(todayDate.getDate().toString()).concat(`${todayDate.getHours().toString()}${todayDate.getMinutes().toString()}${todayDate.getSeconds().toString()}`);
+        if(tipo=='1'){
+            const updData = await Participacion.update({estado: 99, regBilletera: "B".concat(iniDate)}, {where: { estado: 3, regBilletera: '', trxBilletera: '' }});
+            const regData = await sequelize.query(`SELECT id, customerId, valor, idPremio, '' AS trx, '' AS error, 'N' AS correcto, (SELECT telno FROM pronet.tbl_customer tblc WHERE tblc.customer_id=participacions.customerId LIMIT 1) AS telefono, (SELECT t.descripcion from premios p INNER JOIN transaccions t ON t.id = p.idTransaccion WHERE p.id=participacions.idPremio LIMIT 1) AS descripcion FROM participacions WHERE estado=99 AND regBilletera='${"B".concat(iniDate)}';`, { type: Sequelize.QueryTypes.SELECT });
+            return { status: true, data: regData, message: `` };
+        }else if(tipo=='2'){
+            const updData = await Participacion.update({estado: 98, regBilletera: "O".concat(iniDate)}, {where: { estado: 1, regBilletera: '', jugado: 0 }});
+            const regData = await sequelize.query(`SELECT participacions.id, participacions.customerId, campania.descripcion, campania.tituloNotificacion, '' AS error, 'N' AS correcto, (SELECT telno FROM pronet.tbl_customer tblc WHERE tblc.customer_id=participacions.customerId LIMIT 1) AS telefono FROM participacions LEFT JOIN campania ON campania.id=participacions.idCampania WHERE participacions.estado=98 AND regBilletera='${"O".concat(iniDate)}';`, { type: Sequelize.QueryTypes.SELECT });
+            return { status: true, data: regData, message: `` };
+        }else if(tipo=='3'){
+                const updData = await DetallePromocion.update({estado: 99, regBilletera: "B".concat(iniDate)}, {where: { estado: 3, regBilletera: '', trxBilletera: '' }});
+                const regData = await sequelize.query(`SELECT data.*, (SELECT t.descripcion from premios p INNER JOIN transaccions t ON t.id = p.idTransaccion WHERE p.id=data.idPremio LIMIT 1) AS descripcion FROM (SELECT id, customerID, valor, (SELECT idPremio FROM premiopromocions WHERE premiopromocions.id=detallepromocions.idPremioPromocion AND premiopromocions.idPromocion=detallepromocions.idPromocion) AS idPremio, '' AS trx, '' AS error, 'N' AS correcto, (SELECT telno FROM pronet.tbl_customer tblc WHERE tblc.customer_id=detallepromocions.customerID LIMIT 1) AS telefono FROM detallepromocions WHERE estado=99 AND regBilletera='${"B".concat(iniDate)}') data;`, { type: Sequelize.QueryTypes.SELECT });
+                return { status: true, data: regData, message: `` };
+        }else if(tipo=='4'){
+                const updData = await DetallePromocion.update({estado: 98, regBilletera: "O".concat(iniDate)}, {where: { estado: 1, regBilletera: '', jugado: 0 }});
+                const regData = await sequelize.query(`SELECT id, customerID, 'TODO: PENDIENTE' AS descripcion, 'Sigue participando y gana mas premios' AS tituloNotificacion, '' AS trx, '' AS error, 'N' AS correcto, (SELECT telno FROM pronet.tbl_customer tblc WHERE tblc.customer_id=detallepromocions.customerID LIMIT 1) AS telefono FROM detallepromocions WHERE estado=98 AND regBilletera='${"O".concat(iniDate)}';`, { type: Sequelize.QueryTypes.SELECT });
+                return { status: true, data: regData, message: `` };
+        }else{
+            return { status: false, data: [], message: `` };
+        }
+    } catch (error){
+        return { status: false, data: [], message: `Error: Buscando registros de Participacion [${tipo}].` };
+    }
+}
+
+const cronJobParticipacionBilletera = async () => {
+    try{
+        const regDataP = await buscaParticipaiones('1');
+        const regDataC = await buscaParticipaiones('3');
+        for (let i = 0; i < regDataP.data.length; i++) {
+            const enviaPremio = await sendBilletera(regDataP.data[i].telefono, regDataP.data[i].descripcion, regDataP.data[i].valor, "PA".concat(Math.floor(Math.random() * 9999).toString().padStart(4, '0')).concat(regDataP.data[i].id.toString().padStart(8, '0')));
+            if (enviaPremio.status){
+                await actualizaParticipacion({estado: 100, trxBilletera: enviaPremio.data.transaction_id}, regDataP.data[i].id);
+                regDataP.data[i].correcto = 'S';
+                regDataP.data[i].trx = enviaPremio.data.transaction_id;
+            }else{
+                await actualizaParticipacion({estado: 3, trxBilletera: '', regBilletera: ''}, regDataP.data[i].id);
+                regDataP.data[i].error = enviaPremio.message;
+            }
+        }
+        for (let i = 0; i < regDataC.data.length; i++) {
+            const enviaPremio = await sendBilletera(regDataC.data[i].telefono, regDataC.data[i].descripcion, regDataC.data[i].valor, "PA".concat(Math.floor(Math.random() * 9999).toString().padStart(4, '0')).concat(regDataC.data[i].id.toString().padStart(8, '0')));
+            if (enviaPremio.status){
+                await actualizaCupon({estado: 100, trxBilletera: enviaPremio.data.transaction_id}, regDataC.data[i].id);
+                regDataC.data[i].correcto = 'S';
+                regDataC.data[i].trx = enviaPremio.data.transaction_id;
+            }else{
+                await actualizaCupon({estado: 3, trxBilletera: '', regBilletera: ''}, regDataC.data[i].id);
+                regDataC.data[i].error = enviaPremio.message;
+            }
+        }
+        return { status: true, data: {participaciones: regDataP.data, cupones: regDataC.data}, message: `` };
+    } catch (error) {
+        return { status: false, data: [], message: `Error: Realizando tarea de Participacion Billetera.` };
+    }
+}
+
+const cronJobParticipacionOffercraft = async () => {
+    try{
+        const regDataP = await buscaParticipaiones('2');
+        const regDataC = await buscaParticipaiones('4');
+        for (let i = 0; i < regDataP.data.length; i++) {
+            const enviaPremio = await sendOffercraft(regDataP.data[i].telefono, regDataP.data[i].titulo, regDataP.data[i].descripcion);
+            if (enviaPremio.status){
+                await actualizaParticipacion({estado: 2, trxBilletera: '', regBilletera: ''}, regDataP.data[i].id);
+                regDataP.data[i].correcto = 'S';
+            }else{
+                await actualizaParticipacion({estado: 1, trxBilletera: '', regBilletera: ''}, regDataP.data[i].id);
+                regDataP.data[i].error = enviaPremio.message;
+            }
+        }
+        for (let i = 0; i < regDataC.data.length; i++) {
+            const enviaPremio = await sendOffercraft(regDataC.data[i].telefono, regDataC.data[i].titulo, regDataC.data[i].descripcion);
+            if (enviaPremio.status){
+                await actualizaCupon({estado: 2, trxBilletera: '', regBilletera: ''}, regDataC.data[i].id);
+                regDataC.data[i].correcto = 'S';
+            }else{
+                await actualizaCupon({estado: 1, trxBilletera: '', regBilletera: ''}, regDataC.data[i].id);
+                regDataC.data[i].error = enviaPremio.message;
+            }
+        }
+        return { status: true, data: {participaciones: regDataP.data, cupones: regDataC.data}, message: `` };
+    } catch (error) {
+        return { status: false, data: [], message: `Error: Realizando tarea de Participacion Offercraft.` };
+    }
+}
+
 // const participarPorTransaccionDirecta = async (infoBilletera, infoTransaccion, infoCampania) => { 
 //     const registrosPendientes = await obtienePremiosPendintes();
 //     if(registrosPendientes.length>=infoCampania.xxxx){
@@ -1238,5 +1363,7 @@ module.exports = {
     puedeParticiparEnCampaia,
     obtieneAcumulacion,
     obtieneBotonTransaccion,
-    revisaBilleteraPorTelno
+    revisaBilleteraPorTelno,
+    cronJobParticipacionBilletera,
+    cronJobParticipacionOffercraft,
 }

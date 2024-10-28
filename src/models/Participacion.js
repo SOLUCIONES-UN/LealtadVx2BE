@@ -69,6 +69,15 @@ const Participacion = sequelize.define('participacions', {
         type: DataTypes.CHAR(1),
         allowNull: false
     },
+    trxBilletera: {
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
+    regBilletera: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: ''
+    },
     estado: {
         type: DataTypes.INTEGER,
         defaultValue: 1
@@ -112,6 +121,16 @@ FailTransaccion.belongsTo(Participacion, {
 
 
 });
+
+// ESTADOS PARA MANEJO DE PARTICIPACIONES
+//   0 => Anulado/Descartado
+//   1 => Para enviar mensaje juego disponible de Offercraft
+//   2 => Enviado mensaje juego disponible de Offercraft
+//   3 => Para enviar a Billetera
+//  98 => Registro marcado para proceso de envio de notificacion offercraft
+//  99 => Registro marcado para proceso de envio a Billetera
+// 100 => Proceso finalizado
+
 // (async () => {
 //     try{ 
 //     await Participacion.sync({ alter: true });
